@@ -25,3 +25,17 @@ class BreathingFlow:
 
         self.time = data["time"].values
         self.flow = data["values"].values
+
+    def get_hz(self):
+        """
+        To get the sampling rate of the discretized breathing signal.
+
+        Returns:
+        -------
+            int: the sampling rate in Hz (s-1).
+
+        """
+        time_delta = pd.to_timedelta(self.time, unit="s")
+        diff = time_delta.diff().value_counts().index.tolist()[0]
+
+        return int(pd.Timedelta(seconds=1) / diff)
