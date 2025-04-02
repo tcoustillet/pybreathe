@@ -8,6 +8,8 @@ Created on Wed Apr  2 08:40:50 2025
 """
 
 
+import matplotlib.pyplot as plt
+import numpy as np
 import pandas as pd
 
 
@@ -23,8 +25,13 @@ class BreathingFlow:
             .reset_index(drop=True)
         data = data.apply(lambda col: col.str.replace(",", ".").astype(float))
 
-        self.time = data["time"].values
+        self.absolute_time = data["time"].values
         self.flow = data["values"].values
+
+        time_len = len(self.absolute_time)
+        self.time = (
+            np.linspace(0, time_len / self.get_hz(), time_len, endpoint=False)
+        )
 
     def get_hz(self):
         """
@@ -35,7 +42,20 @@ class BreathingFlow:
             int: the sampling rate in Hz (s-1).
 
         """
-        time_delta = pd.to_timedelta(self.time, unit="s")
+        time_delta = pd.to_timedelta(self.absolute_time, unit="s")
         diff = time_delta.diff().value_counts().index.tolist()[0]
 
         return int(pd.Timedelta(seconds=1) / diff)
+
+    def plot(self):
+        """To plot the air flow rate."""
+        fig, ax = plt.subplots(figsize=(12, 2))
+
+        ax.plot(self.time, self.flow, label="air flow rate")
+        ax.set_xlabel("time (s)", labelpad=10)
+        ax.set_ylabel("Air flow rate", labelpad=10)
+        ax.legend()
+        ax.spines["top"].set_visible(False)
+        ax.spines["right"].set_visible(False)
+
+        return None
