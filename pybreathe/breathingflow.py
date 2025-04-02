@@ -11,6 +11,7 @@ Created on Wed Apr  2 08:40:50 2025
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
+from scipy.signal import detrend
 
 
 class BreathingFlow:
@@ -26,12 +27,15 @@ class BreathingFlow:
         data = data.apply(lambda col: col.str.replace(",", ".").astype(float))
 
         self.absolute_time = data["time"].values
-        self.flow = data["values"].values
+        self.raw_flow = data["values"].values
 
         time_len = len(self.absolute_time)
         self.time = (
             np.linspace(0, time_len / self.get_hz(), time_len, endpoint=False)
         )
+
+        detrended_flow = detrend(self.raw_flow)
+        self.flow = detrended_flow
 
     def get_hz(self):
         """
@@ -47,11 +51,13 @@ class BreathingFlow:
 
         return int(pd.Timedelta(seconds=1) / diff)
 
-    def plot(self):
+    def plot(self, y=None):
         """To plot the air flow rate."""
         fig, ax = plt.subplots(figsize=(12, 2))
 
-        ax.plot(self.time, self.flow, label="air flow rate")
+        flow = self.flow if y is None else self.raw_flow
+
+        ax.plot(self.time, flow, label="air flow rate")
         ax.set_xlabel("time (s)", labelpad=10)
         ax.set_ylabel("Air flow rate", labelpad=10)
         ax.legend()
