@@ -29,12 +29,13 @@ class BreathingFlow:
             .reset_index(drop=True)
         data = data.apply(lambda col: col.str.replace(",", ".").astype(float))
 
-        self.raw_time = data["time"].values
+        self.raw_time = np.around(data["time"].values, 3)
         self.raw_flow = data["values"].values
 
         time_len = len(self.raw_time)
-        self.absolute_time = (
-            np.linspace(0, time_len / self.get_hz(), time_len, endpoint=False)
+        self.absolute_time = np.around(
+            np.linspace(0, time_len / self.get_hz(), time_len, endpoint=False),
+            3
         )
 
         self.detrended_flow = detrend(self.raw_flow)
