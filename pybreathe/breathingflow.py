@@ -11,7 +11,7 @@ Created on Wed Apr  2 08:40:50 2025
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
-from scipy.signal import detrend
+from scipy.signal import detrend, find_peaks
 
 from .argcontroller import enforce_bool_arg, enforce_str_arg
 from .signalfeatures import get_segments
@@ -92,7 +92,7 @@ class BreathingFlow:
 
         self.time = x_truncated
         self.flow = y_truncated
-    
+
     @enforce_str_arg("y")
     @enforce_bool_arg("show_segments")
     def plot(self, y="flow", show_segments=False):
@@ -110,7 +110,7 @@ class BreathingFlow:
                 raise AttributeError(
                     f"{self.__class__.__name__} object has no attribute '{y}'"
                 )
-                
+
         if show_segments:
             for i, (x_pos, y_pos) in enumerate(self.get_positive_segments()):
                 pos_label = "Air flow rate > 0" if i == 1 else ""
@@ -136,3 +136,69 @@ class BreathingFlow:
     def get_negative_segments(self):
         """To get the pairs (x,y) for which the air flow rate is negative."""
         return get_segments(self.time, self.flow)[1]
+
+    @enforce_bool_arg("set_dist")
+    @enforce_str_arg("which_peaks")
+    def test_distance(self, which_peaks, distance=0, set_dist=False):
+        """
+        Calibration of peaks detection
+        = test which distance should be assigned to the 'distance' attribute.
+
+        Args:
+        ----
+            which_peaks (str): to consider either top or bottom peaks.
+            distance (int): the minimum distance between two neighbouring peaks.
+            set_dist (bool, optionnal): to set the distance or not. Defaults to False.
+
+        Returns:
+        -------
+            None. Plots a control figure.
+
+        Note:
+        ----
+            You will probably have to test several distance values
+            to find the one that detects all the peaks.
+
+        """
+        t, y = self.time, self.flow
+        top_peaks, _ = find_peaks(y, distance=distance)
+        bottom_peaks, _ = find_peaks(- y, distance=distance)
+
+        fig, ax = plt.subplots(figsize=(12, 2))
+
+        ax.plot(t, y, c="tab:blue", label="your signal", zorder=1)
+
+        match which_peaks:
+            case "top":
+                ax.scatter(
+                    t[top_peaks], y[top_peaks], s=10, marker="x", lw=2, c="red",
+                    label=f"{len(top_peaks)} detected peaks (distance = {distance})", zorder=2,
+                )
+            case "bottom":
+                ax.scatter(
+                    t[bottom_peaks], y[bottom_peaks], s=10, marker="x", lw=2, c="red",
+                    label=f"{len(bottom_peaks)} detected peaks (distance = {distance})",
+                    zorder=2
+                )
+            case _:
+                raise ValueError(
+                    "Argument 'which_peaks' must be either 'top' or 'bottom'. "
+                    f"Not '{which_peaks}'."
+                    )
+
+        min_s, max_s = min(y), max(y)
+        s_amp = max_s - min_s
+        min_b, max_b = min_s - 0.25 * s_amp, max_s + 0.25 * s_amp
+        ax.set_ylim(min_b, max_b)
+        ax.set_xlabel("time (s)", labelpad=10)
+        ax.set_ylabel("Air flow rate", labelpad=10)
+        ax.grid(alpha=0.8, linestyle=":", ms=0.5)
+        ax.legend(prop={"size": 8}, loc="upper left", bbox_to_anchor=(0, 1.25))
+
+        ax.spines["top"].set_visible(False)
+        ax.spines["right"].set_visible(False)
+
+        if set_dist:
+            self.distance = distance
+
+        return None
