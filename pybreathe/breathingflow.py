@@ -91,7 +91,7 @@ class BreathingFlow:
         self.time = x_truncated
         self.flow = y_truncated
 
-    def plot(self, y="flow"):
+    def plot(self, y="flow", show_segments=False):
         """To plot the air flow rate."""
         fig, ax = plt.subplots(figsize=(12, 2))
 
@@ -106,8 +106,17 @@ class BreathingFlow:
                 raise AttributeError(
                     f"{self.__class__.__name__} object has no attribute '{y}'"
                 )
+                
+        if show_segments:
+            for i, (x_pos, y_pos) in enumerate(self.get_positive_segments()):
+                pos_label = "Air flow rate > 0" if i == 1 else ""
+                ax.plot(x_pos, y_pos, label=pos_label, c="tab:blue")
+            for i, (x_neg, y_neg) in enumerate(self.get_negative_segments()):
+                neg_label = "Air flow rate < 0" if i == 1 else ""
+                ax.plot(x_neg, y_neg, label=neg_label, c="tab:orange")
+        else:
+            ax.plot(x, y, label="air flow rate")
 
-        ax.plot(x, y, label="air flow rate")
         ax.set_xlabel("time (s)", labelpad=10)
         ax.set_ylabel("Air flow rate", labelpad=10)
         ax.legend()
