@@ -40,6 +40,12 @@ class BreathingFlow:
 
         self.detrended_flow = detrend(self.raw_flow)
         self.__zero_interpolation()
+        self._distance = None
+
+    @property
+    def distance(self):
+        """Getter."""
+        return self._distance
 
     def get_hz(self):
         """
@@ -199,6 +205,6 @@ class BreathingFlow:
         ax.spines["right"].set_visible(False)
 
         if set_dist:
-            self.distance = distance
+            self._distance = distance
 
         return None
