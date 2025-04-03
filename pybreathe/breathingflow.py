@@ -13,6 +13,8 @@ import numpy as np
 import pandas as pd
 from scipy.signal import detrend
 
+from .signalfeatures import get_segments
+
 
 class BreathingFlow:
     """Breathing Air Flow rate."""
@@ -113,3 +115,11 @@ class BreathingFlow:
         ax.spines["right"].set_visible(False)
 
         return None
+
+    def get_positive_segments(self):
+        """To get the pairs (x,y) for which the air flow rate is positive."""
+        return get_segments(self.time, self.flow)[0]
+
+    def get_negative_segments(self):
+        """To get the pairs (x,y) for which the air flow rate is negative."""
+        return get_segments(self.time, self.flow)[1]
