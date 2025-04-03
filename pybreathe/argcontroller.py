@@ -23,3 +23,15 @@ def enforce_bool_arg(arg_name):
             return func(*args, **kwargs)
         return wrapper
     return decorateur
+
+
+def enforce_str_arg(arg_name):
+    """Decorate a function to enforce a method argument to be of type str."""
+    def decorateur(func):
+        @wraps(func)
+        def wrapper(*args, **kwargs):
+            if arg_name in kwargs and not isinstance(kwargs[arg_name], str):
+                raise TypeError(f"'{arg_name}' argument must be a str.")
+            return func(*args, **kwargs)
+        return wrapper
+    return decorateur
