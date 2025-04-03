@@ -13,6 +13,7 @@ import numpy as np
 import pandas as pd
 from scipy.signal import detrend
 
+from .argcontroller import enforce_bool_arg
 from .signalfeatures import get_segments
 
 
@@ -90,7 +91,8 @@ class BreathingFlow:
 
         self.time = x_truncated
         self.flow = y_truncated
-
+    
+    @enforce_bool_arg("show_segments")
     def plot(self, y="flow", show_segments=False):
         """To plot the air flow rate."""
         fig, ax = plt.subplots(figsize=(12, 2))
