@@ -9,7 +9,7 @@ Created on Thu Apr  3 10:10:59 2025
 
 
 import numpy as np
-from scipy.signal import find_peaks, welch, windows
+from scipy.signal import find_peaks, periodogram, welch, windows
 
 
 def get_segments(x, y):
@@ -146,6 +146,11 @@ def frequency(signal, sampling_rate, method, which_peaks, distance):
                 )
 
             dominant_freq = sampling_rate / np.mean(np.diff(peaks))
+
+        case "periodogram":
+            window = windows.hamming(len(signal))
+            f, Pxx_den = periodogram(x=signal, fs=sampling_rate, window=window)
+            dominant_freq = f[np.argmax(Pxx_den)]
 
     # The frequency is in rpm.s-1; we want it in min.-1.
     dominant_freq *= 60
