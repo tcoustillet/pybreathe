@@ -152,6 +152,17 @@ def frequency(signal, sampling_rate, method, which_peaks, distance):
             f, Pxx_den = periodogram(x=signal, fs=sampling_rate, window=window)
             dominant_freq = f[np.argmax(Pxx_den)]
 
+        case "fft":
+            data_len = len(signal)
+            sp = np.fft.fft(signal)
+            freq = np.fft.fftfreq(data_len, d=1/sampling_rate)
+            dominant_freq = abs(freq[np.argmax(np.abs(sp[:data_len//2]))])
+        case _:
+            raise ValueError(
+                "'method' should be either 'welch', 'peaks', 'periodogram' or "
+                f"'fft'. Not '{method}'."
+            )
+
     # The frequency is in rpm.s-1; we want it in min.-1.
     dominant_freq *= 60
 
