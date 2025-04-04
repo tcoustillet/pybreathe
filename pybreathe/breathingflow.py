@@ -209,6 +209,32 @@ class BreathingFlow:
 
         return None
 
+    def get_top_peaks(self):
+        """To get the top signal peaks."""
+        if not (isinstance(self.distance, int) and self.distance > 0):
+            raise ValueError(
+                "To get top peaks, distance should be a "
+                f"positive integer. Not '{self.distance}'. "
+                "Please use 'test_distance method to set the right distance."
+            )
+
+        top_peaks, _ = find_peaks(self.flow, distance=self.distance)
+
+        return self.time[top_peaks]
+
+    def get_bottom_peaks(self):
+        """To get the bottom signal peaks."""
+        if not (isinstance(self.distance, int) and self.distance > 0):
+            raise ValueError(
+                "To get bottom peaks, distance should be a "
+                f"positive integer. Not '{self.distance}'. "
+                "Please use 'test_distance method to set the right distance."
+            )
+
+        bottom_peaks, _ = find_peaks(- self.flow, distance=self.distance)
+
+        return self.time[bottom_peaks]
+
     def get_frequency(self):
         """Get breathing frequency of the air flow rate (in respirations.min-1)."""
         return frequency(self.flow, self.get_hz())
