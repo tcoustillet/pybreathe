@@ -235,6 +235,12 @@ class BreathingFlow:
 
         return self.time[bottom_peaks]
 
-    def get_frequency(self):
+    def get_frequency(self, method="welch", which_peaks=None):
         """Get breathing frequency of the air flow rate (in respirations.min-1)."""
-        return frequency(self.flow, self.get_hz())
+        return frequency(
+            signal=self.flow,
+            sampling_rate=self.get_hz(),
+            method=method,
+            which_peaks=which_peaks,
+            distance=self.distance
+        )

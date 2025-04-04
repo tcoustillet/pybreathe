@@ -9,7 +9,7 @@ Created on Thu Apr  3 10:10:59 2025
 
 
 import numpy as np
-from scipy.signal import welch, windows
+from scipy.signal import find_peaks, welch, windows
 
 
 def get_segments(x, y):
@@ -100,25 +100,52 @@ def get_segments(x, y):
     return positive_segments, negative_segments
 
 
-def frequency(signal, sampling_rate):
+def frequency(signal, sampling_rate, method, which_peaks, distance):
     """Get the frequency of a given signal.
 
     Args:
     ----
         signal (array): signal to test (list of numbers = discretized signal).
         sampling_rate (int): the sampling rate of the discretized signal.
+        method (str): method to commpute frequency.
+        which_peaks (str): if the method is 'peaks', which peaks should be
+                           considered (top or bottom) ?
+        distance (int): the minimum distance between two neighbouring peaks.
 
     Returns:
     -------
         dominant_freq (float): breathing frequency (in respirations per min.)
 
     """
-    fft_length = len(signal) // 3
-    window = windows.hamming(fft_length)
-    f, Pxx_den = welch(
-        x=signal, fs=sampling_rate, window=window, nperseg=fft_length
-    )
-    dominant_freq = f[np.argmax(Pxx_den)]
+    match method:
+        case "welch":
+            fft_length = len(signal) // 3
+            window = windows.hamming(fft_length)
+            f, Pxx_den = welch(
+                x=signal, fs=sampling_rate, window=window, nperseg=fft_length
+            )
+
+            dominant_freq = f[np.argmax(Pxx_den)]
+
+        case "peaks":
+            if not (isinstance(distance, int) and distance > 0):
+                raise ValueError(
+                    "To use the peak method, distance should be a "
+                    f"positive integer. Not '{distance}'."
+                    "Please use 'test_distance method to set the right distance."
+                )
+
+            if which_peaks == "top":
+                peaks, _ = find_peaks(x=signal, distance=distance)
+            elif which_peaks == "bottom":
+                peaks, _ = find_peaks(x=-signal, distance=distance)
+            else:
+                raise ValueError(
+                    "Argument 'which_peaks' must be either 'top' or 'bottom'. "
+                    f"Not '{which_peaks}'."
+                )
+
+            dominant_freq = sampling_rate / np.mean(np.diff(peaks))
 
     # The frequency is in rpm.s-1; we want it in min.-1.
     dominant_freq *= 60
