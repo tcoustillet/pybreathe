@@ -14,7 +14,7 @@ import pandas as pd
 from scipy.signal import detrend, find_peaks
 
 from .argcontroller import enforce_bool_arg, enforce_str_arg
-from .signalfeatures import get_segments
+from .signalfeatures import get_segments, frequency
 
 
 class BreathingFlow:
@@ -208,3 +208,7 @@ class BreathingFlow:
             self._distance = distance
 
         return None
+
+    def get_frequency(self):
+        """Get breathing frequency of the air flow rate (in respirations.min-1)."""
+        return frequency(self.flow, self.get_hz())

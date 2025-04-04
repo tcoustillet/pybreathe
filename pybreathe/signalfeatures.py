@@ -9,6 +9,7 @@ Created on Thu Apr  3 10:10:59 2025
 
 
 import numpy as np
+from scipy.signal import welch, windows
 
 
 def get_segments(x, y):
@@ -97,3 +98,29 @@ def get_segments(x, y):
     negative_segments = add_zeros(x, y, negative_segments)
 
     return positive_segments, negative_segments
+
+
+def frequency(signal, sampling_rate):
+    """Get the frequency of a given signal.
+
+    Args:
+    ----
+        signal (array): signal to test (list of numbers = discretized signal).
+        sampling_rate (int): the sampling rate of the discretized signal.
+
+    Returns:
+    -------
+        dominant_freq (float): breathing frequency (in respirations per min.)
+
+    """
+    fft_length = len(signal) // 3
+    window = windows.hamming(fft_length)
+    f, Pxx_den = welch(
+        x=signal, fs=sampling_rate, window=window, nperseg=fft_length
+    )
+    dominant_freq = f[np.argmax(Pxx_den)]
+
+    # The frequency is in rpm.s-1; we want it in min.-1.
+    dominant_freq *= 60
+
+    return dominant_freq
