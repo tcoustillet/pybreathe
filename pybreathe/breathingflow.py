@@ -38,7 +38,7 @@ class BreathingFlow:
             3
         )
 
-        self.detrended_flow = detrend(self.raw_flow)
+        self.detrended_flow = detrend(self.raw_flow, type="constant")
         self.__zero_interpolation()
         self._distance = None
 
