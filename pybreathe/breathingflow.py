@@ -244,3 +244,31 @@ class BreathingFlow:
             which_peaks=which_peaks,
             distance=self.distance
         )
+
+    @enforce_bool_arg("return_mean")
+    def get_positive_auc_time(self, return_mean=True):
+        """
+        To get the mean duration of segments when AUC is positive.
+
+        Args:
+        ----
+            return_mean (bool, optional): to return all values or only the mean.
+                                          Defaults to True (= the mean).
+
+        Returns:
+        -------
+            positive_time: mean duration of segments when AUC is positive
+                           (or all durations if return_mean = False).
+
+        Note:
+        ----
+            AUC = Area Under the Curve.
+
+        """
+        positive_points = [ps[0] for ps in self.get_positive_segments()]
+        positive_time = [(p[-1] - p[0]) for p in positive_points]
+
+        if return_mean:
+            return np.mean(positive_time)
+        else:
+            return positive_time
