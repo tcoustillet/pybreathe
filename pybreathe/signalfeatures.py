@@ -9,7 +9,83 @@ Created on Thu Apr  3 10:10:59 2025
 
 
 import numpy as np
+import pandas as pd
+from scipy.integrate import trapezoid
 from scipy.signal import find_peaks, periodogram, welch, windows
+
+
+def compute_sampling_rate(x):
+    """
+    To get the sampling rate of a time vector x.
+
+    Args:
+    ----
+        x (array): a time vector in seconds format ([0.001, 0.002, 0.003, ..]).
+
+    Returns:
+    -------
+        int: the sampling rate in Hz (s-1) = the number of points in 1 s.
+
+    """
+    time_delta = pd.to_timedelta(x, unit="s")
+    diff = time_delta.diff().value_counts().index.tolist()[0]
+
+    return int(pd.Timedelta(seconds=1) / diff)
+
+
+def zero_interpolation(x, y):
+    """
+    To find the 'True' zeros of a discretized signal.
+
+    Args:
+    ----
+        x (array): a discretized vector of floats.
+        y (array): a discretized vector y such that y = f(x).
+
+    Returns:
+    -------
+        x_truncated (array): the input vector x to which have been added
+                             all the x0 such that f(x0) = 0.
+        y_truncated (array): the input vector y to which have been added
+                             all the true zeros.
+
+    Note:
+    ----
+        the 'y' vector must contains positive and negative values.
+
+    """
+    crossing_indices = np.where(
+        np.array(
+            [0 if e in (-1, 1) else e for e in np.diff(np.sign(y))]
+        )
+    )[0]
+
+    x_zeros, y_zeros = [], []
+    for i in crossing_indices:
+        x_upstream, x_downstream = x[i], x[i + 1]
+        y_upstream, y_downstream = y[i], y[i + 1]
+
+        zero = x_upstream - y_upstream * (x_downstream - x_upstream) / (
+            y_downstream - y_upstream
+        )
+        x_zeros.append(zero)
+        y_zeros.append(0.0)
+
+    x_extended = np.concatenate((x, x_zeros))
+    y_extended = np.concatenate((y, y_zeros))
+
+    sorted_indices = np.argsort(x_extended)
+    x_interpolated = x_extended[sorted_indices]
+    y_interpolated = y_extended[sorted_indices]
+
+    # Truncation to start and end with a 'True' zero.
+    first_zero = np.where(y_interpolated == 0)[0][0]
+    lasy_zero = np.where(y_interpolated == 0)[0][-1] + 1
+
+    x_truncated = x_interpolated[first_zero:lasy_zero]
+    y_truncated = y_interpolated[first_zero:lasy_zero]
+
+    return x_truncated, y_truncated
 
 
 def get_segments(x, y):
@@ -18,8 +94,8 @@ def get_segments(x, y):
 
     Args:
     ----
-        x (array): a discretised time in seconds (0.001, 0.002, 0.003, ...).
-        y (array): a discretized breathing air flow rate.
+        x (array): a discretised vector of floats.
+        y (array): a discretized vector y such that y = f(x).
 
     Returns:
     -------
@@ -68,9 +144,10 @@ def get_segments(x, y):
 
         Args:
         ----
-            x (array): a discretised time in seconds (0.001, 0.002, 0.003, ...).
-            y (array): a discretized breathing air flow rate.
-            segments (list): list of arrays where the values of y have always the same sign.
+            x (array): a discretised vector of floats.
+            y (array): a discretized vector y such that y = f(x).
+            segments (list): list of arrays where the values of y
+                             have always the same sign.
 
         Returns:
         -------
@@ -79,7 +156,7 @@ def get_segments(x, y):
         """
         for s in segments:
             first_point = s[0][0]
-            last_point= s[0][-1]
+            last_point = s[0][-1]
 
             first_xzero = x[(np.where(x == first_point)[0][0] - 1)]
             last_xzero = x[(np.where(x == last_point)[0][0] + 1)]
@@ -98,6 +175,40 @@ def get_segments(x, y):
     negative_segments = add_zeros(x, y, negative_segments)
 
     return positive_segments, negative_segments
+
+
+def get_peaks(x, y, which_peaks, distance):
+    """
+    To get the top or bottom peaks of a signal.
+
+    Args:
+    ----
+        x (array): a discretised vector of floats.
+        y (array): a discretized vector y such that y = f(x).
+        which_peaks (str): To get the top or bottom peaks.
+                           Should be "top" or "bottom".
+        distance (int): distance between two neighboring peaks.
+
+    Returns:
+    -------
+        array: values of x such that y[x] is a peak.
+
+    """
+    if not (isinstance(distance, int) and distance > 0):
+        raise ValueError(
+            "To get top or bottom peaks, distance should be a "
+            f"positive integer. Not '{distance}'. "
+            "Please use 'test_distance method to set the right distance."
+        )
+    top_peaks, _ = find_peaks(y, distance=distance)
+    bottom_peaks, _ = find_peaks(- y, distance=distance)
+
+    if which_peaks == "top":
+        return x[top_peaks]
+    elif which_peaks == "bottom":
+        return x[bottom_peaks]
+    else:
+        return None
 
 
 def frequency(signal, sampling_rate, method, which_peaks, distance):
@@ -167,3 +278,59 @@ def frequency(signal, sampling_rate, method, which_peaks, distance):
     dominant_freq *= 60
 
     return dominant_freq
+
+
+def get_auc_time(segments, return_mean):
+    """
+    To get the mean duration of segments when AUC is positive or negative.
+
+    Args:
+    ----
+        segments (tuple): segments ([x0, x1, ...], [y0, y1, ...], ...) where
+                          [y0, y1, ...] contains only values of the same sign.
+        return_mean (bool): to return all values or only the mean.
+
+    Returns:
+    -------
+        int: the mean duration of AUC
+             (or array: all durations if return_mean = False).
+
+    Note:
+    ----
+        To get segments, please use the 'get_segments' function.
+
+    """
+    points_of_interest = [s[0] for s in segments]
+    duration = [(p[-1] - p[0]) for p in points_of_interest]
+
+    if return_mean:
+        return np.mean(duration)
+    else:
+        return duration
+
+
+def get_auc_value(segments, return_mean):
+    """
+    To get the mean AUC of segments when AUC is positive or negative.
+
+    Args:
+    ----
+        segments (tuple): segments ([x0, x1, ...], [y0, y1, ...], ...) where
+                          [y0, y1, ...] contains only values of the same sign.
+        return_mean (bool): to return all values or only the mean.
+
+    Returns:
+    -------
+        int: the mean of AUC (or array: all AUC if return_mean = False).
+
+    Note:
+    ----
+        To get segments, please use the 'get_segments' function.
+
+    """
+    auc = [trapezoid(y=y, x=x) for x, y in segments]
+
+    if return_mean:
+        return np.mean(auc)
+    else:
+        return auc

@@ -11,11 +11,10 @@ Created on Wed Apr  2 08:40:50 2025
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
-from scipy.integrate import trapezoid
 from scipy.signal import detrend, find_peaks
 
 from .argcontroller import enforce_type_arg
-from .signalfeatures import get_segments, frequency
+from . import signalfeatures as sf
 
 
 class BreathingFlow:
@@ -41,7 +40,11 @@ class BreathingFlow:
 
         self.detrended_flow = detrend(self.raw_flow, type="constant")
         self.detrended_flow[np.isclose(self.detrended_flow, 0, atol=1e-12)] = 0
-        self.__zero_interpolation()
+
+        self.time, self.flow = sf.zero_interpolation(
+            self.raw_time, self.detrended_flow
+        )
+
         self._distance = None
 
     @property
@@ -50,56 +53,8 @@ class BreathingFlow:
         return self._distance
 
     def get_hz(self):
-        """
-        To get the sampling rate of the discretized breathing signal.
-
-        Returns:
-        -------
-            int: the sampling rate in Hz (s-1).
-
-        """
-        time_delta = pd.to_timedelta(self.raw_time, unit="s")
-        diff = time_delta.diff().value_counts().index.tolist()[0]
-
-        return int(pd.Timedelta(seconds=1) / diff)
-
-    def __zero_interpolation(self):
-        """To find the 'True' zeros of a discretized signal."""
-        x, y = self.raw_time, self.detrended_flow
-
-        crossing_indices = np.where(
-            np.array(
-                [0 if e in (-1, 1) else e for e in np.diff(np.sign(y))]
-            )
-        )[0]
-
-        x_zeros, y_zeros = [], []
-        for i in crossing_indices:
-            x_upstream, x_downstream = x[i], x[i + 1]
-            y_upstream, y_downstream = y[i], y[i + 1]
-
-            zero = x_upstream - y_upstream * (x_downstream - x_upstream) / (
-                y_downstream - y_upstream
-            )
-            x_zeros.append(zero)
-            y_zeros.append(0.0)
-
-        x_extended = np.concatenate((x, x_zeros))
-        y_extended = np.concatenate((y, y_zeros))
-
-        sorted_indices = np.argsort(x_extended)
-        x_interpolated = x_extended[sorted_indices]
-        y_interpolated = y_extended[sorted_indices]
-
-        # Truncation to start and end with a 'True' zero.
-        first_zero = np.where(y_interpolated == 0)[0][0]
-        lasy_zero = np.where(y_interpolated == 0)[0][-1] + 1
-
-        x_truncated = x_interpolated[first_zero:lasy_zero]
-        y_truncated = y_interpolated[first_zero:lasy_zero]
-
-        self.time = x_truncated
-        self.flow = y_truncated
+        """To get the sampling rate of the discretized breathing signal."""
+        return sf.compute_sampling_rate(x=self.raw_time)
 
     @enforce_type_arg(y=str, show_segments=bool)
     def plot(self, y="flow", show_segments=False):
@@ -138,11 +93,11 @@ class BreathingFlow:
 
     def get_positive_segments(self):
         """To get the pairs (x,y) for which the air flow rate is positive."""
-        return get_segments(self.time, self.flow)[0]
+        return sf.get_segments(self.time, self.flow)[0]
 
     def get_negative_segments(self):
         """To get the pairs (x,y) for which the air flow rate is negative."""
-        return get_segments(self.time, self.flow)[1]
+        return sf.get_segments(self.time, self.flow)[1]
 
     @enforce_type_arg(which_peaks=str, distance=int, set_dist=bool)
     def test_distance(self, which_peaks, distance=0, set_dist=False):
@@ -210,35 +165,21 @@ class BreathingFlow:
         return None
 
     def get_top_peaks(self):
-        """To get the top signal peaks."""
-        if not (isinstance(self.distance, int) and self.distance > 0):
-            raise ValueError(
-                "To get top peaks, distance should be a "
-                f"positive integer. Not '{self.distance}'. "
-                "Please use 'test_distance method to set the right distance."
-            )
-
-        top_peaks, _ = find_peaks(self.flow, distance=self.distance)
-
-        return self.time[top_peaks]
+        """To get the top peaks of the air flow rate."""
+        return sf.get_peaks(
+            x=self.time, y=self.flow, which_peaks="top", distance=self.distance
+        )
 
     def get_bottom_peaks(self):
-        """To get the bottom signal peaks."""
-        if not (isinstance(self.distance, int) and self.distance > 0):
-            raise ValueError(
-                "To get bottom peaks, distance should be a "
-                f"positive integer. Not '{self.distance}'. "
-                "Please use 'test_distance method to set the right distance."
-            )
-
-        bottom_peaks, _ = find_peaks(- self.flow, distance=self.distance)
-
-        return self.time[bottom_peaks]
+        """To get the bottom peaks of the air flow rate."""
+        return sf.get_peaks(
+            x=self.time, y=self.flow, which_peaks="bottom", distance=self.distance
+        )
 
     @enforce_type_arg(method=str)
     def get_frequency(self, method="welch", which_peaks=None):
         """Get breathing frequency of the air flow rate (in respirations.min-1)."""
-        return frequency(
+        return sf.frequency(
             signal=self.flow,
             sampling_rate=self.get_hz(),
             method=method,
@@ -248,8 +189,7 @@ class BreathingFlow:
 
     @enforce_type_arg(return_mean=bool)
     def get_positive_auc_time(self, return_mean=True):
-        """
-        To get the mean duration of segments when AUC is positive.
+        """To get the mean duration of positive segments (when AUC > 0).
 
         Args:
         ----
@@ -258,7 +198,7 @@ class BreathingFlow:
 
         Returns:
         -------
-            positive_time: mean duration of segments when AUC is positive
+            positive_time: mean duration of positive segments (when AUC > 0)
                            (or all durations if return_mean = False).
 
         Note:
@@ -266,18 +206,14 @@ class BreathingFlow:
             AUC = Area Under the Curve.
 
         """
-        positive_points = [ps[0] for ps in self.get_positive_segments()]
-        positive_time = [(p[-1] - p[0]) for p in positive_points]
-
-        if return_mean:
-            return np.mean(positive_time)
-        else:
-            return positive_time
+        return sf.get_auc_time(
+            segments=self.get_positive_segments(), return_mean=return_mean
+        )
 
     @enforce_type_arg(return_mean=bool)
     def get_negative_auc_time(self, return_mean=True):
         """
-        To get the mean duration of segments when AUC is negative.
+        To get the mean duration of negative segments (when AUC < 0).
 
         Args:
         ----
@@ -286,7 +222,7 @@ class BreathingFlow:
 
         Returns:
         -------
-            negative_time: mean duration of segments when AUC is negative
+            negative_time: mean duration of negative segments (when AUC < 0).
                            (or all durations if return_mean = False).
 
         Note:
@@ -294,13 +230,9 @@ class BreathingFlow:
             AUC = Area Under the Curve.
 
         """
-        negative_points = [ps[0] for ps in self.get_negative_segments()]
-        negative_time = [(p[-1] - p[0]) for p in negative_points]
-
-        if return_mean:
-            return np.mean(negative_time)
-        else:
-            return negative_time
+        return sf.get_auc_time(
+            segments=self.get_negative_segments(), return_mean=return_mean
+        )
 
     @enforce_type_arg(return_mean=bool)
     def get_positive_auc_value(self, return_mean=True):
@@ -315,22 +247,16 @@ class BreathingFlow:
         Returns:
         -------
             positive_auc: mean AUC of positive segments (when AUC > 0).
-                           (or each AUC of each segment if return_mean = False).
+                          (or each AUC of each segment if return_mean = False).
 
         Note:
         ----
             AUC = Area Under the Curve.
 
         """
-        positive_auc = []
-        for x, y in self.get_positive_segments():
-            auc = trapezoid(y=y, x=x)
-            positive_auc.append(auc)
-
-        if return_mean:
-            return np.mean(positive_auc)
-        else:
-            return positive_auc
+        return sf.get_auc_value(
+            segments=self.get_positive_segments(), return_mean=return_mean
+        )
 
     @enforce_type_arg(return_mean=bool)
     def get_negative_auc_value(self, return_mean=True):
@@ -345,19 +271,13 @@ class BreathingFlow:
         Returns:
         -------
             negative_auc: mean AUC of negative segments (when AUC < 0).
-                           (or each AUC of each segment if return_mean = False).
+                          (or each AUC of each segment if return_mean = False).
 
         Note:
         ----
             AUC = Area Under the Curve.
 
         """
-        negative_auc = []
-        for x, y in self.get_negative_segments():
-            auc = trapezoid(y=y, x=x)
-            negative_auc.append(auc)
-
-        if return_mean:
-            return np.mean(negative_auc)
-        else:
-            return negative_auc
+        return sf.get_auc_value(
+            segments=self.get_negative_segments(), return_mean=return_mean
+        )
