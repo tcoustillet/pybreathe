@@ -29,16 +29,16 @@ class BreathingFlow:
             .reset_index(drop=True)
         data = data.apply(lambda col: col.str.replace(",", ".").astype(float))
 
-        self.raw_time = np.around(data["time"].values, 3)
+        self.raw_time = data["time"].values
         self.raw_flow = data["values"].values
 
         time_len = len(self.raw_time)
-        self.absolute_time = np.around(
-            np.linspace(0, time_len / self.get_hz(), time_len, endpoint=False),
-            3
+        self.absolute_time = (
+            np.linspace(0, time_len / self.get_hz(), time_len, endpoint=False)
         )
 
         self.detrended_flow = detrend(self.raw_flow, type="constant")
+        self.detrended_flow[np.isclose(self.detrended_flow, 0, atol=1e-12)] = 0
         self.__zero_interpolation()
         self._distance = None
 
@@ -63,7 +63,7 @@ class BreathingFlow:
 
     def __zero_interpolation(self):
         """To find the 'True' zeros of a discretized signal."""
-        x, y = self.absolute_time, self.detrended_flow
+        x, y = self.raw_time, self.detrended_flow
 
         crossing_indices = np.where(
             np.array(
