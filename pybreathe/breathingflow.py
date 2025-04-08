@@ -11,6 +11,7 @@ Created on Wed Apr  2 08:40:50 2025
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
+from scipy.integrate import trapezoid
 from scipy.signal import detrend, find_peaks
 
 from .argcontroller import enforce_bool_arg, enforce_str_arg
@@ -300,3 +301,63 @@ class BreathingFlow:
             return np.mean(negative_time)
         else:
             return negative_time
+
+    @enforce_bool_arg("return_mean")
+    def get_positive_auc_value(self, return_mean=True):
+        """
+        To get the mean AUC of positive segments (when AUC > 0).
+
+        Args:
+        ----
+            return_mean (bool, optional): to return all values or only the mean.
+                                          Defaults to True (= the mean).
+
+        Returns:
+        -------
+            positive_auc: mean AUC of positive segments (when AUC > 0).
+                           (or each AUC of each segment if return_mean = False).
+
+        Note:
+        ----
+            AUC = Area Under the Curve.
+
+        """
+        positive_auc = []
+        for x, y in self.get_positive_segments():
+            auc = trapezoid(y=y, x=x)
+            positive_auc.append(auc)
+
+        if return_mean:
+            return np.mean(positive_auc)
+        else:
+            return positive_auc
+
+    @enforce_bool_arg("return_mean")
+    def get_negative_auc_value(self, return_mean=True):
+        """
+        To get the mean AUC of negative segments (when AUC < 0).
+
+        Args:
+        ----
+            return_mean (bool, optional): to return all values or only the mean.
+                                          Defaults to True (= the mean).
+
+        Returns:
+        -------
+            negative_auc: mean AUC of negative segments (when AUC < 0).
+                           (or each AUC of each segment if return_mean = False).
+
+        Note:
+        ----
+            AUC = Area Under the Curve.
+
+        """
+        negative_auc = []
+        for x, y in self.get_negative_segments():
+            auc = trapezoid(y=y, x=x)
+            negative_auc.append(auc)
+
+        if return_mean:
+            return np.mean(negative_auc)
+        else:
+            return negative_auc
