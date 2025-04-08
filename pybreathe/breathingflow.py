@@ -14,13 +14,14 @@ import pandas as pd
 from scipy.integrate import trapezoid
 from scipy.signal import detrend, find_peaks
 
-from .argcontroller import enforce_bool_arg, enforce_str_arg
+from .argcontroller import enforce_type_arg
 from .signalfeatures import get_segments, frequency
 
 
 class BreathingFlow:
     """Breathing Air Flow rate."""
 
+    @enforce_type_arg(filename=str)
     def __init__(self, filename):
         raw_data = pd.read_csv(
             filename, sep=r"\s+", usecols=[0, 1], names=["time", "values"],
@@ -100,8 +101,7 @@ class BreathingFlow:
         self.time = x_truncated
         self.flow = y_truncated
 
-    @enforce_str_arg("y")
-    @enforce_bool_arg("show_segments")
+    @enforce_type_arg(y=str, show_segments=bool)
     def plot(self, y="flow", show_segments=False):
         """To plot the air flow rate."""
         fig, ax = plt.subplots(figsize=(12, 2))
@@ -144,8 +144,7 @@ class BreathingFlow:
         """To get the pairs (x,y) for which the air flow rate is negative."""
         return get_segments(self.time, self.flow)[1]
 
-    @enforce_bool_arg("set_dist")
-    @enforce_str_arg("which_peaks")
+    @enforce_type_arg(which_peaks=str, distance=int, set_dist=bool)
     def test_distance(self, which_peaks, distance=0, set_dist=False):
         """
         Calibration of peaks detection
@@ -236,6 +235,7 @@ class BreathingFlow:
 
         return self.time[bottom_peaks]
 
+    @enforce_type_arg(method=str)
     def get_frequency(self, method="welch", which_peaks=None):
         """Get breathing frequency of the air flow rate (in respirations.min-1)."""
         return frequency(
@@ -246,7 +246,7 @@ class BreathingFlow:
             distance=self.distance
         )
 
-    @enforce_bool_arg("return_mean")
+    @enforce_type_arg(return_mean=bool)
     def get_positive_auc_time(self, return_mean=True):
         """
         To get the mean duration of segments when AUC is positive.
@@ -274,7 +274,7 @@ class BreathingFlow:
         else:
             return positive_time
 
-    @enforce_bool_arg("return_mean")
+    @enforce_type_arg(return_mean=bool)
     def get_negative_auc_time(self, return_mean=True):
         """
         To get the mean duration of segments when AUC is negative.
@@ -302,7 +302,7 @@ class BreathingFlow:
         else:
             return negative_time
 
-    @enforce_bool_arg("return_mean")
+    @enforce_type_arg(return_mean=bool)
     def get_positive_auc_value(self, return_mean=True):
         """
         To get the mean AUC of positive segments (when AUC > 0).
@@ -332,7 +332,7 @@ class BreathingFlow:
         else:
             return positive_auc
 
-    @enforce_bool_arg("return_mean")
+    @enforce_type_arg(return_mean=bool)
     def get_negative_auc_value(self, return_mean=True):
         """
         To get the mean AUC of negative segments (when AUC < 0).
