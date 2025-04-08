@@ -25,8 +25,8 @@ class BreathingFlow:
             filename, sep=r"\s+", usecols=[0, 1], names=["time", "values"],
             dtype=str
         )
-        data = raw_data[raw_data["time"].str.match(r"^\d+([.,]\d+)?$")] \
-            .reset_index(drop=True)
+        pattern = r"^[+-]?\d+([.,]\d+)?([eE+][+-]?\d+)?$"
+        data = raw_data[raw_data["time"].str.match(pattern)].reset_index(drop=True)
         data = data.apply(lambda col: col.str.replace(",", ".").astype(float))
 
         self.raw_time = data["time"].values
