@@ -58,7 +58,7 @@ class BreathingFlow:
         time_pattern = r"^[+-]?\d+([.,]\d+)?([eE+][+-]?\d+)?$"
 
         match filename:
-            case filename.endswith("txt"):
+            case _ if filename.endswith("txt"):
                 raw_data = pd.read_csv(
                     filename, sep=r"\s+", usecols=[0, 1], names=col_names,
                     dtype=str
