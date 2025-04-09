@@ -20,7 +20,8 @@ from . import visualization
 class BreathingFlow:
     """Breathing Air Flow rate."""
 
-    def __init__(self, raw_time, raw_flow):
+    @enforce_type_arg(detrend_y=bool)
+    def __init__(self, raw_time, raw_flow, detrend_y=True):
         self.raw_time = raw_time
         self.raw_flow = raw_flow
 
@@ -29,18 +30,21 @@ class BreathingFlow:
             np.linspace(0, time_len / self.get_hz(), time_len, endpoint=False)
         )
 
-        self.detrended_flow = detrend(self.raw_flow, type="constant")
-        self.detrended_flow[np.isclose(self.detrended_flow, 0, atol=1e-12)] = 0
+        if detrend_y:
+            self.detrended_flow = detrend(self.raw_flow, type="constant")
+            self.detrended_flow[np.isclose(self.detrended_flow, 0, atol=1e-12)] = 0
+
+        y_to_be_interpolated = getattr(self, "detrended_flow", self.raw_flow)
 
         self.time, self.flow = features.zero_interpolation(
-            self.raw_time, self.detrended_flow
+            x=self.raw_time, y=y_to_be_interpolated
         )
 
         self._distance = None
 
     @classmethod
-    @enforce_type_arg(filename=str)
-    def from_file(cls, filename):
+    @enforce_type_arg(filename=str, detrend_y=bool)
+    def from_file(cls, filename, detrend_y=True):
         """
         To instantiate a 'BreathingFlow' objet from a file path.
 
@@ -67,10 +71,15 @@ class BreathingFlow:
         data = raw_data[raw_data["time"].str.match(time_pattern)].reset_index(drop=True)
         data = data.apply(lambda col: col.str.replace(",", ".").astype(float))
 
-        return cls(raw_time=data["time"].values, raw_flow=data["values"].values)
+        return cls(
+            raw_time=data["time"].values,
+            raw_flow=data["values"].values,
+            detrend_y=detrend_y
+        )
 
     @classmethod
-    def from_dataframe(cls, df):
+    @enforce_type_arg(detrend_y=bool)
+    def from_dataframe(cls, df, detrend_y=True):
         """
         To instantiate a 'BreathingFlow' objet from a dataframe.
 
@@ -88,7 +97,35 @@ class BreathingFlow:
             raise ValueError(
                 "DataFrame must contain a 'time' column and a 'values' column."
             )
-        return cls(raw_time=df["time"].values, raw_flow=df["values"].values)
+        return cls(
+            raw_time=df["time"].values,
+            raw_flow=df["values"].values,
+            detrend_y=detrend_y
+        )
+
+    def __getitem__(self, key):
+        """
+        To allow a 'BreathingFlow' object to be sliced and used as a new object.
+
+        Args:
+        ----
+            key (list): slice of shape [start:stop:steps].
+
+        Returns:
+        -------
+            A new 'BreathingFlow' sliced object.
+
+        """
+        sliced_object = self.__class__(
+            raw_time=self.time[key],
+            raw_flow=self.flow[key],
+            detrend_y=False
+        )
+
+        if hasattr(self, "distance"):
+            sliced_object._distance = self._distance
+
+        return sliced_object
 
     @property
     def distance(self):
