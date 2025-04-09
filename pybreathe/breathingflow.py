@@ -13,7 +13,7 @@ import pandas as pd
 from scipy.signal import detrend
 
 from .argcontroller import enforce_type_arg
-from . import signalfeatures as sf
+from . import featureextraction as features
 from . import visualization
 
 
@@ -41,7 +41,7 @@ class BreathingFlow:
         self.detrended_flow = detrend(self.raw_flow, type="constant")
         self.detrended_flow[np.isclose(self.detrended_flow, 0, atol=1e-12)] = 0
 
-        self.time, self.flow = sf.zero_interpolation(
+        self.time, self.flow = features.zero_interpolation(
             self.raw_time, self.detrended_flow
         )
 
@@ -54,7 +54,7 @@ class BreathingFlow:
 
     def get_hz(self):
         """To get the sampling rate of the discretized breathing signal."""
-        return sf.compute_sampling_rate(x=self.raw_time)
+        return features.compute_sampling_rate(x=self.raw_time)
 
     @enforce_type_arg(y=str, show_segments=bool)
     def plot(self, y="flow", show_segments=False):
@@ -75,11 +75,11 @@ class BreathingFlow:
 
     def get_positive_segments(self):
         """To get the pairs (x,y) for which the air flow rate is positive."""
-        return sf.get_segments(self.time, self.flow)[0]
+        return features.get_segments(self.time, self.flow)[0]
 
     def get_negative_segments(self):
         """To get the pairs (x,y) for which the air flow rate is negative."""
-        return sf.get_segments(self.time, self.flow)[1]
+        return features.get_segments(self.time, self.flow)[1]
 
     @enforce_type_arg(which_peaks=str, distance=int, set_dist=bool)
     def test_distance(self, which_peaks, distance=0, set_dist=False):
@@ -112,20 +112,20 @@ class BreathingFlow:
 
     def get_top_peaks(self):
         """To get the top peaks of the air flow rate."""
-        return sf.get_peaks(
+        return features.get_peaks(
             x=self.time, y=self.flow, which_peaks="top", distance=self.distance
         )
 
     def get_bottom_peaks(self):
         """To get the bottom peaks of the air flow rate."""
-        return sf.get_peaks(
+        return features.get_peaks(
             x=self.time, y=self.flow, which_peaks="bottom", distance=self.distance
         )
 
     @enforce_type_arg(method=str)
     def get_frequency(self, method="welch", which_peaks=None):
         """Get breathing frequency of the air flow rate (in respirations.min-1)."""
-        return sf.frequency(
+        return features.frequency(
             signal=self.flow,
             sampling_rate=self.get_hz(),
             method=method,
@@ -152,7 +152,7 @@ class BreathingFlow:
             AUC = Area Under the Curve.
 
         """
-        return sf.get_auc_time(
+        return features.get_auc_time(
             segments=self.get_positive_segments(), return_mean=return_mean
         )
 
@@ -176,7 +176,7 @@ class BreathingFlow:
             AUC = Area Under the Curve.
 
         """
-        return sf.get_auc_time(
+        return features.get_auc_time(
             segments=self.get_negative_segments(), return_mean=return_mean
         )
 
@@ -200,7 +200,7 @@ class BreathingFlow:
             AUC = Area Under the Curve.
 
         """
-        return sf.get_auc_value(
+        return features.get_auc_value(
             segments=self.get_positive_segments(), return_mean=return_mean
         )
 
@@ -224,6 +224,6 @@ class BreathingFlow:
             AUC = Area Under the Curve.
 
         """
-        return sf.get_auc_value(
+        return features.get_auc_value(
             segments=self.get_negative_segments(), return_mean=return_mean
         )

@@ -10,7 +10,7 @@ Created on Wed Apr  9 08:30:59 2025
 
 import matplotlib.pyplot as plt
 from scipy.signal import find_peaks
-from . import signalfeatures as sf
+from . import featureextraction as features
 
 
 def plot_signal(x, y, show_segments):
@@ -31,10 +31,10 @@ def plot_signal(x, y, show_segments):
     fig, ax = plt.subplots(figsize=(14, 2))
 
     if show_segments:
-        for i, (x_pos, y_pos) in enumerate(sf.get_segments(x, y)[0]):
+        for i, (x_pos, y_pos) in enumerate(features.get_segments(x, y)[0]):
             pos_label = "Air flow rate > 0" if i == 1 else ""
             ax.plot(x_pos, y_pos, label=pos_label, c="tab:blue")
-        for i, (x_neg, y_neg) in enumerate(sf.get_segments(x, y)[1]):
+        for i, (x_neg, y_neg) in enumerate(features.get_segments(x, y)[1]):
             neg_label = "Air flow rate < 0" if i == 1 else ""
             ax.plot(x_neg, y_neg, label=neg_label, c="tab:orange")
     else:
