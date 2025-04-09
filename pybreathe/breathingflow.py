@@ -8,13 +8,13 @@ Created on Wed Apr  2 08:40:50 2025
 """
 
 
-import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
-from scipy.signal import detrend, find_peaks
+from scipy.signal import detrend
 
 from .argcontroller import enforce_type_arg
 from . import signalfeatures as sf
+from . import visualization
 
 
 class BreathingFlow:
@@ -59,8 +59,6 @@ class BreathingFlow:
     @enforce_type_arg(y=str, show_segments=bool)
     def plot(self, y="flow", show_segments=False):
         """To plot the air flow rate."""
-        fig, ax = plt.subplots(figsize=(12, 2))
-
         match y:
             case "flow":
                 x, y = self.time, self.flow
@@ -73,23 +71,7 @@ class BreathingFlow:
                     f"{self.__class__.__name__} object has no attribute '{y}'"
                 )
 
-        if show_segments:
-            for i, (x_pos, y_pos) in enumerate(self.get_positive_segments()):
-                pos_label = "Air flow rate > 0" if i == 1 else ""
-                ax.plot(x_pos, y_pos, label=pos_label, c="tab:blue")
-            for i, (x_neg, y_neg) in enumerate(self.get_negative_segments()):
-                neg_label = "Air flow rate < 0" if i == 1 else ""
-                ax.plot(x_neg, y_neg, label=neg_label, c="tab:orange")
-        else:
-            ax.plot(x, y, label="air flow rate")
-
-        ax.set_xlabel("time (s)", labelpad=10)
-        ax.set_ylabel("Air flow rate", labelpad=10)
-        ax.legend()
-        ax.spines["top"].set_visible(False)
-        ax.spines["right"].set_visible(False)
-
-        return None
+        visualization.plot_signal(x=x, y=y, show_segments=show_segments)
 
     def get_positive_segments(self):
         """To get the pairs (x,y) for which the air flow rate is positive."""
@@ -121,48 +103,12 @@ class BreathingFlow:
             to find the one that detects all the peaks.
 
         """
-        t, y = self.time, self.flow
-        top_peaks, _ = find_peaks(y, distance=distance)
-        bottom_peaks, _ = find_peaks(- y, distance=distance)
-
-        fig, ax = plt.subplots(figsize=(12, 2))
-
-        ax.plot(t, y, c="tab:blue", label="your signal", zorder=1)
-
-        match which_peaks:
-            case "top":
-                ax.scatter(
-                    t[top_peaks], y[top_peaks], s=10, marker="x", lw=2, c="red",
-                    label=f"{len(top_peaks)} detected peaks (distance = {distance})", zorder=2,
-                )
-            case "bottom":
-                ax.scatter(
-                    t[bottom_peaks], y[bottom_peaks], s=10, marker="x", lw=2, c="red",
-                    label=f"{len(bottom_peaks)} detected peaks (distance = {distance})",
-                    zorder=2
-                )
-            case _:
-                raise ValueError(
-                    "Argument 'which_peaks' must be either 'top' or 'bottom'. "
-                    f"Not '{which_peaks}'."
-                    )
-
-        min_s, max_s = min(y), max(y)
-        s_amp = max_s - min_s
-        min_b, max_b = min_s - 0.25 * s_amp, max_s + 0.25 * s_amp
-        ax.set_ylim(min_b, max_b)
-        ax.set_xlabel("time (s)", labelpad=10)
-        ax.set_ylabel("Air flow rate", labelpad=10)
-        ax.grid(alpha=0.8, linestyle=":", ms=0.5)
-        ax.legend(prop={"size": 8}, loc="upper left", bbox_to_anchor=(0, 1.25))
-
-        ax.spines["top"].set_visible(False)
-        ax.spines["right"].set_visible(False)
+        visualization.plot_peaks(
+            x=self.time, y=self.flow, which_peaks=which_peaks, distance=distance
+        )
 
         if set_dist:
             self._distance = distance
-
-        return None
 
     def get_top_peaks(self):
         """To get the top peaks of the air flow rate."""
