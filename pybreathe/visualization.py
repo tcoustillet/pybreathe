@@ -9,11 +9,12 @@ Created on Wed Apr  9 08:30:59 2025
 
 
 import matplotlib.pyplot as plt
+import numpy as np
 from scipy.signal import find_peaks
 from . import featureextraction as features
 
 
-def plot_signal(x, y, show_segments):
+def plot_signal(x, y, show_segments, show_auc):
     """To plot y versus x.
 
     Args:
@@ -28,20 +29,54 @@ def plot_signal(x, y, show_segments):
         None. Plot the figure.
 
     """
+    positive_segments = features.get_segments(x, y)[0]
+    negative_segments = features.get_segments(x, y)[1]
+
     fig, ax = plt.subplots(figsize=(14, 2))
 
     if show_segments:
-        for i, (x_pos, y_pos) in enumerate(features.get_segments(x, y)[0]):
+        for i, (x_pos, y_pos) in enumerate(positive_segments):
             pos_label = "Air flow rate > 0" if i == 1 else ""
             ax.plot(x_pos, y_pos, label=pos_label, c="tab:blue")
-        for i, (x_neg, y_neg) in enumerate(features.get_segments(x, y)[1]):
+        for i, (x_neg, y_neg) in enumerate(negative_segments):
             neg_label = "Air flow rate < 0" if i == 1 else ""
             ax.plot(x_neg, y_neg, label=neg_label, c="tab:orange")
-    else:
-        ax.plot(x, y, label="air flow rate")
+    elif not show_segments and not show_auc:
+        ax.plot(x, y, label="air flow rate", c="tab:gray")
+
+    if show_auc:
+        ax.plot(x, y, label="air flow rate", c="tab:gray", lw=0.5)
+
+        positive_auc = features.get_auc_value(
+            segments=positive_segments, return_mean=False
+        )
+
+        negative_auc = features.get_auc_value(
+            segments=negative_segments, return_mean=False
+        )
+
+        pos_normalized = positive_auc / np.max(positive_auc)
+        neg_normalized = negative_auc / np.max(negative_auc)
+
+        cmap_pos, cmap_neg = plt.cm.GnBu, plt.cm.RdPu
+
+        ax.axhline(y=0, c="grey", linestyle=":", lw=1)
+        zeros = np.where(y == 0)[0]
+        ax.scatter(
+            x[zeros], y[zeros], zorder=2, c="gold", s=9, lw=0.4, edgecolor="k"
+        )
+
+        for i, (xp, yp) in enumerate(positive_segments):
+            color = cmap_pos(pos_normalized[i])
+            ax.fill_between(xp, yp, color=color, alpha=1)
+
+        for j, (xn, yn) in enumerate(negative_segments):
+            color = cmap_neg(neg_normalized[j])
+            ax.fill_between(xn, yn, color=color, alpha=1)
 
     ax.set_xlabel("time (s)", labelpad=10)
     ax.set_ylabel("Air flow rate", labelpad=10)
+    ax.grid(alpha=0.8, linestyle=":", ms=0.1, zorder=1)
     ax.legend(fontsize=8, loc="upper left", bbox_to_anchor=(0, 1.2))
     ax.spines["top"].set_visible(False)
     ax.spines["right"].set_visible(False)
