@@ -42,12 +42,12 @@ class BreathingFlow:
     @enforce_type_arg(filename=str)
     def from_file(cls, filename):
         """
-        To instantiate an objet from a file path.
+        To instantiate a 'BreathingFlow' objet from a file path.
 
         Args:
         ----
             filename (str): path to the two-column file representing
-                           discretized time and discretized air flow rate.
+                            discretized time and discretized air flow rate.
 
         Returns:
         -------
@@ -68,6 +68,27 @@ class BreathingFlow:
         data = data.apply(lambda col: col.str.replace(",", ".").astype(float))
 
         return cls(raw_time=data["time"].values, raw_flow=data["values"].values)
+
+    @classmethod
+    def from_dataframe(cls, df):
+        """
+        To instantiate a 'BreathingFlow' objet from a dataframe.
+
+        Args:
+        ----
+            df (pandas.DataFrame): two-column dataframe representing discretized
+                                   time and discretized air flow rate.
+
+        Returns:
+        -------
+            BreathingFlow: instantiate an objet of type 'BreathingFlow'.
+
+        """
+        if not {"time", "values"}.issubset(df.columns):
+            raise ValueError(
+                "DataFrame must contain a 'time' column and a 'values' column."
+            )
+        return cls(raw_time=df["time"].values, raw_flow=df["values"].values)
 
     @property
     def distance(self):
