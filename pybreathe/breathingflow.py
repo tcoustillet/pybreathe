@@ -20,18 +20,9 @@ from . import visualization
 class BreathingFlow:
     """Breathing Air Flow rate."""
 
-    @enforce_type_arg(filename=str)
-    def __init__(self, filename):
-        raw_data = pd.read_csv(
-            filename, sep=r"\s+", usecols=[0, 1], names=["time", "values"],
-            dtype=str
-        )
-        pattern = r"^[+-]?\d+([.,]\d+)?([eE+][+-]?\d+)?$"
-        data = raw_data[raw_data["time"].str.match(pattern)].reset_index(drop=True)
-        data = data.apply(lambda col: col.str.replace(",", ".").astype(float))
-
-        self.raw_time = data["time"].values
-        self.raw_flow = data["values"].values
+    def __init__(self, raw_time, raw_flow):
+        self.raw_time = raw_time
+        self.raw_flow = raw_flow
 
         time_len = len(self.raw_time)
         self.absolute_time = (
@@ -46,6 +37,37 @@ class BreathingFlow:
         )
 
         self._distance = None
+
+    @classmethod
+    @enforce_type_arg(filename=str)
+    def from_file(cls, filename):
+        """
+        To instantiate an objet from a file path.
+
+        Args:
+        ----
+            filename (str): path to the two-column file representing
+                           discretized time and discretized air flow rate.
+
+        Returns:
+        -------
+            BreathingFlow: instantiate an objet of type 'BreathingFlow'.
+
+        """
+        col_names = ["time", "values"]
+        time_pattern = r"^[+-]?\d+([.,]\d+)?([eE+][+-]?\d+)?$"
+
+        match filename:
+            case filename.endswith("txt"):
+                raw_data = pd.read_csv(
+                    filename, sep=r"\s+", usecols=[0, 1], names=col_names,
+                    dtype=str
+                )
+
+        data = raw_data[raw_data["time"].str.match(time_pattern)].reset_index(drop=True)
+        data = data.apply(lambda col: col.str.replace(",", ".").astype(float))
+
+        return cls(raw_time=data["time"].values, raw_flow=data["values"].values)
 
     @property
     def distance(self):
