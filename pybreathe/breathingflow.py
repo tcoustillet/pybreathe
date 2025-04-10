@@ -12,7 +12,7 @@ import numpy as np
 import pandas as pd
 from scipy.signal import detrend
 
-from .argcontroller import enforce_type_arg
+from .utils import enforce_type_arg
 from . import featureextraction as features
 from . import visualization
 
