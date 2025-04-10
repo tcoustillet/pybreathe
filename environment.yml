@@ -12,4 +12,5 @@ dependencies:
   - anaconda::numpy
   - conda-forge::matplotlib
   - conda-forge::jupyterlab
+  - anaconda::openpyxl
 prefix: C:\Users\CoustilletT\anaconda3\envs\venv_pybreathe
