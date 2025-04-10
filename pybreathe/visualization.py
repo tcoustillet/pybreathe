@@ -48,11 +48,13 @@ def plot_signal(x, y, show_segments, show_auc):
         ax.plot(x, y, label="air flow rate", c="tab:gray", lw=0.5)
 
         positive_auc = features.get_auc_value(
-            segments=positive_segments, return_mean=False, verbose=False
+            segments=positive_segments, return_mean=False,
+            verbose=False, decimals=2
         )
 
         negative_auc = features.get_auc_value(
-            segments=negative_segments, return_mean=False, verbose=False
+            segments=negative_segments, return_mean=False,
+            verbose=False, decimals=2
         )
 
         pos_normalized = positive_auc / np.max(positive_auc)

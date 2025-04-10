@@ -13,6 +13,8 @@ import pandas as pd
 from scipy.integrate import trapezoid
 from scipy.signal import find_peaks, periodogram, welch, windows
 
+from .utils import scientific_round
+
 
 def compute_sampling_rate(x):
     """
@@ -211,7 +213,7 @@ def get_peaks(x, y, which_peaks, distance):
         return None
 
 
-def frequency(signal, sampling_rate, method, which_peaks, distance):
+def frequency(signal, sampling_rate, method, which_peaks, distance, decimals):
     """Get the frequency of a given signal.
 
     Args:
@@ -222,6 +224,7 @@ def frequency(signal, sampling_rate, method, which_peaks, distance):
         which_peaks (str): if the method is 'peaks', which peaks should be
                            considered (top or bottom) ?
         distance (int): the minimum distance between two neighbouring peaks.
+        decimals (int): to round freq to the given number of decimals.
 
     Returns:
     -------
@@ -277,10 +280,10 @@ def frequency(signal, sampling_rate, method, which_peaks, distance):
     # The frequency is in rpm.s-1; we want it in min.-1.
     dominant_freq *= 60
 
-    return dominant_freq
+    return scientific_round(dominant_freq, decimals=decimals)
 
 
-def get_auc_time(segments, return_mean, verbose):
+def get_auc_time(segments, return_mean, verbose, decimals):
     """
     To get the mean duration of segments when AUC is positive or negative.
 
@@ -290,6 +293,7 @@ def get_auc_time(segments, return_mean, verbose):
                           [y0, y1, ...] contains only values of the same sign.
         return_mean (bool): to return all values or only the mean.
         verbose (bool): to print (or not) results in human readable format.
+        decimals (int): to round time to the given number of decimals.
 
     Returns:
     -------
@@ -305,16 +309,19 @@ def get_auc_time(segments, return_mean, verbose):
     duration = [(p[-1] - p[0]) for p in points_of_interest]
 
     if return_mean:
-        mean_duration, std_duration = np.mean(duration), np.std(duration)
+        mean_duration = scientific_round(np.mean(duration), decimals=decimals)
+        std_duration = scientific_round(np.std(duration), decimals=decimals)
         n_duration = len(duration)
+
         if verbose:
             print(f"mean = {mean_duration} ± {std_duration} (n = {n_duration}).")
         return mean_duration, std_duration, n_duration
+
     else:
-        return duration
+        return scientific_round(duration, decimals=decimals)
 
 
-def get_auc_value(segments, return_mean, verbose):
+def get_auc_value(segments, return_mean, verbose, decimals):
     """
     To get the mean AUC of segments when AUC is positive or negative.
 
@@ -324,6 +331,7 @@ def get_auc_value(segments, return_mean, verbose):
                           [y0, y1, ...] contains only values of the same sign.
         return_mean (bool): to return all values or only the mean.
         verbose (bool) : to print (or not) results in human readable format.
+        decimals (int): to round auc value to the given number of decimals.
 
     Returns:
     -------
@@ -337,9 +345,13 @@ def get_auc_value(segments, return_mean, verbose):
     auc = [trapezoid(y=y, x=x) for x, y in segments]
 
     if return_mean:
-        mean_auc, std_auc, n_auc = np.mean(auc), np.std(auc), len(auc)
+        mean_auc = scientific_round(np.mean(auc), decimals=decimals)
+        std_auc = scientific_round(np.std(auc), decimals=decimals)
+        n_auc = len(auc)
+
         if verbose:
             print(f"mean = {mean_auc} ± {std_auc} (n = {n_auc}).")
         return mean_auc, std_auc, n_auc
+
     else:
-        return auc
+        return scientific_round(auc, decimals=decimals)
