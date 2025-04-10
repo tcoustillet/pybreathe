@@ -21,7 +21,8 @@ class BreathingFlow:
     """Breathing Air Flow rate."""
 
     @enforce_type_arg(detrend_y=bool)
-    def __init__(self, raw_time, raw_flow, detrend_y=True):
+    def __init__(self, identifier, raw_time, raw_flow, detrend_y=True):
+        self.identifier = identifier
         self.raw_time = raw_time
         self.raw_flow = raw_flow
 
@@ -44,7 +45,7 @@ class BreathingFlow:
 
     @classmethod
     @enforce_type_arg(filename=str, detrend_y=bool)
-    def from_file(cls, filename, detrend_y=True):
+    def from_file(cls, identifier, filename, detrend_y=True):
         """
         To instantiate a 'BreathingFlow' objet from a file path.
 
@@ -72,6 +73,7 @@ class BreathingFlow:
         data = data.apply(lambda col: col.str.replace(",", ".").astype(float))
 
         return cls(
+            identifier=identifier,
             raw_time=data["time"].values,
             raw_flow=data["values"].values,
             detrend_y=detrend_y
@@ -79,7 +81,7 @@ class BreathingFlow:
 
     @classmethod
     @enforce_type_arg(detrend_y=bool)
-    def from_dataframe(cls, df, detrend_y=True):
+    def from_dataframe(cls, identifier, df, detrend_y=True):
         """
         To instantiate a 'BreathingFlow' objet from a dataframe.
 
@@ -98,6 +100,7 @@ class BreathingFlow:
                 "DataFrame must contain a 'time' column and a 'values' column."
             )
         return cls(
+            identifier=identifier,
             raw_time=df["time"].values,
             raw_flow=df["values"].values,
             detrend_y=detrend_y
@@ -117,6 +120,7 @@ class BreathingFlow:
 
         """
         sliced_object = self.__class__(
+            identifier=self.identifier,
             raw_time=self.time[key],
             raw_flow=self.flow[key],
             detrend_y=False
