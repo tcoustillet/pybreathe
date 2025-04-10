@@ -215,14 +215,16 @@ class BreathingFlow:
             distance=self.distance
         )
 
-    @enforce_type_arg(return_mean=bool)
-    def get_positive_auc_time(self, return_mean=True):
+    @enforce_type_arg(return_mean=bool, verbose=bool)
+    def get_positive_auc_time(self, return_mean=True, verbose=True):
         """To get the mean duration of positive segments (when AUC > 0).
 
         Args:
         ----
             return_mean (bool, optional): to return all values or only the mean.
                                           Defaults to True (= the mean).
+            verbose (bool, optional): to print (or not) results in human
+                                      readable format. Defaults to True.
 
         Returns:
         -------
@@ -235,11 +237,13 @@ class BreathingFlow:
 
         """
         return features.get_auc_time(
-            segments=self.get_positive_segments(), return_mean=return_mean
+            segments=self.get_positive_segments(),
+            return_mean=return_mean,
+            verbose=verbose
         )
 
-    @enforce_type_arg(return_mean=bool)
-    def get_negative_auc_time(self, return_mean=True):
+    @enforce_type_arg(return_mean=bool, verbose=bool)
+    def get_negative_auc_time(self, return_mean=True, verbose=True):
         """
         To get the mean duration of negative segments (when AUC < 0).
 
@@ -247,6 +251,8 @@ class BreathingFlow:
         ----
             return_mean (bool, optional): to return all values or only the mean.
                                           Defaults to True (= the mean).
+            verbose (bool, optional): to print (or not) results in human
+                                      readable format. Defaults to True.
 
         Returns:
         -------
@@ -259,11 +265,13 @@ class BreathingFlow:
 
         """
         return features.get_auc_time(
-            segments=self.get_negative_segments(), return_mean=return_mean
+            segments=self.get_negative_segments(),
+            return_mean=return_mean,
+            verbose=verbose
         )
 
-    @enforce_type_arg(return_mean=bool)
-    def get_positive_auc_value(self, return_mean=True):
+    @enforce_type_arg(return_mean=bool, verbose=bool)
+    def get_positive_auc_value(self, return_mean=True, verbose=True):
         """
         To get the mean AUC of positive segments (when AUC > 0).
 
@@ -271,6 +279,8 @@ class BreathingFlow:
         ----
             return_mean (bool, optional): to return all values or only the mean.
                                           Defaults to True (= the mean).
+            verbose (bool, optional): to print (or not) results in human
+                                      readable format. Defaults to True.
 
         Returns:
         -------
@@ -283,11 +293,13 @@ class BreathingFlow:
 
         """
         return features.get_auc_value(
-            segments=self.get_positive_segments(), return_mean=return_mean
+            segments=self.get_positive_segments(),
+            return_mean=return_mean,
+            verbose=verbose
         )
 
-    @enforce_type_arg(return_mean=bool)
-    def get_negative_auc_value(self, return_mean=True):
+    @enforce_type_arg(return_mean=bool, verbose=bool)
+    def get_negative_auc_value(self, return_mean=True, verbose=True):
         """
         To get the mean AUC of negative segments (when AUC < 0).
 
@@ -300,6 +312,8 @@ class BreathingFlow:
         -------
             negative_auc: mean AUC of negative segments (when AUC < 0).
                           (or each AUC of each segment if return_mean = False).
+            verbose (bool, optional): to print (or not) results in human
+                                      readable format. Defaults to True.
 
         Note:
         ----
@@ -307,5 +321,7 @@ class BreathingFlow:
 
         """
         return features.get_auc_value(
-            segments=self.get_negative_segments(), return_mean=return_mean
+            segments=self.get_negative_segments(),
+            return_mean=return_mean,
+            verbose=verbose
         )

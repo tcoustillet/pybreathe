@@ -280,7 +280,7 @@ def frequency(signal, sampling_rate, method, which_peaks, distance):
     return dominant_freq
 
 
-def get_auc_time(segments, return_mean):
+def get_auc_time(segments, return_mean, verbose):
     """
     To get the mean duration of segments when AUC is positive or negative.
 
@@ -289,6 +289,7 @@ def get_auc_time(segments, return_mean):
         segments (tuple): segments ([x0, x1, ...], [y0, y1, ...], ...) where
                           [y0, y1, ...] contains only values of the same sign.
         return_mean (bool): to return all values or only the mean.
+        verbose (bool): to print (or not) results in human readable format.
 
     Returns:
     -------
@@ -304,12 +305,16 @@ def get_auc_time(segments, return_mean):
     duration = [(p[-1] - p[0]) for p in points_of_interest]
 
     if return_mean:
-        return np.mean(duration)
+        mean_duration, std_duration = np.mean(duration), np.std(duration)
+        n_duration = len(duration)
+        if verbose:
+            print(f"mean = {mean_duration} ± {std_duration} (n = {n_duration}).")
+        return mean_duration, std_duration, n_duration
     else:
         return duration
 
 
-def get_auc_value(segments, return_mean):
+def get_auc_value(segments, return_mean, verbose):
     """
     To get the mean AUC of segments when AUC is positive or negative.
 
@@ -318,6 +323,7 @@ def get_auc_value(segments, return_mean):
         segments (tuple): segments ([x0, x1, ...], [y0, y1, ...], ...) where
                           [y0, y1, ...] contains only values of the same sign.
         return_mean (bool): to return all values or only the mean.
+        verbose (bool) : to print (or not) results in human readable format.
 
     Returns:
     -------
@@ -331,6 +337,9 @@ def get_auc_value(segments, return_mean):
     auc = [trapezoid(y=y, x=x) for x, y in segments]
 
     if return_mean:
-        return np.mean(auc)
+        mean_auc, std_auc, n_auc = np.mean(auc), np.std(auc), len(auc)
+        if verbose:
+            print(f"mean = {mean_auc} ± {std_auc} (n = {n_auc}).")
+        return mean_auc, std_auc, n_auc
     else:
         return auc
