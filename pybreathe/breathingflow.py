@@ -343,3 +343,51 @@ class BreathingFlow:
             verbose=verbose,
             decimals=decimals
         )
+
+    def get_overview(self):
+        """To summarize the features of the 'BreathingFlow' in a DataFrame."""
+        metrics = ["mean", "std", "n cycle(s)"]
+        dict_data = {}
+        dict_data["Bf (rpm)"] = {
+            "mean": self.get_frequency(), "std": "-", "n cycle(s)": "-"
+        }
+        dict_data["time (AUC > 0) (s)"] = (
+            dict(zip(metrics, self.get_positive_auc_time(verbose=False)))
+        )
+        dict_data["time (AUC < 0) (s)"] = (
+            dict(zip(metrics, self.get_negative_auc_time(verbose=False)))
+        )
+        dict_data["AUC value (AUC > 0)"] = (
+            dict(zip(metrics, self.get_positive_auc_value(verbose=False)))
+        )
+        dict_data["AUC value (AUC < 0)"] = (
+            dict(zip(metrics, self.get_negative_auc_value(verbose=False)))
+        )
+
+        def to_dataframe(overview_dict, identifier):
+            """
+            To convert the dictionary into a specially formatted Dataframe.
+
+            Args:
+            ----
+                overview_dict (dict): dictionary hosting all the signal features.
+                identifier (str): identifier of the 'BreathingFlow' object.
+
+            Returns:
+            -------
+                multicols_df (pandas.DataFrame): dataframe summarising the
+                                                 features (freq, auc, times).
+
+            """
+            data_tuples = [
+                ((key, sub_key), value) for key, sub_dict in overview_dict.items()
+                for sub_key, value in sub_dict.items()
+            ]
+            multicols_df = pd.DataFrame.from_dict(dict(data_tuples), orient="index").T
+            multicols_df.columns = pd.MultiIndex.from_tuples(multicols_df.columns)
+            multicols_df.index.name = "identifier"
+            multicols_df.index = [self.identifier]
+
+            return multicols_df
+
+        return to_dataframe(overview_dict=dict_data, identifier=self.identifier)
