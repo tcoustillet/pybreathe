@@ -8,6 +8,8 @@ Created on Wed Apr  2 08:40:50 2025
 """
 
 
+import os
+
 import numpy as np
 import pandas as pd
 from scipy.signal import detrend
@@ -344,8 +346,23 @@ class BreathingFlow:
             decimals=decimals
         )
 
-    def get_overview(self):
-        """To summarize the features of the 'BreathingFlow' in a DataFrame."""
+    @enforce_type_arg(output_directory=str)
+    def get_overview(self, output_directory=""):
+        """
+        To summarize the features of the 'BreathingFlow' object in a DataFrame.
+
+        Args:
+        ----
+            output_directory (str, optional): where to save the backup file.
+                                              It should not be the full path
+                                              but just a path to a directory.
+                                              Defaults to "" (no backup).
+
+        Returns:
+        -------
+            pandas.DataFrame: dataframe summarising the features.
+
+        """
         metrics = ["mean", "std", "n cycle(s)"]
         dict_data = {}
         dict_data["Bf (rpm)"] = {
@@ -390,4 +407,12 @@ class BreathingFlow:
 
             return multicols_df
 
-        return to_dataframe(overview_dict=dict_data, identifier=self.identifier)
+        formatted_dataframe = to_dataframe(
+            overview_dict=dict_data, identifier=self.identifier
+        )
+
+        if output_directory:
+            output_path = os.path.join(output_directory, f"overview_{self.identifier}")
+            formatted_dataframe.to_excel(excel_writer=f"{output_path}.xlsx")
+
+        return formatted_dataframe
