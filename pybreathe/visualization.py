@@ -11,6 +11,7 @@ Created on Wed Apr  9 08:30:59 2025
 import matplotlib.pyplot as plt
 import numpy as np
 from scipy.signal import find_peaks
+import seaborn as sns
 from . import featureextraction as features
 
 
@@ -138,3 +139,44 @@ def plot_peaks(x, y, which_peaks, distance):
 
     ax.spines["top"].set_visible(False)
     ax.spines["right"].set_visible(False)
+
+
+def plot_features_distribution(*args):
+    """
+    To get the distribution of each feature of the 'BreathingFlow' object.
+
+    Args:
+    ----
+        *args (array): all the values of one of the signal features.
+
+    Returns:
+    -------
+        None. Plots the distribution.
+
+    """
+    x1, x2, x3, x4 = args
+    fig, ((ax1, ax2), (ax3, ax4)) = plt.subplots(nrows=2, ncols=2, figsize=(12, 6))
+
+    sns.histplot(data=x1, kde=True, stat="probability", ax=ax1)
+    sns.histplot(data=x2, kde=True, stat="probability", ax=ax2)
+    sns.histplot(data=x3, kde=True, stat="probability", ax=ax3)
+    sns.histplot(data=x4, kde=True, stat="probability", ax=ax4)
+
+    for ax in fig.axes:
+        ax.grid(alpha=0.8, linestyle=":", ms=0.5)
+        ax.lines[0].set_color("crimson")
+        ax.spines["top"].set_visible(False)
+        ax.spines["bottom"].set_visible(False)
+
+    for ax, lab, x in zip(
+        fig.axes,
+        ("time (AUC > 0) (s)", "time (AUC < 0) (s)", "AUC > 0", "AUC < 0"),
+        args
+    ):
+        ax.set_xlabel(lab, labelpad=10)
+        if lab.endswith("(s)"):
+            lab = lab[:-3]
+        ax.set_ylabel(fr"$\mathbb{{P}}$ ({lab})", labelpad=10)
+        ax.set_title(f"Distribution of {lab} (n = {len(x)})", pad=10)
+
+    fig.tight_layout()

@@ -346,6 +346,15 @@ class BreathingFlow:
             decimals=decimals
         )
 
+    def plot_distribution(self):
+        """To get distribution of each feature of the 'BreathingFlow' object."""
+        visualization.plot_features_distribution(
+            self.get_positive_auc_time(return_mean=False),
+            self.get_negative_auc_time(return_mean=False),
+            self.get_positive_auc_value(return_mean=False),
+            self.get_negative_auc_value(return_mean=False)
+        )
+
     @enforce_type_arg(output_directory=str)
     def get_overview(self, output_directory=""):
         """
