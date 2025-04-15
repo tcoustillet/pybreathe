@@ -222,7 +222,9 @@ class BreathingFlow:
             decimals=decimals
         )
 
-    @enforce_type_arg(return_mean=bool, verbose=bool, decimals=int)
+    @enforce_type_arg(
+        return_mean=bool, verbose=bool, decimals=int, threshold=float
+    )
     def get_positive_auc_time(
             self, return_mean=True, verbose=True, decimals=2, threshold=0
     ):
@@ -257,7 +259,9 @@ class BreathingFlow:
             threshold=threshold
         )
 
-    @enforce_type_arg(return_mean=bool, verbose=bool, decimals=int)
+    @enforce_type_arg(
+        return_mean=bool, verbose=bool, decimals=int, threshold=float
+    )
     def get_negative_auc_time(
             self, return_mean=True, verbose=True, decimals=2, threshold=0
     ):
@@ -293,7 +297,9 @@ class BreathingFlow:
             threshold=threshold
         )
 
-    @enforce_type_arg(return_mean=bool, verbose=bool, decimals=int)
+    @enforce_type_arg(
+        return_mean=bool, verbose=bool, decimals=int, threshold=float
+    )
     def get_positive_auc_value(
             self, return_mean=True, verbose=True, decimals=2, threshold=0
     ):
@@ -329,7 +335,9 @@ class BreathingFlow:
             threshold=threshold
         )
 
-    @enforce_type_arg(return_mean=bool, verbose=bool, decimals=int)
+    @enforce_type_arg(
+        return_mean=bool, verbose=bool, decimals=int, threshold=float
+    )
     def get_negative_auc_value(
             self, return_mean=True, verbose=True, decimals=2, threshold=0
     ):
