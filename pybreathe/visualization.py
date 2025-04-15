@@ -10,6 +10,8 @@ Created on Wed Apr  9 08:30:59 2025
 
 import matplotlib.pyplot as plt
 import numpy as np
+from matplotlib.cm import ScalarMappable
+import matplotlib.colors as mcolors
 from scipy.signal import find_peaks
 import seaborn as sns
 from . import featureextraction as features
@@ -50,18 +52,27 @@ def plot_signal(x, y, show_segments, show_auc):
 
         positive_auc = features.get_auc_value(
             segments=positive_segments, return_mean=False,
-            verbose=False, decimals=2
+            verbose=False, decimals=2, threshold=0
         )
 
         negative_auc = features.get_auc_value(
             segments=negative_segments, return_mean=False,
-            verbose=False, decimals=2
+            verbose=False, decimals=2, threshold=0
         )
 
         pos_normalized = positive_auc / np.max(positive_auc)
         neg_normalized = negative_auc / np.max(negative_auc)
 
         cmap_pos, cmap_neg = plt.cm.GnBu, plt.cm.RdPu
+        cmap_pos_normalized = cmap_pos(np.linspace(
+            np.min(pos_normalized), np.max(pos_normalized), len(positive_auc)
+        ))
+        cmap_neg_normalized = cmap_neg(np.linspace(
+            np.min(neg_normalized), np.max(neg_normalized), len(negative_auc)
+        ))
+        global_cmap = mcolors.ListedColormap(
+            np.concatenate([cmap_neg_normalized, cmap_pos_normalized])
+        )
 
         ax.axhline(y=0, c="grey", linestyle=":", lw=1)
         zeros = np.where(y == 0)[0]
@@ -76,6 +87,16 @@ def plot_signal(x, y, show_segments, show_auc):
         for j, (xn, yn) in enumerate(negative_segments):
             color = cmap_neg(neg_normalized[j])
             ax.fill_between(xn, yn, color=color, alpha=1)
+
+        sm = ScalarMappable(
+            norm=mcolors.TwoSlopeNorm(
+                vmin=np.min(negative_auc), vcenter=0, vmax=np.max(positive_auc)
+            ),
+            cmap=global_cmap
+        )
+        sm.set_array([])
+        cbar = fig.colorbar(sm, ax=ax, orientation="vertical")
+        cbar.set_label("Area under the curve", labelpad=15)
 
     ax.set_xlabel("time (s)", labelpad=10)
     ax.set_ylabel("Air flow rate", labelpad=10)
