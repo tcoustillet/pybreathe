@@ -283,7 +283,7 @@ def frequency(signal, sampling_rate, method, which_peaks, distance, decimals):
     return scientific_round(dominant_freq, decimals=decimals)
 
 
-def get_auc_time(segments, return_mean, verbose, decimals):
+def get_auc_time(segments, return_mean, verbose, decimals, threshold):
     """
     To get the mean duration of segments when AUC is positive or negative.
 
@@ -294,6 +294,7 @@ def get_auc_time(segments, return_mean, verbose, decimals):
         return_mean (bool): to return all values or only the mean.
         verbose (bool): to print (or not) results in human readable format.
         decimals (int): to round time to the given number of decimals.
+        threshold (float): to ignore values below the threshold.
 
     Returns:
     -------
@@ -306,7 +307,10 @@ def get_auc_time(segments, return_mean, verbose, decimals):
 
     """
     points_of_interest = [s[0] for s in segments]
-    duration = [(p[-1] - p[0]) for p in points_of_interest]
+    duration = np.array([(p[-1] - p[0]) for p in points_of_interest])
+
+    if threshold:
+        duration = duration[duration > threshold]
 
     if return_mean:
         mean_duration = scientific_round(np.mean(duration), decimals=decimals)
@@ -321,7 +325,7 @@ def get_auc_time(segments, return_mean, verbose, decimals):
         return scientific_round(duration, decimals=decimals)
 
 
-def get_auc_value(segments, return_mean, verbose, decimals):
+def get_auc_value(segments, return_mean, verbose, decimals, threshold):
     """
     To get the mean AUC of segments when AUC is positive or negative.
 
@@ -332,6 +336,7 @@ def get_auc_value(segments, return_mean, verbose, decimals):
         return_mean (bool): to return all values or only the mean.
         verbose (bool) : to print (or not) results in human readable format.
         decimals (int): to round auc value to the given number of decimals.
+        threshold (float): to ignore values below the threshold.
 
     Returns:
     -------
@@ -342,7 +347,13 @@ def get_auc_value(segments, return_mean, verbose, decimals):
         To get segments, please use the 'get_segments' function.
 
     """
-    auc = [trapezoid(y=y, x=x) for x, y in segments]
+    auc = np.array([trapezoid(y=y, x=x) for x, y in segments])
+
+    if threshold:
+        if np.all(auc > 0):
+            auc = auc[auc > threshold]
+        else:
+            auc = auc[auc < threshold]
 
     if return_mean:
         mean_auc = scientific_round(np.mean(auc), decimals=decimals)

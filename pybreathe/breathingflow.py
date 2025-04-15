@@ -222,9 +222,10 @@ class BreathingFlow:
             decimals=decimals
         )
 
-
     @enforce_type_arg(return_mean=bool, verbose=bool, decimals=int)
-    def get_positive_auc_time(self, return_mean=True, verbose=True, decimals=2):
+    def get_positive_auc_time(
+            self, return_mean=True, verbose=True, decimals=2, threshold=0
+    ):
         """To get the mean duration of positive segments (when AUC > 0).
 
         Args:
@@ -235,6 +236,8 @@ class BreathingFlow:
                                       readable format. Defaults to True.
             decimals (int, optional): to round auc time to the given
                                       number of decimals. Defaults to 2.
+            threshold (float, optional): to ignore values below the threshold.
+                                         Defaults to 0.
 
         Returns:
         -------
@@ -250,11 +253,14 @@ class BreathingFlow:
             segments=self.get_positive_segments(),
             return_mean=return_mean,
             verbose=verbose,
-            decimals=decimals
+            decimals=decimals,
+            threshold=threshold
         )
 
     @enforce_type_arg(return_mean=bool, verbose=bool, decimals=int)
-    def get_negative_auc_time(self, return_mean=True, verbose=True, decimals=2):
+    def get_negative_auc_time(
+            self, return_mean=True, verbose=True, decimals=2, threshold=0
+    ):
         """
         To get the mean duration of negative segments (when AUC < 0).
 
@@ -266,6 +272,8 @@ class BreathingFlow:
                                       readable format. Defaults to True.
             decimals (int, optional): to round auc time to the given
                                       number of decimals. Defaults to 2.
+            threshold (float, optional): to ignore values below the threshold.
+                                         Defaults to 0.
 
         Returns:
         -------
@@ -281,11 +289,14 @@ class BreathingFlow:
             segments=self.get_negative_segments(),
             return_mean=return_mean,
             verbose=verbose,
-            decimals=decimals
+            decimals=decimals,
+            threshold=threshold
         )
 
     @enforce_type_arg(return_mean=bool, verbose=bool, decimals=int)
-    def get_positive_auc_value(self, return_mean=True, verbose=True, decimals=2):
+    def get_positive_auc_value(
+            self, return_mean=True, verbose=True, decimals=2, threshold=0
+    ):
         """
         To get the mean AUC of positive segments (when AUC > 0).
 
@@ -297,6 +308,8 @@ class BreathingFlow:
                                       readable format. Defaults to True.
             decimals (int, optional): to round auc value to the given
                                       number of decimals. Defaults to 2.
+            threshold (float, optional): to ignore values below the threshold.
+                                         Defaults to 0.
 
         Returns:
         -------
@@ -312,11 +325,14 @@ class BreathingFlow:
             segments=self.get_positive_segments(),
             return_mean=return_mean,
             verbose=verbose,
-            decimals=decimals
+            decimals=decimals,
+            threshold=threshold
         )
 
     @enforce_type_arg(return_mean=bool, verbose=bool, decimals=int)
-    def get_negative_auc_value(self, return_mean=True, verbose=True, decimals=2):
+    def get_negative_auc_value(
+            self, return_mean=True, verbose=True, decimals=2, threshold=0
+    ):
         """
         To get the mean AUC of negative segments (when AUC < 0).
 
@@ -328,6 +344,8 @@ class BreathingFlow:
                                       readable format. Defaults to True.
             decimals (int, optional): to round auc value to the given
                                       number of decimals. Defaults to 2.
+            threshold (float, optional): to ignore values above the threshold.
+                                         Defaults to 0.
 
         Returns:
         -------
@@ -337,13 +355,17 @@ class BreathingFlow:
         Note:
         ----
             AUC = Area Under the Curve.
+            'threshold' must be negative as AUC is also negative, e.g.,
+            if AUC values = [- 0.2, - 0.18, - 0.23, - 0.01], then to remove the
+            - 0.01 value, threshold should be - 0.05 for example.
 
         """
         return features.get_auc_value(
             segments=self.get_negative_segments(),
             return_mean=return_mean,
             verbose=verbose,
-            decimals=decimals
+            decimals=decimals,
+            threshold=threshold
         )
 
     def plot_distribution(self):
