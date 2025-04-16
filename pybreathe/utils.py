@@ -40,14 +40,14 @@ def enforce_type_arg(**arg_types):
     return decorator
 
 
-def scientific_round(x, decimals):
+def scientific_round(x, n_digits):
     """
-    To evenly round x to the given number of decimals.
+    To evenly round x to the given number significant digits.
 
     Args:
     ----
         x (tuple, float): a float or a tuple of floats.
-        decimals (int): number of decimal places to round to.
+        n_digits (int): number of significant digits.
 
     Returns:
     -------
@@ -55,6 +55,6 @@ def scientific_round(x, decimals):
 
     """
     if isinstance(x, (tuple, list, np.ndarray)):
-        return tuple(float(f"{element:.{decimals - 1}e}") for element in x)
+        return tuple(float(f"{element:.{n_digits - 1}e}") for element in x)
     elif isinstance(x, float):
-        return float(f"{x:.{decimals - 1}e}")
+        return float(f"{x:.{n_digits - 1}e}")

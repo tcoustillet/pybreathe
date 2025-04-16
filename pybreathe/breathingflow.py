@@ -210,8 +210,8 @@ class BreathingFlow:
             x=self.time, y=self.flow, which_peaks="bottom", distance=self.distance
         )
 
-    @enforce_type_arg(method=str, decimals=int)
-    def get_frequency(self, method="welch", which_peaks=None, decimals=1):
+    @enforce_type_arg(method=str, n_digits=int)
+    def get_frequency(self, method="welch", which_peaks=None, n_digits=3):
         """Get breathing frequency of the air flow rate (in respirations.min-1)."""
         return features.frequency(
             signal=self.flow,
@@ -219,14 +219,14 @@ class BreathingFlow:
             method=method,
             which_peaks=which_peaks,
             distance=self.distance,
-            decimals=decimals
+            n_digits=n_digits
         )
 
     @enforce_type_arg(
-        return_mean=bool, verbose=bool, decimals=int, threshold=float
+        return_mean=bool, verbose=bool, n_digits=int, threshold=float
     )
     def get_positive_auc_time(
-            self, return_mean=True, verbose=True, decimals=2, threshold=0
+            self, return_mean=True, verbose=True, n_digits=3, threshold=0
     ):
         """To get the mean duration of positive segments (when AUC > 0).
 
@@ -236,8 +236,8 @@ class BreathingFlow:
                                           Defaults to True (= the mean).
             verbose (bool, optional): to print (or not) results in human
                                       readable format. Defaults to True.
-            decimals (int, optional): to round auc time to the given
-                                      number of decimals. Defaults to 2.
+            n_digits (int, optional): to round auc time to n_digits significant
+                                      digits. Defaults to 3.
             threshold (float, optional): to ignore values below the threshold.
                                          Defaults to 0.
 
@@ -255,15 +255,15 @@ class BreathingFlow:
             segments=self.get_positive_segments(),
             return_mean=return_mean,
             verbose=verbose,
-            decimals=decimals,
+            n_digits=n_digits,
             threshold=threshold
         )
 
     @enforce_type_arg(
-        return_mean=bool, verbose=bool, decimals=int, threshold=float
+        return_mean=bool, verbose=bool, n_digits=int, threshold=float
     )
     def get_negative_auc_time(
-            self, return_mean=True, verbose=True, decimals=2, threshold=0
+            self, return_mean=True, verbose=True, n_digits=3, threshold=0
     ):
         """
         To get the mean duration of negative segments (when AUC < 0).
@@ -274,8 +274,8 @@ class BreathingFlow:
                                           Defaults to True (= the mean).
             verbose (bool, optional): to print (or not) results in human
                                       readable format. Defaults to True.
-            decimals (int, optional): to round auc time to the given
-                                      number of decimals. Defaults to 2.
+            n_digits (int, optional): to round auc time to n_digits significant
+                                      digits. Defaults to 3.
             threshold (float, optional): to ignore values below the threshold.
                                          Defaults to 0.
 
@@ -293,15 +293,15 @@ class BreathingFlow:
             segments=self.get_negative_segments(),
             return_mean=return_mean,
             verbose=verbose,
-            decimals=decimals,
+            n_digits=n_digits,
             threshold=threshold
         )
 
     @enforce_type_arg(
-        return_mean=bool, verbose=bool, decimals=int, threshold=float
+        return_mean=bool, verbose=bool, n_digits=int, threshold=float
     )
     def get_positive_auc_value(
-            self, return_mean=True, verbose=True, decimals=2, threshold=0
+            self, return_mean=True, verbose=True, n_digits=3, threshold=0
     ):
         """
         To get the mean AUC of positive segments (when AUC > 0).
@@ -312,8 +312,8 @@ class BreathingFlow:
                                           Defaults to True (= the mean).
             verbose (bool, optional): to print (or not) results in human
                                       readable format. Defaults to True.
-            decimals (int, optional): to round auc value to the given
-                                      number of decimals. Defaults to 2.
+            n_digits (int, optional): to round auc value to n_digits significant
+                                      digits. Defaults to 3.
             threshold (float, optional): to ignore values below the threshold.
                                          Defaults to 0.
 
@@ -331,15 +331,15 @@ class BreathingFlow:
             segments=self.get_positive_segments(),
             return_mean=return_mean,
             verbose=verbose,
-            decimals=decimals,
+            n_digits=n_digits,
             threshold=threshold
         )
 
     @enforce_type_arg(
-        return_mean=bool, verbose=bool, decimals=int, threshold=float
+        return_mean=bool, verbose=bool, n_digits=int, threshold=float
     )
     def get_negative_auc_value(
-            self, return_mean=True, verbose=True, decimals=2, threshold=0
+            self, return_mean=True, verbose=True, n_digits=3, threshold=0
     ):
         """
         To get the mean AUC of negative segments (when AUC < 0).
@@ -350,8 +350,8 @@ class BreathingFlow:
                                           Defaults to True (= the mean).
             verbose (bool, optional): to print (or not) results in human
                                       readable format. Defaults to True.
-            decimals (int, optional): to round auc value to the given
-                                      number of decimals. Defaults to 2.
+            n_digits (int, optional): to round auc value to n_digits significant
+                                      digits. Defaults to 3.
             threshold (float, optional): to ignore values above the threshold.
                                          Defaults to 0.
 
@@ -372,7 +372,7 @@ class BreathingFlow:
             segments=self.get_negative_segments(),
             return_mean=return_mean,
             verbose=verbose,
-            decimals=decimals,
+            n_digits=n_digits,
             threshold=threshold
         )
 

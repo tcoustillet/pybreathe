@@ -213,7 +213,7 @@ def get_peaks(x, y, which_peaks, distance):
         return None
 
 
-def frequency(signal, sampling_rate, method, which_peaks, distance, decimals):
+def frequency(signal, sampling_rate, method, which_peaks, distance, n_digits):
     """Get the frequency of a given signal.
 
     Args:
@@ -224,7 +224,7 @@ def frequency(signal, sampling_rate, method, which_peaks, distance, decimals):
         which_peaks (str): if the method is 'peaks', which peaks should be
                            considered (top or bottom) ?
         distance (int): the minimum distance between two neighbouring peaks.
-        decimals (int): to round freq to the given number of decimals.
+        n_digits (int): to round freq to n_digits significant digits.
 
     Returns:
     -------
@@ -280,10 +280,10 @@ def frequency(signal, sampling_rate, method, which_peaks, distance, decimals):
     # The frequency is in rpm.s-1; we want it in min.-1.
     dominant_freq *= 60
 
-    return scientific_round(dominant_freq, decimals=decimals)
+    return scientific_round(dominant_freq, n_digits=n_digits)
 
 
-def get_auc_time(segments, return_mean, verbose, decimals, threshold):
+def get_auc_time(segments, return_mean, verbose, n_digits, threshold):
     """
     To get the mean duration of segments when AUC is positive or negative.
 
@@ -293,7 +293,7 @@ def get_auc_time(segments, return_mean, verbose, decimals, threshold):
                           [y0, y1, ...] contains only values of the same sign.
         return_mean (bool): to return all values or only the mean.
         verbose (bool): to print (or not) results in human readable format.
-        decimals (int): to round time to the given number of decimals.
+        n_digits (int): to round time to n_digits significant digits.
         threshold (float): to ignore values below the threshold.
 
     Returns:
@@ -313,8 +313,8 @@ def get_auc_time(segments, return_mean, verbose, decimals, threshold):
         duration = duration[duration > threshold]
 
     if return_mean:
-        mean_duration = scientific_round(np.mean(duration), decimals=decimals)
-        std_duration = scientific_round(np.std(duration), decimals=decimals)
+        mean_duration = scientific_round(np.mean(duration), n_digits=n_digits)
+        std_duration = scientific_round(np.std(duration), n_digits=n_digits)
         n_duration = len(duration)
 
         if verbose:
@@ -322,10 +322,10 @@ def get_auc_time(segments, return_mean, verbose, decimals, threshold):
         return mean_duration, std_duration, n_duration
 
     else:
-        return scientific_round(duration, decimals=decimals)
+        return scientific_round(duration, n_digits=n_digits)
 
 
-def get_auc_value(segments, return_mean, verbose, decimals, threshold):
+def get_auc_value(segments, return_mean, verbose, n_digits, threshold):
     """
     To get the mean AUC of segments when AUC is positive or negative.
 
@@ -335,7 +335,7 @@ def get_auc_value(segments, return_mean, verbose, decimals, threshold):
                           [y0, y1, ...] contains only values of the same sign.
         return_mean (bool): to return all values or only the mean.
         verbose (bool) : to print (or not) results in human readable format.
-        decimals (int): to round auc value to the given number of decimals.
+        n_digits (int): to round auc value to n_digits significant digits.
         threshold (float): to ignore values below the threshold.
 
     Returns:
@@ -356,8 +356,8 @@ def get_auc_value(segments, return_mean, verbose, decimals, threshold):
             auc = auc[auc < threshold]
 
     if return_mean:
-        mean_auc = scientific_round(np.mean(auc), decimals=decimals)
-        std_auc = scientific_round(np.std(auc), decimals=decimals)
+        mean_auc = scientific_round(np.mean(auc), n_digits=n_digits)
+        std_auc = scientific_round(np.std(auc), n_digits=n_digits)
         n_auc = len(auc)
 
         if verbose:
@@ -365,4 +365,4 @@ def get_auc_value(segments, return_mean, verbose, decimals, threshold):
         return mean_auc, std_auc, n_auc
 
     else:
-        return scientific_round(auc, decimals=decimals)
+        return scientific_round(auc, n_digits=n_digits)

@@ -52,12 +52,12 @@ def plot_signal(x, y, show_segments, show_auc):
 
         positive_auc = features.get_auc_value(
             segments=positive_segments, return_mean=False,
-            verbose=False, decimals=2, threshold=0
+            verbose=False, n_digits=2, threshold=0
         )
 
         negative_auc = features.get_auc_value(
             segments=negative_segments, return_mean=False,
-            verbose=False, decimals=2, threshold=0
+            verbose=False, n_digits=2, threshold=0
         )
 
         pos_normalized = positive_auc / np.max(positive_auc)
