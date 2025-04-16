@@ -226,7 +226,7 @@ class BreathingFlow:
         return_mean=bool, verbose=bool, n_digits=int, threshold=float
     )
     def get_positive_auc_time(
-            self, return_mean=True, verbose=True, n_digits=3, threshold=0
+            self, return_mean=True, verbose=True, n_digits=3, threshold=0.0
     ):
         """To get the mean duration of positive segments (when AUC > 0).
 
@@ -263,7 +263,7 @@ class BreathingFlow:
         return_mean=bool, verbose=bool, n_digits=int, threshold=float
     )
     def get_negative_auc_time(
-            self, return_mean=True, verbose=True, n_digits=3, threshold=0
+            self, return_mean=True, verbose=True, n_digits=3, threshold=0.0
     ):
         """
         To get the mean duration of negative segments (when AUC < 0).
@@ -301,7 +301,7 @@ class BreathingFlow:
         return_mean=bool, verbose=bool, n_digits=int, threshold=float
     )
     def get_positive_auc_value(
-            self, return_mean=True, verbose=True, n_digits=3, threshold=0
+            self, return_mean=True, verbose=True, n_digits=3, threshold=0.0
     ):
         """
         To get the mean AUC of positive segments (when AUC > 0).
@@ -339,7 +339,7 @@ class BreathingFlow:
         return_mean=bool, verbose=bool, n_digits=int, threshold=float
     )
     def get_negative_auc_value(
-            self, return_mean=True, verbose=True, n_digits=3, threshold=0
+            self, return_mean=True, verbose=True, n_digits=3, threshold=0.0
     ):
         """
         To get the mean AUC of negative segments (when AUC < 0).
