@@ -12,6 +12,7 @@ import os
 
 import numpy as np
 import pandas as pd
+import re
 from scipy.signal import detrend
 
 from .utils import enforce_type_arg
@@ -62,7 +63,9 @@ class BreathingFlow:
 
         """
         col_names = ["time", "values"]
-        time_pattern = r"^[+-]?\d+([.,]\d+)?([eE+][+-]?\d+)?$"
+        time_pattern_1 = r"^\d{2}:\d{2}:\d{2}([.:])\d+$"
+        time_pattern_2 = r"^[+-]?\d+([.,]\d+)?([eE+][+-]?\d+)?$"
+        time_pattern = f"(?:{time_pattern_1})|(?:{time_pattern_2})"
 
         match filename:
             case _ if filename.endswith("txt"):
@@ -70,9 +73,24 @@ class BreathingFlow:
                     filename, sep=r"\s+", usecols=[0, 1], names=col_names,
                     dtype=str
                 )
+            case _ if filename.endswith(("xlsx", "xls")):
+                raw_data = pd.read_excel(filename, names=col_names, dtype=str)
 
-        data = raw_data[raw_data["time"].str.match(time_pattern)].reset_index(drop=True)
-        data = data.apply(lambda col: col.str.replace(",", ".").astype(float))
+        data = (raw_data[raw_data["time"]
+                .str.match(time_pattern, na=False)]
+                .reset_index(drop=True)
+                )
+        if not data["time"].str.contains(":").any():
+            data["time"] = data["time"].apply(lambda col: col.str.replace(",", ".").astype(float))
+        if data["values"].str.contains(",").any():
+            data["values"] = data["values"].str.replace(",", ".")
+
+        data["values"] = data["values"].astype(float)
+
+        # To instantiate an object even if the time vector is not in absolute seconds.
+        # Required format : HH:MM:SS.XXX
+        if not all(re.match(time_pattern_2, time) for time in data["time"].values):
+            data["time"] = pd.to_timedelta(data["time"]).dt.total_seconds()
 
         return cls(
             identifier=identifier,
