@@ -184,6 +184,7 @@ def plot_features_distribution(*args):
     sns.histplot(data=x4, kde=True, stat="probability", ax=ax4)
 
     for ax in fig.axes:
+        print(ax)
         ax.grid(alpha=0.8, linestyle=":", ms=0.5)
         ax.lines[0].set_color("crimson")
         ax.spines["top"].set_visible(False)
