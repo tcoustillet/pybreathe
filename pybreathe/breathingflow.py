@@ -81,7 +81,7 @@ class BreathingFlow:
                 .reset_index(drop=True)
                 )
         if not data["time"].str.contains(":").any():
-            data["time"] = data["time"].apply(lambda col: col.str.replace(",", ".").astype(float))
+            data["time"] = data["time"].str.replace(",", ".").astype(float)
         if data["values"].str.contains(",").any():
             data["values"] = data["values"].str.replace(",", ".")
 
@@ -89,7 +89,7 @@ class BreathingFlow:
 
         # To instantiate an object even if the time vector is not in absolute seconds.
         # Required format : HH:MM:SS.XXX
-        if not all(re.match(time_pattern_2, time) for time in data["time"].values):
+        if not all(re.match(time_pattern_2, time) for time in data["time"].values.astype(str)):
             data["time"] = pd.to_timedelta(data["time"]).dt.total_seconds()
 
         return cls(
