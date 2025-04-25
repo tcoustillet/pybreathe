@@ -46,6 +46,13 @@ class BreathingFlow:
 
         self._distance = None
 
+        # Features
+        self._frequency = None
+        self._positive_auc_time = None
+        self._negative_auc_time = None
+        self._positive_auc_value = None
+        self._negative_auc_value = None
+
     @classmethod
     @enforce_type_arg(filename=str, detrend_y=bool)
     def from_file(cls, identifier, filename, detrend_y=True):
@@ -156,6 +163,31 @@ class BreathingFlow:
         """Getter."""
         return self._distance
 
+    @property
+    def frequency(self):
+        """Getter."""
+        return self._frequency
+
+    @property
+    def positive_auc_time(self):
+        """Getter."""
+        return self._positive_auc_time
+
+    @property
+    def negative_auc_time(self):
+        """Getter."""
+        return self._negative_auc_time
+
+    @property
+    def positive_auc_value(self):
+        """Getter."""
+        return self._positive_auc_value
+
+    @property
+    def negative_auc_value(self):
+        """Getter."""
+        return self._negative_auc_value
+
     def get_hz(self):
         """To get the sampling rate of the discretized breathing signal."""
         return features.compute_sampling_rate(x=self.raw_time)
@@ -234,10 +266,12 @@ class BreathingFlow:
             x=self.time, y=self.flow, which_peaks="bottom", distance=self.distance
         )
 
-    @enforce_type_arg(method=str, n_digits=int)
-    def get_frequency(self, method="welch", which_peaks=None, n_digits=3):
+    @enforce_type_arg(method=str, n_digits=int, set_frequency=bool)
+    def get_frequency(
+            self, method="welch", which_peaks=None, n_digits=3, set_frequency=False
+    ):
         """Get breathing frequency of the air flow rate (in respirations.min-1)."""
-        return features.frequency(
+        freq = features.frequency(
             signal=self.flow,
             sampling_rate=self.get_hz(),
             method=method,
@@ -246,13 +280,19 @@ class BreathingFlow:
             n_digits=n_digits
         )
 
+        if set_frequency:
+            self._frequency = freq
+
+        return freq
+
     @enforce_type_arg(
         return_mean=bool, verbose=bool, n_digits=int, lower_threshold=float,
-        upper_threshold=float
+        upper_threshold=float, set_positive_auc_time=bool
     )
     def get_positive_auc_time(
             self, return_mean=True, verbose=True, n_digits=3,
-            lower_threshold=-np.inf, upper_threshold=np.inf
+            lower_threshold=-np.inf, upper_threshold=np.inf,
+            set_positive_auc_time=False
     ):
         """To get the mean duration of positive segments (when AUC > 0).
 
@@ -268,6 +308,8 @@ class BreathingFlow:
                                          Defaults to - ∞.
             upper_threshold (float, optional): to ignore values above the threshold.
                                          Defaults to + ∞.
+            set_positive_auc_time (bool, optional): to memorise or not the value obtained.
+                                                    Defaults to False.
 
         Returns:
         -------
@@ -279,7 +321,7 @@ class BreathingFlow:
             AUC = Area Under the Curve.
 
         """
-        return features.get_auc_time(
+        pos_auc_time =  features.get_auc_time(
             segments=self.get_positive_segments(),
             return_mean=return_mean,
             verbose=verbose,
@@ -288,13 +330,19 @@ class BreathingFlow:
             upper_threshold=upper_threshold
         )
 
+        if set_positive_auc_time:
+            self._positive_auc_time = pos_auc_time
+
+        return pos_auc_time
+
     @enforce_type_arg(
         return_mean=bool, verbose=bool, n_digits=int, lower_threshold=float,
-        upper_threshold=float
+        upper_threshold=float, set_negative_auc_time=bool
     )
     def get_negative_auc_time(
             self, return_mean=True, verbose=True, n_digits=3,
-            lower_threshold=-np.inf, upper_threshold=np.inf
+            lower_threshold=-np.inf, upper_threshold=np.inf,
+            set_negative_auc_time=False
     ):
         """
         To get the mean duration of negative segments (when AUC < 0).
@@ -311,6 +359,8 @@ class BreathingFlow:
                                          Defaults to - ∞.
             upper_threshold (float, optional): to ignore values above the threshold.
                                          Defaults to + ∞.
+            set_negative_auc_time (bool, optional): to memorise or not the value obtained.
+                                                    Defaults to False.
 
         Returns:
         -------
@@ -322,7 +372,7 @@ class BreathingFlow:
             AUC = Area Under the Curve.
 
         """
-        return features.get_auc_time(
+        neg_auc_time =  features.get_auc_time(
             segments=self.get_negative_segments(),
             return_mean=return_mean,
             verbose=verbose,
@@ -331,13 +381,19 @@ class BreathingFlow:
             upper_threshold=upper_threshold
         )
 
+        if set_negative_auc_time:
+            self._negative_auc_time = neg_auc_time
+
+        return neg_auc_time
+
     @enforce_type_arg(
         return_mean=bool, verbose=bool, n_digits=int, lower_threshold=float,
-        upper_threshold=float
+        upper_threshold=float, set_positive_auc_value=bool
     )
     def get_positive_auc_value(
             self, return_mean=True, verbose=True, n_digits=3,
-            lower_threshold=-np.inf, upper_threshold=np.inf
+            lower_threshold=-np.inf, upper_threshold=np.inf,
+            set_positive_auc_value=False
     ):
         """
         To get the mean AUC of positive segments (when AUC > 0).
@@ -354,6 +410,8 @@ class BreathingFlow:
                                          Defaults to - ∞.
             upper_threshold (float, optional): to ignore values above the threshold.
                                          Defaults to + ∞.
+            set_positive_auc_value (bool, optional): to memorise or not the value obtained.
+                                                     Defaults to False.
 
         Returns:
         -------
@@ -365,7 +423,7 @@ class BreathingFlow:
             AUC = Area Under the Curve.
 
         """
-        return features.get_auc_value(
+        pos_auc_val = features.get_auc_value(
             segments=self.get_positive_segments(),
             return_mean=return_mean,
             verbose=verbose,
@@ -374,13 +432,19 @@ class BreathingFlow:
             upper_threshold=upper_threshold
         )
 
+        if set_positive_auc_value:
+            self._positive_auc_value = pos_auc_val
+
+        return pos_auc_val
+
     @enforce_type_arg(
         return_mean=bool, verbose=bool, n_digits=int, lower_threshold=float,
-        upper_threshold=float
+        upper_threshold=float, set_negative_auc_value=bool
     )
     def get_negative_auc_value(
             self, return_mean=True, verbose=True, n_digits=3,
-            lower_threshold=-np.inf, upper_threshold=np.inf
+            lower_threshold=-np.inf, upper_threshold=np.inf,
+            set_negative_auc_value=False
     ):
         """
         To get the mean AUC of negative segments (when AUC < 0).
@@ -397,6 +461,8 @@ class BreathingFlow:
                                          Defaults to - ∞.
             upper_threshold (float, optional): to ignore values above the threshold.
                                          Defaults to + ∞.
+            set_negative_auc_value (bool, optional): to memorise or not the value obtained.
+                                                     Defaults to False.
 
         Returns:
         -------
@@ -411,7 +477,7 @@ class BreathingFlow:
             - 0.01 value, threshold should be - 0.05 for example.
 
         """
-        return features.get_auc_value(
+        neg_auc_val =  features.get_auc_value(
             segments=self.get_negative_segments(),
             return_mean=return_mean,
             verbose=verbose,
@@ -419,6 +485,11 @@ class BreathingFlow:
             lower_threshold=lower_threshold,
             upper_threshold=upper_threshold
         )
+
+        if set_negative_auc_value:
+            self._negative_auc_value = neg_auc_val
+
+        return neg_auc_val
 
     def plot_distribution(self):
         """To get distribution of each feature of the 'BreathingFlow' object."""
