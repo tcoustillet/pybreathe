@@ -241,10 +241,12 @@ class BreathingFlow:
         )
 
     @enforce_type_arg(
-        return_mean=bool, verbose=bool, n_digits=int, threshold=float
+        return_mean=bool, verbose=bool, n_digits=int, lower_threshold=float,
+        upper_threshold=float
     )
     def get_positive_auc_time(
-            self, return_mean=True, verbose=True, n_digits=3, threshold=0.0
+            self, return_mean=True, verbose=True, n_digits=3,
+            lower_threshold=-np.inf, upper_threshold=np.inf
     ):
         """To get the mean duration of positive segments (when AUC > 0).
 
@@ -256,8 +258,10 @@ class BreathingFlow:
                                       readable format. Defaults to True.
             n_digits (int, optional): to round auc time to n_digits significant
                                       digits. Defaults to 3.
-            threshold (float, optional): to ignore values below the threshold.
-                                         Defaults to 0.
+            lower_threshold (float, optional): to ignore values below the threshold.
+                                         Defaults to - ∞.
+            upper_threshold (float, optional): to ignore values above the threshold.
+                                         Defaults to + ∞.
 
         Returns:
         -------
@@ -274,14 +278,17 @@ class BreathingFlow:
             return_mean=return_mean,
             verbose=verbose,
             n_digits=n_digits,
-            threshold=threshold
+            lower_threshold=lower_threshold,
+            upper_threshold=upper_threshold
         )
 
     @enforce_type_arg(
-        return_mean=bool, verbose=bool, n_digits=int, threshold=float
+        return_mean=bool, verbose=bool, n_digits=int, lower_threshold=float,
+        upper_threshold=float
     )
     def get_negative_auc_time(
-            self, return_mean=True, verbose=True, n_digits=3, threshold=0.0
+            self, return_mean=True, verbose=True, n_digits=3,
+            lower_threshold=-np.inf, upper_threshold=np.inf
     ):
         """
         To get the mean duration of negative segments (when AUC < 0).
@@ -294,8 +301,10 @@ class BreathingFlow:
                                       readable format. Defaults to True.
             n_digits (int, optional): to round auc time to n_digits significant
                                       digits. Defaults to 3.
-            threshold (float, optional): to ignore values below the threshold.
-                                         Defaults to 0.
+            lower_threshold (float, optional): to ignore values below the threshold.
+                                         Defaults to - ∞.
+            upper_threshold (float, optional): to ignore values above the threshold.
+                                         Defaults to + ∞.
 
         Returns:
         -------
@@ -312,14 +321,17 @@ class BreathingFlow:
             return_mean=return_mean,
             verbose=verbose,
             n_digits=n_digits,
-            threshold=threshold
+            lower_threshold=lower_threshold,
+            upper_threshold=upper_threshold
         )
 
     @enforce_type_arg(
-        return_mean=bool, verbose=bool, n_digits=int, threshold=float
+        return_mean=bool, verbose=bool, n_digits=int, lower_threshold=float,
+        upper_threshold=float
     )
     def get_positive_auc_value(
-            self, return_mean=True, verbose=True, n_digits=3, threshold=0.0
+            self, return_mean=True, verbose=True, n_digits=3,
+            lower_threshold=-np.inf, upper_threshold=np.inf
     ):
         """
         To get the mean AUC of positive segments (when AUC > 0).
@@ -332,8 +344,10 @@ class BreathingFlow:
                                       readable format. Defaults to True.
             n_digits (int, optional): to round auc value to n_digits significant
                                       digits. Defaults to 3.
-            threshold (float, optional): to ignore values below the threshold.
-                                         Defaults to 0.
+            lower_threshold (float, optional): to ignore values below the threshold.
+                                         Defaults to - ∞.
+            upper_threshold (float, optional): to ignore values above the threshold.
+                                         Defaults to + ∞.
 
         Returns:
         -------
@@ -350,14 +364,17 @@ class BreathingFlow:
             return_mean=return_mean,
             verbose=verbose,
             n_digits=n_digits,
-            threshold=threshold
+            lower_threshold=lower_threshold,
+            upper_threshold=upper_threshold
         )
 
     @enforce_type_arg(
-        return_mean=bool, verbose=bool, n_digits=int, threshold=float
+        return_mean=bool, verbose=bool, n_digits=int, lower_threshold=float,
+        upper_threshold=float
     )
     def get_negative_auc_value(
-            self, return_mean=True, verbose=True, n_digits=3, threshold=0.0
+            self, return_mean=True, verbose=True, n_digits=3,
+            lower_threshold=-np.inf, upper_threshold=np.inf
     ):
         """
         To get the mean AUC of negative segments (when AUC < 0).
@@ -370,8 +387,10 @@ class BreathingFlow:
                                       readable format. Defaults to True.
             n_digits (int, optional): to round auc value to n_digits significant
                                       digits. Defaults to 3.
-            threshold (float, optional): to ignore values above the threshold.
-                                         Defaults to 0.
+            lower_threshold (float, optional): to ignore values below the threshold.
+                                         Defaults to - ∞.
+            upper_threshold (float, optional): to ignore values above the threshold.
+                                         Defaults to + ∞.
 
         Returns:
         -------
@@ -391,7 +410,8 @@ class BreathingFlow:
             return_mean=return_mean,
             verbose=verbose,
             n_digits=n_digits,
-            threshold=threshold
+            lower_threshold=lower_threshold,
+            upper_threshold=upper_threshold
         )
 
     def plot_distribution(self):

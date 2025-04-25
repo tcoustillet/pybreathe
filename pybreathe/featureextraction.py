@@ -9,6 +9,7 @@ Created on Thu Apr  3 10:10:59 2025
 
 
 import numpy as np
+import numpy.ma as ma
 import pandas as pd
 from scipy.integrate import trapezoid
 from scipy.signal import find_peaks, periodogram, welch, windows
@@ -283,7 +284,9 @@ def frequency(signal, sampling_rate, method, which_peaks, distance, n_digits):
     return scientific_round(dominant_freq, n_digits=n_digits)
 
 
-def get_auc_time(segments, return_mean, verbose, n_digits, threshold):
+def get_auc_time(
+        segments, return_mean, verbose, n_digits, lower_threshold, upper_threshold
+):
     """
     To get the mean duration of segments when AUC is positive or negative.
 
@@ -294,7 +297,8 @@ def get_auc_time(segments, return_mean, verbose, n_digits, threshold):
         return_mean (bool): to return all values or only the mean.
         verbose (bool): to print (or not) results in human readable format.
         n_digits (int): to round time to n_digits significant digits.
-        threshold (float): to ignore values below the threshold.
+        lower_threshold (float): to ignore values below the threshold.
+        upper_threshold (float): to ignore values above the threshold.
 
     Returns:
     -------
@@ -307,10 +311,11 @@ def get_auc_time(segments, return_mean, verbose, n_digits, threshold):
 
     """
     points_of_interest = [s[0] for s in segments]
-    duration = np.array([(p[-1] - p[0]) for p in points_of_interest])
+    all_durations = np.array([(p[-1] - p[0]) for p in points_of_interest])
 
-    if threshold:
-        duration = duration[duration > threshold]
+    duration = ma.masked_outside(
+        all_durations, lower_threshold, upper_threshold
+    ).compressed()
 
     if return_mean:
         mean_duration = scientific_round(np.mean(duration), n_digits=n_digits)
@@ -325,7 +330,9 @@ def get_auc_time(segments, return_mean, verbose, n_digits, threshold):
         return scientific_round(duration, n_digits=n_digits)
 
 
-def get_auc_value(segments, return_mean, verbose, n_digits, threshold):
+def get_auc_value(
+        segments, return_mean, verbose, n_digits, lower_threshold, upper_threshold
+):
     """
     To get the mean AUC of segments when AUC is positive or negative.
 
@@ -336,7 +343,8 @@ def get_auc_value(segments, return_mean, verbose, n_digits, threshold):
         return_mean (bool): to return all values or only the mean.
         verbose (bool) : to print (or not) results in human readable format.
         n_digits (int): to round auc value to n_digits significant digits.
-        threshold (float): to ignore values below the threshold.
+        lower_threshold (float): to ignore values below the threshold.
+        upper_threshold (float): to ignore values above the threshold.
 
     Returns:
     -------
@@ -347,13 +355,8 @@ def get_auc_value(segments, return_mean, verbose, n_digits, threshold):
         To get segments, please use the 'get_segments' function.
 
     """
-    auc = np.array([trapezoid(y=y, x=x) for x, y in segments])
-
-    if threshold:
-        if np.all(auc > 0):
-            auc = auc[auc > threshold]
-        else:
-            auc = auc[auc < threshold]
+    aucs = np.array([trapezoid(y=y, x=x) for x, y in segments])
+    auc = ma.masked_outside(aucs, lower_threshold, upper_threshold).compressed()
 
     if return_mean:
         mean_auc = scientific_round(np.mean(auc), n_digits=n_digits)
