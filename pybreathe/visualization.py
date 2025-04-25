@@ -12,12 +12,14 @@ import matplotlib.pyplot as plt
 import numpy as np
 from matplotlib.cm import ScalarMappable
 import matplotlib.colors as mcolors
+from scipy.integrate import trapezoid
 from scipy.signal import find_peaks
 import seaborn as sns
 from . import featureextraction as features
+from .utils import scientific_round
 
 
-def plot_signal(x, y, show_segments, show_auc):
+def plot_signal(x, y, show_segments, show_auc, highlight_time, highlight_auc):
     """To plot y versus x.
 
     Args:
@@ -35,6 +37,41 @@ def plot_signal(x, y, show_segments, show_auc):
     positive_segments = features.get_segments(x, y)[0]
     negative_segments = features.get_segments(x, y)[1]
 
+    positive_auc = features.get_auc_value(
+        segments=positive_segments, return_mean=False,
+        verbose=False, n_digits=2, lower_threshold=-np.inf,
+        upper_threshold=np.inf
+    )
+
+    negative_auc = features.get_auc_value(
+        segments=negative_segments, return_mean=False,
+        verbose=False, n_digits=2, lower_threshold=-np.inf,
+        upper_threshold=np.inf
+    )
+
+    pos_normalized = positive_auc / np.max(positive_auc)
+    neg_normalized = negative_auc / np.max(negative_auc)
+
+    cmap_pos, cmap_neg = plt.cm.GnBu, plt.cm.RdPu
+    cmap_pos_normalized = cmap_pos(np.linspace(
+        np.min(pos_normalized), np.max(pos_normalized), len(positive_auc)
+    ))
+    cmap_neg_normalized = cmap_neg(np.linspace(
+        np.min(neg_normalized), np.max(neg_normalized), len(negative_auc)
+    ))
+    global_cmap = mcolors.ListedColormap(
+        np.concatenate([cmap_neg_normalized, cmap_pos_normalized])
+    )
+
+    positive_time = features.get_auc_time(
+        segments=positive_segments, return_mean=False, verbose=False,
+        n_digits=3, lower_threshold=-np.inf, upper_threshold=np.inf
+    )
+    negative_time = features.get_auc_time(
+        segments=negative_segments, return_mean=False, verbose=False,
+        n_digits=3, lower_threshold=-np.inf, upper_threshold=np.inf
+    )
+
     fig, ax = plt.subplots(figsize=(14, 2))
 
     if show_segments:
@@ -44,44 +81,15 @@ def plot_signal(x, y, show_segments, show_auc):
         for i, (x_neg, y_neg) in enumerate(negative_segments):
             neg_label = "Air flow rate < 0" if i == 1 else ""
             ax.plot(x_neg, y_neg, label=neg_label, c="tab:orange")
-    elif not show_segments and not show_auc:
-        ax.plot(x, y, label="air flow rate", c="tab:gray")
-
-    if show_auc:
-        ax.plot(x, y, label="air flow rate", c="tab:gray", lw=0.5)
-
-        positive_auc = features.get_auc_value(
-            segments=positive_segments, return_mean=False,
-            verbose=False, n_digits=2, lower_threshold=-np.inf,
-            upper_threshold=np.inf
-        )
-
-        negative_auc = features.get_auc_value(
-            segments=negative_segments, return_mean=False,
-            verbose=False, n_digits=2, lower_threshold=-np.inf,
-            upper_threshold=np.inf
-        )
-
-        pos_normalized = positive_auc / np.max(positive_auc)
-        neg_normalized = negative_auc / np.max(negative_auc)
-
-        cmap_pos, cmap_neg = plt.cm.GnBu, plt.cm.RdPu
-        cmap_pos_normalized = cmap_pos(np.linspace(
-            np.min(pos_normalized), np.max(pos_normalized), len(positive_auc)
-        ))
-        cmap_neg_normalized = cmap_neg(np.linspace(
-            np.min(neg_normalized), np.max(neg_normalized), len(negative_auc)
-        ))
-        global_cmap = mcolors.ListedColormap(
-            np.concatenate([cmap_neg_normalized, cmap_pos_normalized])
-        )
-
+    else:
+        ax.plot(x, y, label="air flow rate", c="tab:gray", lw=1)
         ax.axhline(y=0, c="grey", linestyle=":", lw=1)
         zeros = np.where(y == 0)[0]
         ax.scatter(
             x[zeros], y[zeros], zorder=2, c="gold", s=9, lw=0.4, edgecolor="k"
         )
 
+    if show_auc:
         for i, (xp, yp) in enumerate(positive_segments):
             color = cmap_pos(pos_normalized[i])
             ax.fill_between(xp, yp, color=color, alpha=1)
@@ -99,6 +107,30 @@ def plot_signal(x, y, show_segments, show_auc):
         sm.set_array([])
         cbar = fig.colorbar(sm, ax=ax, orientation="vertical")
         cbar.set_label("Area under the curve", labelpad=15)
+
+    if highlight_time:
+        for s in (positive_segments, negative_segments):
+            cmap = cmap_pos if s == positive_segments else cmap_neg
+            normalized = pos_normalized if s == positive_segments else neg_normalized
+            for t in highlight_time:
+                for i, (xs, ys) in enumerate(s):
+                    if scientific_round((xs[-1] - xs[0]), n_digits=3) == t:
+                        color = cmap(normalized[i])
+                        ax.fill_between(xs, ys, color=color, alpha=1)
+                        max_y = max(ys) if max(ys) > 0 else min(ys)
+                        ax.text(x=(xs[0] + xs[-1])/2, y=max_y, s=f"t={t}")
+
+    if highlight_auc:
+        for s in (positive_segments, negative_segments):
+            cmap = cmap_pos if s == positive_segments else cmap_neg
+            normalized = pos_normalized if s == positive_segments else neg_normalized
+            for a in highlight_auc:
+                for i, (xs, ys) in enumerate(s):
+                    if scientific_round(trapezoid(y=ys, x=xs), n_digits=3) == a:
+                        color = cmap(normalized[i])
+                        ax.fill_between(xs, ys, color=color, alpha=1)
+                        max_y = max(ys) if max(ys) > 0 else min(ys)
+                        ax.text(x=(xs[0] + xs[-1])/2, y=max_y, s=f"auc={a}")
 
     ax.set_xlabel("time (s)", labelpad=10)
     ax.set_ylabel("Air flow rate", labelpad=10)

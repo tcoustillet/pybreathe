@@ -160,8 +160,13 @@ class BreathingFlow:
         """To get the sampling rate of the discretized breathing signal."""
         return features.compute_sampling_rate(x=self.raw_time)
 
-    @enforce_type_arg(y=str, show_segments=bool, show_auc=bool)
-    def plot(self, y="flow", show_segments=False, show_auc=False):
+    @enforce_type_arg(y=str, show_segments=bool, show_auc=bool,
+        highlight_time=tuple, highlight_auc=tuple
+    )
+    def plot(
+            self, y="flow", show_segments=False, show_auc=False,
+            highlight_time=(), highlight_auc=()
+    ):
         """To plot the air flow rate."""
         match y:
             case "flow":
@@ -176,7 +181,8 @@ class BreathingFlow:
                 )
 
         visualization.plot_signal(
-            x=x, y=y, show_segments=show_segments, show_auc=show_auc
+            x=x, y=y, show_segments=show_segments, show_auc=show_auc,
+            highlight_time=highlight_time, highlight_auc=highlight_auc
         )
 
     def get_positive_segments(self):
