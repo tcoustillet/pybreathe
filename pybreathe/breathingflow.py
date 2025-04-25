@@ -464,14 +464,13 @@ class BreathingFlow:
             dict(zip(metrics, self.get_negative_auc_value(verbose=False)))
         )
 
-        def to_dataframe(overview_dict, identifier):
+        def to_dataframe(overview_dict):
             """
             To convert the dictionary into a specially formatted Dataframe.
 
             Args:
             ----
                 overview_dict (dict): dictionary hosting all the signal features.
-                identifier (str): identifier of the 'BreathingFlow' object.
 
             Returns:
             -------
@@ -490,9 +489,7 @@ class BreathingFlow:
 
             return multicols_df
 
-        formatted_dataframe = to_dataframe(
-            overview_dict=dict_data, identifier=self.identifier
-        )
+        formatted_dataframe = to_dataframe(overview_dict=dict_data)
 
         if output_directory:
             output_path = os.path.join(output_directory, f"overview_{self.identifier}")
