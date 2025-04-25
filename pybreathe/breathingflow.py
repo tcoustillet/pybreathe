@@ -520,20 +520,12 @@ class BreathingFlow:
         metrics = ["mean", "std", "n cycle(s)"]
         dict_data = {}
         dict_data["Bf (rpm)"] = {
-            "mean": self.get_frequency(), "std": "-", "n cycle(s)": "-"
+            "mean": self._frequency, "std": "-", "n cycle(s)": "-"
         }
-        dict_data["time (AUC > 0) (s)"] = (
-            dict(zip(metrics, self.get_positive_auc_time(verbose=False)))
-        )
-        dict_data["time (AUC < 0) (s)"] = (
-            dict(zip(metrics, self.get_negative_auc_time(verbose=False)))
-        )
-        dict_data["AUC value (AUC > 0)"] = (
-            dict(zip(metrics, self.get_positive_auc_value(verbose=False)))
-        )
-        dict_data["AUC value (AUC < 0)"] = (
-            dict(zip(metrics, self.get_negative_auc_value(verbose=False)))
-        )
+        dict_data["time (AUC > 0) (s)"] = dict(zip(metrics, self.positive_auc_time))
+        dict_data["time (AUC < 0) (s)"] = dict(zip(metrics, self.negative_auc_time))
+        dict_data["AUC value (AUC > 0)"] = dict(zip(metrics, self.positive_auc_value))
+        dict_data["AUC value (AUC < 0)"] = dict(zip(metrics, self.negative_auc_value))
 
         def to_dataframe(overview_dict):
             """
