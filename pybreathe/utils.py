@@ -10,6 +10,7 @@ Created on Thu Apr 10 09:48:33 2025
 
 from functools import wraps
 from inspect import signature
+import pandas as pd
 
 import numpy as np
 
@@ -58,3 +59,32 @@ def scientific_round(x, n_digits):
         return tuple(float(f"{element:.{n_digits - 1}e}") for element in x)
     elif isinstance(x, float):
         return float(f"{x:.{n_digits - 1}e}")
+
+
+def flowMerger(*args):
+    """
+    To combine data from several respiratory signals into an unique summary table.
+
+    Args:
+    ----
+        *args (BreathingFlow): Respiratory air flow rates instantiated
+                               and analysed using 'BreathingFlow' object.
+
+    Raises:
+    ------
+        TypeError: forces all arguments to be of the right type ('BreathingFlow').
+
+    Returns:
+    -------
+        merged_files (pandas.DataFrame): merged data; 1 row = features for a file.
+
+    """
+    from .breathingflow import BreathingFlow
+
+    if not all(isinstance(arg, BreathingFlow) for arg in args):
+        raise TypeError("All arguments must be of type 'BreathingFlow'.")
+
+    overview_1f = [arg.get_overview() for arg in args]
+    merged_files = pd.concat(overview_1f)
+
+    return merged_files
