@@ -10,6 +10,7 @@ Created on Thu Apr 10 09:48:33 2025
 
 from functools import wraps
 from inspect import signature
+import os
 import pandas as pd
 
 import numpy as np
@@ -61,7 +62,7 @@ def scientific_round(x, n_digits):
         return float(f"{x:.{n_digits - 1}e}")
 
 
-def flowMerger(*args):
+def flowMerger(*args, table_name, output_directory=None):
     """
     To combine data from several respiratory signals into an unique summary table.
 
@@ -69,6 +70,9 @@ def flowMerger(*args):
     ----
         *args (BreathingFlow): Respiratory air flow rates instantiated
                                and analysed using 'BreathingFlow' object.
+        table_name (str): name of the summary table.
+        output_directory (str, optional): backup directory for the summary table.
+                                          Defaults to None.
 
     Raises:
     ------
@@ -86,5 +90,9 @@ def flowMerger(*args):
 
     overview_1f = [arg.get_overview() for arg in args]
     merged_files = pd.concat(overview_1f)
+
+    if output_directory:
+        output_path = os.path.join(output_directory, f"overview_{table_name}")
+        merged_files.to_excel(excel_writer=f"{output_path}.xlsx")
 
     return merged_files
