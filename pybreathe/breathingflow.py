@@ -599,6 +599,12 @@ class BreathingFlow:
         dict_data["time (AUC < 0) (s)"] = dict(zip(metrics, self.negative_time))
         dict_data["AUC value (AUC > 0)"] = dict(zip(metrics, self.positive_auc))
         dict_data["AUC value (AUC < 0)"] = dict(zip(metrics, self.negative_auc))
+        dict_data["Min. ventilation (AUC > 0)"] = {
+            "mean": self._positive_minute_ventilation
+        }
+        dict_data["Min. ventilation (AUC < 0)"] = {
+            "mean": self._negative_minute_ventilation
+        }
 
         def to_dataframe(overview_dict):
             """
