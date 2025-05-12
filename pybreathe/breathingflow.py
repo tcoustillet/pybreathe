@@ -15,7 +15,7 @@ import pandas as pd
 import re
 from scipy.signal import detrend
 
-from .utils import enforce_type_arg
+from .utils import enforce_type_arg, scientific_round
 from . import featureextraction as features
 from . import visualization
 
@@ -52,6 +52,8 @@ class BreathingFlow:
         self._negative_time = None
         self._positive_auc = None
         self._negative_auc = None
+        self._positive_minute_ventilation = None
+        self._negative_minute_ventilation = None
 
     @classmethod
     @enforce_type_arg(filename=str, detrend_y=bool)
@@ -187,6 +189,16 @@ class BreathingFlow:
     def negative_auc(self):
         """Getter."""
         return self._negative_auc
+
+    @property
+    def positive_minute_ventilation(self):
+        """Getter."""
+        return self._positive_minute_ventilation
+
+    @property
+    def negative_minute_ventilation(self):
+        """Getter."""
+        return self._negative_minute_ventilation
 
     def get_hz(self):
         """To get the sampling rate of the discretized breathing signal."""
@@ -488,6 +500,69 @@ class BreathingFlow:
             self._negative_auc = neg_auc_val
 
         return neg_auc_val
+
+    @enforce_type_arg(verbose=bool, n_digits=int, save=bool)
+    def get_minute_ventilation(self, verbose=True, n_digits=3, save=False):
+        """
+        To get minute ventilation of positive and negative segments.
+
+        Args:
+        ----
+            verbose (bool, optional): to print (or not) results in human
+                                      readable format. Defaults to True.
+            n_digits (int, optional): to round auc value to n_digits significant
+                                      digits. Defaults to 3.
+            save (bool, optional): to memorise or not the value obtained.
+                                   Defaults to False.
+
+        Raises:
+        ------
+            ValueError: The frequency and tidal volume must have been
+                        set by calling up the corresponding methods.
+
+        Returns:
+        -------
+            pos_mv (float): minute ventilation of positive segments
+                            (in unit of tidal volume .min-1).
+            neg_mv (float): minute ventilation of negative segments
+                            (in unit of tidal volume .min-1).
+
+        Note:
+        ----
+            Minute Ventilation is the product of frequency and tidal volume.
+
+        """
+        if self.frequency and self.positive_auc:
+            pos_mv = scientific_round(
+                (self.frequency * self.positive_auc[0]), n_digits=n_digits
+            )
+            if verbose:
+                print(f"Minute ventilation of positive segments: {pos_mv}.")
+        else:
+            raise ValueError(
+                "Please save the frequency and tidal volume by setting the "
+                "'save' argument to 'True' in the method call. "
+                "(get_frequency() and get_positive_auc())"
+            )
+
+        if self.frequency and self.negative_auc:
+            neg_mv = scientific_round(
+                (self.frequency * self.negative_auc[0]), n_digits=n_digits
+            )
+            if verbose:
+                print(f"Minute ventilation of negative segments: {neg_mv}.")
+        else:
+            raise ValueError(
+                "Please save the frequency and tidal volume by setting the "
+                "'save' argument to 'True' in the method call. "
+                "(get_frequency() and get_negative_auc())"
+            )
+
+        if save:
+            self._positive_minute_ventilation = pos_mv
+            self._negative_minute_ventilation = neg_mv
+
+        return pos_mv, neg_mv
 
     def plot_distribution(self):
         """To get distribution of each feature of the 'BreathingFlow' object."""
