@@ -169,6 +169,31 @@ class BreathingFlow:
             detrend_y=False
         )
 
+    @classmethod
+    def load_sinus(cls):
+        """
+        Load and return a BreathingFlow object from the "sinus" dataset.
+
+        Returns:
+        -------
+            BreathingFlow: a BreathingFlow object = the sinus function.
+
+        Note:
+        ----
+            is used to demonstrate the 'proof of concept'.
+        """
+        sinus = pd.read_csv(StringIO(
+            read_text("pybreathe.datasets", "sinus.txt")
+            ), sep="\t", names=["time", "values"], dtype=float
+        )
+
+        return cls(
+            identifier="example_sinus",
+            raw_time=sinus["time"].values,
+            raw_flow=sinus["values"].values,
+            detrend_y=False
+        )
+
     def __getitem__(self, key):
         """
         To allow a 'BreathingFlow' object to be sliced and used as a new object.
