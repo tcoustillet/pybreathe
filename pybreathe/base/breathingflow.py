@@ -9,6 +9,8 @@ Created on Wed Apr  2 08:40:50 2025
 
 
 import os
+from importlib.resources import read_text
+from io import StringIO
 
 import numpy as np
 import pandas as pd
@@ -133,6 +135,38 @@ class BreathingFlow:
             raw_time=df["time"].values,
             raw_flow=df["values"].values,
             detrend_y=detrend_y
+        )
+
+    @classmethod
+    def load_mouse_01(cls, signal_len=5000):
+        """
+        Load and return a BreathingFlow object from the "mouse_01" dataset.
+
+        Args:
+        ----
+            signal_len (int, optional): desired signal length. Defaults to 5000.
+
+        Returns:
+        -------
+            BreathingFlow: a BreathingFlow object.
+
+        Note:
+        ----
+            To get the signal length in seconds, signal_len must be divided by 500.
+            Defaults value: 5000 points = 10 seconds.
+        """
+        mouse_01 = pd.read_csv(StringIO(
+            read_text("pybreathe.datasets", "mouse_01.txt")
+            ), sep="\t", names=["time", "values"]
+        )
+
+        mouse_01["time"] = mouse_01["time"].str.replace(",", ".").astype(float)
+
+        return cls(
+            identifier="example_mouse_01",
+            raw_time=mouse_01["time"].values[:signal_len],
+            raw_flow=mouse_01["values"].values[:signal_len],
+            detrend_y=False
         )
 
     def __getitem__(self, key):
