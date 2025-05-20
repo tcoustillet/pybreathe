@@ -623,13 +623,37 @@ class BreathingFlow:
 
         return pos_mv, neg_mv
 
-    def plot_distribution(self):
-        """To get distribution of each feature of the 'BreathingFlow' object."""
+    @enforce_type_arg(stat=str)
+    def plot_distribution(self, stat="probability"):
+        """
+        To get distribution of each feature of the 'BreathingFlow' object.
+
+        Args:
+        ----
+            stat (int, optional): aggregate statistic to compute in each bin.
+                                  Defaults to "probability".
+
+        Returns:
+        -------
+            None. Plots the distribution.
+
+        Note:
+        ----
+            stat should be 'count', 'frequency', 'probability', 'percent' or
+            'density'.
+
+        """
+        if stat not in ('count', 'frequency', 'probability', 'percent', 'density'):
+            raise ValueError(
+                "stat should be either 'count', 'frequency', 'probability', "
+                f"'percent' or 'density'. Not {stat}.")
+
         visualization.plot_features_distribution(
             self.get_positive_time(return_mean=False),
             self.get_negative_time(return_mean=False),
             self.get_positive_auc(return_mean=False),
-            self.get_negative_auc(return_mean=False)
+            self.get_negative_auc(return_mean=False),
+            stat=stat
         )
 
     @enforce_type_arg(output_directory=str)

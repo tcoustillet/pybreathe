@@ -196,7 +196,7 @@ def plot_peaks(x, y, which_peaks, distance):
     ax.spines["right"].set_visible(False)
 
 
-def plot_features_distribution(*args):
+def plot_features_distribution(*args, stat):
     """
     To get the distribution of each feature of the 'BreathingFlow' object.
 
@@ -212,10 +212,10 @@ def plot_features_distribution(*args):
     x1, x2, x3, x4 = args
     fig, ((ax1, ax2), (ax3, ax4)) = plt.subplots(nrows=2, ncols=2, figsize=(12, 6))
 
-    sns.histplot(data=x1, kde=True, stat="probability", ax=ax1)
-    sns.histplot(data=x2, kde=True, stat="probability", ax=ax2)
-    sns.histplot(data=x3, kde=True, stat="probability", ax=ax3)
-    sns.histplot(data=x4, kde=True, stat="probability", ax=ax4)
+    sns.histplot(data=x1, kde=True, stat=stat, ax=ax1)
+    sns.histplot(data=x2, kde=True, stat=stat, ax=ax2)
+    sns.histplot(data=x3, kde=True, stat=stat, ax=ax3)
+    sns.histplot(data=x4, kde=True, stat=stat, ax=ax4)
 
     for ax in fig.axes:
         ax.grid(alpha=0.8, linestyle=":", ms=0.5)
@@ -231,7 +231,19 @@ def plot_features_distribution(*args):
         ax.set_xlabel(lab, labelpad=10)
         if lab.endswith("(s)"):
             lab = lab[:-3]
-        ax.set_ylabel(fr"$\mathbb{{P}}$ ({lab})", labelpad=10)
+
+        match stat:
+            case "probability":
+                ax.set_ylabel(fr"$\mathbb{{P}}$ ({lab})", labelpad=10)
+            case "count":
+                ax.set_ylabel(fr"count ({lab})", labelpad=10)
+            case "frequency":
+                ax.set_ylabel(fr"frequency ({lab})", labelpad=10)
+            case "percent":
+                ax.set_ylabel(fr"percentage ({lab})", labelpad=10)
+            case "density":
+                ax.set_ylabel(fr"density ({lab})", labelpad=10)
+
         ax.set_title(f"Distribution of {lab} (n = {len(x)})", pad=10)
 
     fig.tight_layout()
