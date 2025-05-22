@@ -161,11 +161,16 @@ def get_segments(x, y):
             first_point = s[0][0]
             last_point = s[0][-1]
 
-            first_xzero = x[(np.where(x == first_point)[0][0] - 1)]
-            last_xzero = x[(np.where(x == last_point)[0][0] + 1)]
+            first_index_zero = np.where(x == first_point)[0][0] - 1
+            last_index_zero = np.where(x == last_point)[0][0]
 
-            first_yzero = y[(np.where(x == first_point)[0][0] - 1)]
-            last_yzero = y[(np.where(x == last_point)[0][0] + 1)]
+            last_index_zero += 1 if (last_index_zero != (len(y) - 1)) else 0
+
+            first_xzero = x[first_index_zero]
+            first_yzero = y[first_index_zero]
+
+            last_xzero = x[last_index_zero]
+            last_yzero = y[last_index_zero]
 
             s[0].insert(0, first_xzero)
             s[0].append(last_xzero)
