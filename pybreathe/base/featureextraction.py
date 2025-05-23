@@ -252,7 +252,7 @@ def frequency(signal, sampling_rate, method, which_peaks, distance, n_digits):
                 raise ValueError(
                     "To use the peak method, distance should be a "
                     f"positive integer. Not '{distance}'."
-                    "Please use 'test_distance method to set the right distance."
+                    "Please use 'test_distance' method to set the right distance."
                 )
 
             if which_peaks == "top":

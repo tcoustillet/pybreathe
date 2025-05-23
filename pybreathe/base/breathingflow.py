@@ -297,7 +297,7 @@ class BreathingFlow:
         return features.get_segments(self.time, self.flow)[1]
 
     @enforce_type_arg(which_peaks=str, distance=int, set_dist=bool)
-    def test_distance(self, which_peaks, distance=0, set_dist=False):
+    def test_distance(self, which_peaks="top", distance=0, set_dist=False):
         """
         Calibration of peaks detection
         = test which distance should be assigned to the 'distance' attribute.
