@@ -264,13 +264,32 @@ class BreathingFlow:
         return features.compute_sampling_rate(x=self.raw_time)
 
     @enforce_type_arg(y=str, show_segments=bool, show_auc=bool,
-        highlight_time=tuple, highlight_auc=tuple
+        highlight_time=tuple, highlight_auc=tuple, output_path=str
     )
     def plot(
             self, y="flow", show_segments=False, show_auc=False,
-            highlight_time=(), highlight_auc=()
+            highlight_time=(), highlight_auc=(), output_path=""
     ):
-        """To plot the air flow rate."""
+        """
+        To plot the air flow rate.
+
+        Args:
+        ----
+            y (str, optional): the values for the y-axis.
+            show_segments (bool, optional): to distinguish between the positive and negative
+                                            parts of the curve. Defaults to False.
+            show_auc (bool, optional): to distinguish between the positive and negative
+                                       areas of the curve. Defaults to False.
+            highlight_time (tuple, optional): to highlight breathing cycles with a specific time.
+            highlight_auc (tuple, optional): to highlight breathing cycles with a specific area.
+            output_path (str, optional): to choose where to save the figure, if applicable.
+                                         Defaults to "" (figure not saved).
+
+        Returns:
+        -------
+            None. Plot the figure.
+
+        """
         match y:
             case "flow":
                 x, y = self.time, self.flow
@@ -285,7 +304,8 @@ class BreathingFlow:
 
         visualization.plot_signal(
             x=x, y=y, show_segments=show_segments, show_auc=show_auc,
-            highlight_time=highlight_time, highlight_auc=highlight_auc
+            highlight_time=highlight_time, highlight_auc=highlight_auc,
+            output_path=output_path
         )
 
     def get_positive_segments(self):
@@ -296,17 +316,23 @@ class BreathingFlow:
         """To get the pairs (x,y) for which the air flow rate is negative."""
         return features.get_segments(self.time, self.flow)[1]
 
-    @enforce_type_arg(which_peaks=str, distance=int, set_dist=bool)
-    def test_distance(self, which_peaks="top", distance=0, set_dist=False):
+    @enforce_type_arg(
+        which_peaks=str, distance=int, set_dist=bool, output_path=str
+    )
+    def test_distance(
+            self, which_peaks="top", distance=0, set_dist=False, output_path=""
+    ):
         """
         Calibration of peaks detection
         = test which distance should be assigned to the 'distance' attribute.
 
         Args:
         ----
-            which_peaks (str): to consider either top or bottom peaks.
+            which_peaks (str, optional): to consider either top or bottom peaks. Defaults to 'top'.
             distance (int): the minimum distance between two neighbouring peaks.
             set_dist (bool, optionnal): to set the distance or not. Defaults to False.
+            output_path (str, optional): to choose where to save the figure, if applicable.
+                                         Defaults to "" (figure not saved).
 
         Returns:
         -------
@@ -319,7 +345,8 @@ class BreathingFlow:
 
         """
         visualization.plot_peaks(
-            x=self.time, y=self.flow, which_peaks=which_peaks, distance=distance
+            x=self.time, y=self.flow, which_peaks=which_peaks,
+            distance=distance, output_path=output_path
         )
 
         if set_dist:
@@ -623,8 +650,8 @@ class BreathingFlow:
 
         return pos_mv, neg_mv
 
-    @enforce_type_arg(stat=str)
-    def plot_distribution(self, stat="probability"):
+    @enforce_type_arg(stat=str, output_path=str)
+    def plot_distribution(self, stat="probability", output_path=""):
         """
         To get distribution of each feature of the 'BreathingFlow' object.
 
@@ -632,6 +659,8 @@ class BreathingFlow:
         ----
             stat (int, optional): aggregate statistic to compute in each bin.
                                   Defaults to "probability".
+            output_path (str, optional): to choose where to save the figure,
+                                         if applicable. Defaults to "" (figure not saved)
 
         Returns:
         -------
@@ -653,7 +682,8 @@ class BreathingFlow:
             self.get_negative_time(return_mean=False),
             self.get_positive_auc(return_mean=False),
             self.get_negative_auc(return_mean=False),
-            stat=stat
+            stat=stat,
+            output_path=output_path
         )
 
     @enforce_type_arg(output_directory=str)

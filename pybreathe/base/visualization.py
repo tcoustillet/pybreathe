@@ -19,7 +19,9 @@ from . import featureextraction as features
 from .utils import scientific_round
 
 
-def plot_signal(x, y, show_segments, show_auc, highlight_time, highlight_auc):
+def plot_signal(
+        x, y, show_segments, show_auc, highlight_time, highlight_auc, output_path
+):
     """To plot y versus x.
 
     Args:
@@ -28,6 +30,11 @@ def plot_signal(x, y, show_segments, show_auc, highlight_time, highlight_auc):
         y (array): the values for the y-axis.
         show_segments (bool): to distinguish between the positive and negative
                               parts of the curve.
+        show_auc (bool): to distinguish between the positive and negative
+                         areas of the curve.
+        highlight_time (tuple): to highlight breathing cycles with a specific time.
+        highlight_auc (tuple): to highlight breathing cycles with a specific area.
+        output_path (str): to choose where to save the figure, if applicable.
 
     Returns:
     -------
@@ -139,8 +146,11 @@ def plot_signal(x, y, show_segments, show_auc, highlight_time, highlight_auc):
     ax.spines["top"].set_visible(False)
     ax.spines["right"].set_visible(False)
 
+    if output_path:
+        fig.savefig(output_path, bbox_inches="tight")
 
-def plot_peaks(x, y, which_peaks, distance):
+
+def plot_peaks(x, y, which_peaks, distance, output_path):
     """
     Calibration of peaks detection
     = test of the distance that correctly detects all the peaks.
@@ -151,6 +161,7 @@ def plot_peaks(x, y, which_peaks, distance):
         y (array): the values for the y-axis.
         which_peaks (str): to consider either top or bottom peaks.
         distance (int): the minimum distance between two neighbouring peaks.
+        output_path (str): to choose where to save the figure, if applicable.
 
     Returns:
     -------
@@ -195,14 +206,19 @@ def plot_peaks(x, y, which_peaks, distance):
     ax.spines["top"].set_visible(False)
     ax.spines["right"].set_visible(False)
 
+    if output_path:
+        fig.savefig(output_path, bbox_inches="tight")
 
-def plot_features_distribution(*args, stat):
+
+def plot_features_distribution(*args, stat, output_path):
     """
     To get the distribution of each feature of the 'BreathingFlow' object.
 
     Args:
     ----
         *args (array): all the values of one of the signal features.
+        stat (str): aggregate statistic to compute in each bin.
+        output_path (str): to choose where to save the figure, if applicable.
 
     Returns:
     -------
@@ -247,3 +263,6 @@ def plot_features_distribution(*args, stat):
         ax.set_title(f"Distribution of {lab} (n = {len(x)})", pad=10)
 
     fig.tight_layout()
+
+    if output_path:
+        fig.savefig(output_path, bbox_inches="tight")
