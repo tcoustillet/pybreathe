@@ -18,7 +18,7 @@ import numpy as np
 
 # Function (decorator) that handle argument types for object methods.
 def enforce_type_arg(**arg_types):
-    """Decorate a function to enforce a method argument to be of certain type ."""
+    """Decorate a function to enforce a method argument to be of certain type."""
     def decorator(func):
         @wraps(func)
         def wrapper(*args, **kwargs):
@@ -58,11 +58,11 @@ def scientific_round(x, n_digits):
     """
     if isinstance(x, (tuple, list, np.ndarray)):
         return tuple(float(f"{element:.{n_digits - 1}e}") for element in x)
-    elif isinstance(x, float):
+    if isinstance(x, float):
         return float(f"{x:.{n_digits - 1}e}")
 
 
-def flowMerger(*args, table_name, output_directory=None):
+def flow_merger(*args, table_name, output_directory=None):
     """
     To combine data from several respiratory signals into an unique summary table.
 

@@ -15,12 +15,13 @@ import matplotlib.colors as mcolors
 from scipy.integrate import trapezoid
 from scipy.signal import find_peaks
 import seaborn as sns
+
 from . import featureextraction as features
 from .utils import scientific_round
 
 
 def plot_signal(
-        x, y, show_segments, show_auc, highlight_time, highlight_auc, output_path
+    x, y, show_segments, show_auc, highlight_time, highlight_auc, output_path
 ):
     """To plot y versus x.
 
@@ -45,38 +46,35 @@ def plot_signal(
     negative_segments = features.get_segments(x, y)[1]
 
     positive_auc = features.get_auc_value(
-        segments=positive_segments, return_mean=False,
-        verbose=False, n_digits=2, lower_threshold=-np.inf,
-        upper_threshold=np.inf
+        segments=positive_segments,
+        return_mean=False,
+        verbose=False,
+        n_digits=2,
+        lower_threshold=-np.inf,
+        upper_threshold=np.inf,
     )
 
     negative_auc = features.get_auc_value(
-        segments=negative_segments, return_mean=False,
-        verbose=False, n_digits=2, lower_threshold=-np.inf,
-        upper_threshold=np.inf
+        segments=negative_segments,
+        return_mean=False,
+        verbose=False,
+        n_digits=2,
+        lower_threshold=-np.inf,
+        upper_threshold=np.inf,
     )
 
     pos_normalized = positive_auc / np.max(positive_auc)
     neg_normalized = negative_auc / np.max(negative_auc)
 
     cmap_pos, cmap_neg = plt.cm.GnBu, plt.cm.RdPu
-    cmap_pos_normalized = cmap_pos(np.linspace(
-        np.min(pos_normalized), np.max(pos_normalized), len(positive_auc)
-    ))
-    cmap_neg_normalized = cmap_neg(np.linspace(
-        np.min(neg_normalized), np.max(neg_normalized), len(negative_auc)
-    ))
+    cmap_pos_normalized = cmap_pos(
+        np.linspace(np.min(pos_normalized), np.max(pos_normalized), len(positive_auc))
+    )
+    cmap_neg_normalized = cmap_neg(
+        np.linspace(np.min(neg_normalized), np.max(neg_normalized), len(negative_auc))
+    )
     global_cmap = mcolors.ListedColormap(
         np.concatenate([cmap_neg_normalized, cmap_pos_normalized])
-    )
-
-    positive_time = features.get_auc_time(
-        segments=positive_segments, return_mean=False, verbose=False,
-        n_digits=3, lower_threshold=-np.inf, upper_threshold=np.inf
-    )
-    negative_time = features.get_auc_time(
-        segments=negative_segments, return_mean=False, verbose=False,
-        n_digits=3, lower_threshold=-np.inf, upper_threshold=np.inf
     )
 
     fig, ax = plt.subplots(figsize=(14, 2))
@@ -92,9 +90,7 @@ def plot_signal(
         ax.plot(x, y, label="air flow rate", c="tab:gray", lw=1)
         ax.axhline(y=0, c="grey", linestyle=":", lw=1)
         zeros = np.where(y == 0)[0]
-        ax.scatter(
-            x[zeros], y[zeros], zorder=2, c="gold", s=9, lw=0.4, edgecolor="k"
-        )
+        ax.scatter(x[zeros], y[zeros], zorder=2, c="gold", s=9, lw=0.4, edgecolor="k")
 
     if show_auc:
         for i, (xp, yp) in enumerate(positive_segments):
@@ -109,7 +105,7 @@ def plot_signal(
             norm=mcolors.TwoSlopeNorm(
                 vmin=np.min(negative_auc), vcenter=0, vmax=np.max(positive_auc)
             ),
-            cmap=global_cmap
+            cmap=global_cmap,
         )
         sm.set_array([])
         cbar = fig.colorbar(sm, ax=ax, orientation="vertical")
@@ -125,7 +121,7 @@ def plot_signal(
                         color = cmap(normalized[i])
                         ax.fill_between(xs, ys, color=color, alpha=1)
                         max_y = max(ys) if max(ys) > 0 else min(ys)
-                        ax.text(x=(xs[0] + xs[-1])/2, y=max_y, s=f"t={t}")
+                        ax.text(x=(xs[0] + xs[-1]) / 2, y=max_y, s=f"t={t}")
 
     if highlight_auc:
         for s in (positive_segments, negative_segments):
@@ -137,7 +133,7 @@ def plot_signal(
                         color = cmap(normalized[i])
                         ax.fill_between(xs, ys, color=color, alpha=1)
                         max_y = max(ys) if max(ys) > 0 else min(ys)
-                        ax.text(x=(xs[0] + xs[-1])/2, y=max_y, s=f"auc={a}")
+                        ax.text(x=(xs[0] + xs[-1]) / 2, y=max_y, s=f"auc={a}")
 
     ax.set_xlabel("time (s)", labelpad=10)
     ax.set_ylabel("Air flow rate", labelpad=10)
@@ -169,7 +165,7 @@ def plot_peaks(x, y, which_peaks, distance, output_path):
 
     """
     top_peaks, _ = find_peaks(y, distance=distance)
-    bottom_peaks, _ = find_peaks(- y, distance=distance)
+    bottom_peaks, _ = find_peaks(-y, distance=distance)
 
     fig, ax = plt.subplots(figsize=(14, 2))
 
@@ -178,21 +174,31 @@ def plot_peaks(x, y, which_peaks, distance, output_path):
     match which_peaks:
         case "top":
             ax.scatter(
-                x[top_peaks], y[top_peaks], s=10, marker="x", lw=2, c="red",
+                x[top_peaks],
+                y[top_peaks],
+                s=10,
+                marker="x",
+                lw=2,
+                c="red",
                 label=f"{len(top_peaks)} detected peaks (distance = {distance})",
                 zorder=2,
             )
         case "bottom":
             ax.scatter(
-                x[bottom_peaks], y[bottom_peaks], s=10, marker="x", lw=2, c="red",
+                x[bottom_peaks],
+                y[bottom_peaks],
+                s=10,
+                marker="x",
+                lw=2,
+                c="red",
                 label=f"{len(bottom_peaks)} detected peaks (distance = {distance})",
-                zorder=2
+                zorder=2,
             )
         case _:
             raise ValueError(
                 "Argument 'which_peaks' must be either 'top' or 'bottom'. "
                 f"Not '{which_peaks}'."
-                )
+            )
 
     min_s, max_s = min(y), max(y)
     s_amp = max_s - min_s
@@ -242,7 +248,7 @@ def plot_features_distribution(*args, stat, output_path):
     for ax, lab, x in zip(
         fig.axes,
         ("time (AUC > 0) (s)", "time (AUC < 0) (s)", "AUC > 0", "AUC < 0"),
-        args
+        args,
     ):
         ax.set_xlabel(lab, labelpad=10)
         if lab.endswith("(s)"):
@@ -250,15 +256,15 @@ def plot_features_distribution(*args, stat, output_path):
 
         match stat:
             case "probability":
-                ax.set_ylabel(fr"$\mathbb{{P}}$ ({lab})", labelpad=10)
+                ax.set_ylabel(rf"$\mathbb{{P}}$ ({lab})", labelpad=10)
             case "count":
-                ax.set_ylabel(fr"count ({lab})", labelpad=10)
+                ax.set_ylabel(rf"count ({lab})", labelpad=10)
             case "frequency":
-                ax.set_ylabel(fr"frequency ({lab})", labelpad=10)
+                ax.set_ylabel(rf"frequency ({lab})", labelpad=10)
             case "percent":
-                ax.set_ylabel(fr"percentage ({lab})", labelpad=10)
+                ax.set_ylabel(rf"percentage ({lab})", labelpad=10)
             case "density":
-                ax.set_ylabel(fr"density ({lab})", labelpad=10)
+                ax.set_ylabel(rf"density ({lab})", labelpad=10)
 
         ax.set_title(f"Distribution of {lab} (n = {len(x)})", pad=10)
 

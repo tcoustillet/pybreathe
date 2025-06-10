@@ -1,2 +1,2 @@
 from .breathingflow import BreathingFlow
-from .utils import flowMerger
+from .utils import flow_merger
