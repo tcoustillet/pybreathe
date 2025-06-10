@@ -9,7 +9,7 @@ Created on Thu Apr  3 10:10:59 2025
 
 
 import numpy as np
-import numpy.ma as ma
+from numpy import ma
 import pandas as pd
 from scipy.integrate import trapezoid
 from scipy.signal import find_peaks, periodogram, welch, windows
@@ -58,9 +58,7 @@ def zero_interpolation(x, y):
 
     """
     crossing_indices = np.where(
-        np.array(
-            [0 if e in (-1, 1) else e for e in np.diff(np.sign(y))]
-        )
+        np.array([0 if e in (-1, 1) else e for e in np.diff(np.sign(y))])
     )[0]
 
     x_zeros, y_zeros = [], []
@@ -109,22 +107,22 @@ def get_segments(x, y):
     positive_segments, negative_segments = [], []
     pos_x, pos_y, neg_x, neg_y = [], [], [], []
 
-    for i in range(len(y)):
-        if y[i] > 0:
+    for i, yi in enumerate(y):
+        if yi > 0:
             if len(neg_x) > 0:
                 negative_segments.append((neg_x, neg_y))
                 neg_x, neg_y = [], []
 
             pos_x.append(x[i])
-            pos_y.append(y[i])
+            pos_y.append(yi)
 
-        elif y[i] < 0:
+        elif yi < 0:
             if len(pos_x) > 0:
                 positive_segments.append((pos_x, pos_y))
                 pos_x, pos_y = [], []
 
             neg_x.append(x[i])
-            neg_y.append(y[i])
+            neg_y.append(yi)
 
         else:
             if len(pos_x) > 0:
@@ -209,14 +207,13 @@ def get_peaks(x, y, which_peaks, distance):
             "Please use 'test_distance method to set the right distance."
         )
     top_peaks, _ = find_peaks(y, distance=distance)
-    bottom_peaks, _ = find_peaks(- y, distance=distance)
+    bottom_peaks, _ = find_peaks(-y, distance=distance)
 
     if which_peaks == "top":
         return x[top_peaks]
-    elif which_peaks == "bottom":
+    if which_peaks == "bottom":
         return x[bottom_peaks]
-    else:
-        return None
+    return None
 
 
 def frequency(signal, sampling_rate, method, which_peaks, distance, n_digits):
@@ -275,8 +272,8 @@ def frequency(signal, sampling_rate, method, which_peaks, distance, n_digits):
         case "fft":
             data_len = len(signal)
             sp = np.fft.fft(signal)
-            freq = np.fft.fftfreq(data_len, d=1/sampling_rate)
-            dominant_freq = abs(freq[np.argmax(np.abs(sp[:data_len//2]))])
+            freq = np.fft.fftfreq(data_len, d=1 / sampling_rate)
+            dominant_freq = abs(freq[np.argmax(np.abs(sp[: data_len // 2]))])
         case _:
             raise ValueError(
                 "'method' should be either 'welch', 'peaks', 'periodogram' or "
@@ -290,7 +287,7 @@ def frequency(signal, sampling_rate, method, which_peaks, distance, n_digits):
 
 
 def get_auc_time(
-        segments, return_mean, verbose, n_digits, lower_threshold, upper_threshold
+    segments, return_mean, verbose, n_digits, lower_threshold, upper_threshold
 ):
     """
     To get the mean duration of segments when AUC is positive or negative.
@@ -331,12 +328,11 @@ def get_auc_time(
             print(f"mean = {mean_duration} ± {std_duration} (n = {n_duration}).")
         return mean_duration, std_duration, n_duration
 
-    else:
-        return scientific_round(duration, n_digits=n_digits)
+    return scientific_round(duration, n_digits=n_digits)
 
 
 def get_auc_value(
-        segments, return_mean, verbose, n_digits, lower_threshold, upper_threshold
+    segments, return_mean, verbose, n_digits, lower_threshold, upper_threshold
 ):
     """
     To get the mean AUC of segments when AUC is positive or negative.
@@ -372,5 +368,4 @@ def get_auc_value(
             print(f"mean = {mean_auc} ± {std_auc} (n = {n_auc}).")
         return mean_auc, std_auc, n_auc
 
-    else:
-        return scientific_round(auc, n_digits=n_digits)
+    return scientific_round(auc, n_digits=n_digits)
