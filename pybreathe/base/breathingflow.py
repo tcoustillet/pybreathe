@@ -7,14 +7,13 @@ Created on Wed Apr  2 08:40:50 2025
 @author: CoustilletT
 """
 
-
-import os
 from importlib.resources import read_text
 from io import StringIO
+import os
+import re
 
 import numpy as np
 import pandas as pd
-import re
 from scipy.signal import detrend
 
 from .utils import enforce_type_arg, scientific_round
@@ -25,15 +24,31 @@ from . import visualization
 class BreathingFlow:
     """Breathing Air Flow rate."""
 
-    @enforce_type_arg(detrend_y=bool)
+    @enforce_type_arg(identifier=str, detrend_y=bool)
     def __init__(self, identifier, raw_time, raw_flow, detrend_y=True):
+        """
+        Class constructor.
+
+        Args:
+        ----
+            identifier (str): breathing signal identifier.
+            raw_time (array): discretized time vector.
+            raw_flow (array): discretized breathing signal (air flow rate).
+            detrend_y (bool, optional): to set the mean of the air flow rate at 0.
+                                        Defaults to True.
+
+        Returns:
+        -------
+            None.
+
+        """
         self.identifier = identifier
         self.raw_time = raw_time
         self.raw_flow = raw_flow
 
         time_len = len(self.raw_time)
-        self.absolute_time = (
-            np.linspace(0, time_len / self.get_hz(), time_len, endpoint=False)
+        self.absolute_time = np.linspace(
+            0, time_len / self.get_hz(), time_len, endpoint=False
         )
 
         if detrend_y:
@@ -58,15 +73,18 @@ class BreathingFlow:
         self._negative_minute_ventilation = None
 
     @classmethod
-    @enforce_type_arg(filename=str, detrend_y=bool)
+    @enforce_type_arg(identifier=str, filename=str, detrend_y=bool)
     def from_file(cls, identifier, filename, detrend_y=True):
         """
         To instantiate a 'BreathingFlow' objet from a file path.
 
         Args:
         ----
+            identifier (str): breathing signal identifier.
             filename (str): path to the two-column file representing
                             discretized time and discretized air flow rate.
+            detrend_y (bool, optional): to set the mean of the air flow rate at 0.
+                                        Defaults to True.
 
         Returns:
         -------
@@ -81,16 +99,14 @@ class BreathingFlow:
         match filename:
             case _ if filename.endswith("txt"):
                 raw_data = pd.read_csv(
-                    filename, sep=r"\s+", usecols=[0, 1], names=col_names,
-                    dtype=str
+                    filename, sep=r"\s+", usecols=[0, 1], names=col_names, dtype=str
                 )
             case _ if filename.endswith(("xlsx", "xls")):
                 raw_data = pd.read_excel(filename, names=col_names, dtype=str)
 
-        data = (raw_data[raw_data["time"]
-                .str.match(time_pattern, na=False)]
-                .reset_index(drop=True)
-                )
+        data = raw_data[raw_data["time"].str.match(time_pattern, na=False)].reset_index(
+            drop=True
+        )
         if not data["time"].str.contains(":").any():
             data["time"] = data["time"].str.replace(",", ".").astype(float)
         if data["values"].str.contains(",").any():
@@ -100,26 +116,31 @@ class BreathingFlow:
 
         # To instantiate an object even if the time vector is not in absolute seconds.
         # Required format : HH:MM:SS.XXX
-        if not all(re.match(time_pattern_2, time) for time in data["time"].values.astype(str)):
+        if not all(
+            re.match(time_pattern_2, time) for time in data["time"].values.astype(str)
+        ):
             data["time"] = pd.to_timedelta(data["time"]).dt.total_seconds()
 
         return cls(
             identifier=identifier,
             raw_time=data["time"].values,
             raw_flow=data["values"].values,
-            detrend_y=detrend_y
+            detrend_y=detrend_y,
         )
 
     @classmethod
-    @enforce_type_arg(detrend_y=bool)
+    @enforce_type_arg(identifier=str, detrend_y=bool)
     def from_dataframe(cls, identifier, df, detrend_y=True):
         """
         To instantiate a 'BreathingFlow' objet from a dataframe.
 
         Args:
         ----
+            identifier (str): breathing signal identifier.
             df (pandas.DataFrame): two-column dataframe representing discretized
                                    time and discretized air flow rate.
+            detrend_y (bool, optional): to set the mean of the air flow rate at 0.
+                                        Defaults to True.
 
         Returns:
         -------
@@ -134,7 +155,7 @@ class BreathingFlow:
             identifier=identifier,
             raw_time=df["time"].values,
             raw_flow=df["values"].values,
-            detrend_y=detrend_y
+            detrend_y=detrend_y,
         )
 
     @classmethod
@@ -155,9 +176,10 @@ class BreathingFlow:
             To get the signal length in seconds, signal_len must be divided by 500.
             Defaults value: 5000 points = 10 seconds.
         """
-        mouse_01 = pd.read_csv(StringIO(
-            read_text("pybreathe.datasets", "mouse_01.txt")
-            ), sep="\t", names=["time", "values"]
+        mouse_01 = pd.read_csv(
+            StringIO(read_text("pybreathe.datasets", "mouse_01.txt")),
+            sep="\t",
+            names=["time", "values"],
         )
 
         mouse_01["time"] = mouse_01["time"].str.replace(",", ".").astype(float)
@@ -166,7 +188,7 @@ class BreathingFlow:
             identifier="example_mouse_01",
             raw_time=mouse_01["time"].values[:signal_len],
             raw_flow=mouse_01["values"].values[:signal_len],
-            detrend_y=False
+            detrend_y=False,
         )
 
     @classmethod
@@ -182,16 +204,18 @@ class BreathingFlow:
         ----
             is used to demonstrate the 'proof of concept'.
         """
-        sinus = pd.read_csv(StringIO(
-            read_text("pybreathe.datasets", "sinus.txt")
-            ), sep="\t", names=["time", "values"], dtype=float
+        sinus = pd.read_csv(
+            StringIO(read_text("pybreathe.datasets", "sinus.txt")),
+            sep="\t",
+            names=["time", "values"],
+            dtype=float,
         )
 
         return cls(
             identifier="example_sinus",
             raw_time=sinus["time"].values,
             raw_flow=sinus["values"].values,
-            detrend_y=False
+            detrend_y=False,
         )
 
     def __getitem__(self, key):
@@ -211,7 +235,7 @@ class BreathingFlow:
             identifier=self.identifier,
             raw_time=self.time[key],
             raw_flow=self.flow[key],
-            detrend_y=False
+            detrend_y=False,
         )
 
         if hasattr(self, "distance"):
@@ -263,12 +287,22 @@ class BreathingFlow:
         """To get the sampling rate of the discretized breathing signal."""
         return features.compute_sampling_rate(x=self.raw_time)
 
-    @enforce_type_arg(y=str, show_segments=bool, show_auc=bool,
-        highlight_time=tuple, highlight_auc=tuple, output_path=str
+    @enforce_type_arg(
+        y=str,
+        show_segments=bool,
+        show_auc=bool,
+        highlight_time=tuple,
+        highlight_auc=tuple,
+        output_path=str,
     )
     def plot(
-            self, y="flow", show_segments=False, show_auc=False,
-            highlight_time=(), highlight_auc=(), output_path=""
+        self,
+        y="flow",
+        show_segments=False,
+        show_auc=False,
+        highlight_time=(),
+        highlight_auc=(),
+        output_path="",
     ):
         """
         To plot the air flow rate.
@@ -303,9 +337,13 @@ class BreathingFlow:
                 )
 
         visualization.plot_signal(
-            x=x, y=y, show_segments=show_segments, show_auc=show_auc,
-            highlight_time=highlight_time, highlight_auc=highlight_auc,
-            output_path=output_path
+            x=x,
+            y=y,
+            show_segments=show_segments,
+            show_auc=show_auc,
+            highlight_time=highlight_time,
+            highlight_auc=highlight_auc,
+            output_path=output_path,
         )
 
     def get_positive_segments(self):
@@ -316,11 +354,9 @@ class BreathingFlow:
         """To get the pairs (x,y) for which the air flow rate is negative."""
         return features.get_segments(self.time, self.flow)[1]
 
-    @enforce_type_arg(
-        which_peaks=str, distance=int, set_dist=bool, output_path=str
-    )
+    @enforce_type_arg(which_peaks=str, distance=int, set_dist=bool, output_path=str)
     def test_distance(
-            self, which_peaks="top", distance=0, set_dist=False, output_path=""
+        self, which_peaks="top", distance=0, set_dist=False, output_path=""
     ):
         """
         Calibration of peaks detection
@@ -345,8 +381,11 @@ class BreathingFlow:
 
         """
         visualization.plot_peaks(
-            x=self.time, y=self.flow, which_peaks=which_peaks,
-            distance=distance, output_path=output_path
+            x=self.time,
+            y=self.flow,
+            which_peaks=which_peaks,
+            distance=distance,
+            output_path=output_path,
         )
 
         if set_dist:
@@ -365,17 +404,34 @@ class BreathingFlow:
         )
 
     @enforce_type_arg(method=str, n_digits=int, save=bool)
-    def get_frequency(
-            self, method="welch", which_peaks=None, n_digits=3, save=False
-    ):
-        """Get breathing frequency of the air flow rate (in respirations.min-1)."""
+    def get_frequency(self, method="welch", which_peaks=None, n_digits=3, save=False):
+        """
+        Get breathing frequency of the air flow rate (in respirations.min-1).
+
+        Args:
+        ----
+            method (str, optional): method used to calculate the frequency.
+                                    Defaults to "welch".
+                                    Possible choices: 'welch', 'peaks', 'periodogram' or 'fft'.
+            which_peaks (str, optional): if the method is 'peaks', which peaks should be considered?.
+                                         Defaults to None.
+            n_digits (int, optional): to round freq to n_digits significant
+                                      digits. Defaults to 3.
+            save (bool, optional): save (bool, optional): to memorise or not the value obtained.
+                                   Defaults to False.
+
+        Returns:
+        -------
+            freq (float): breathing frequency in rpm.min-1.
+
+        """
         freq = features.frequency(
             signal=self.flow,
             sampling_rate=self.get_hz(),
             method=method,
             which_peaks=which_peaks,
             distance=self.distance,
-            n_digits=n_digits
+            n_digits=n_digits,
         )
 
         if save:
@@ -384,13 +440,21 @@ class BreathingFlow:
         return freq
 
     @enforce_type_arg(
-        return_mean=bool, verbose=bool, n_digits=int, lower_threshold=float,
-        upper_threshold=float, save=bool
+        return_mean=bool,
+        verbose=bool,
+        n_digits=int,
+        lower_threshold=float,
+        upper_threshold=float,
+        save=bool,
     )
     def get_positive_time(
-            self, return_mean=True, verbose=True, n_digits=3,
-            lower_threshold=-np.inf, upper_threshold=np.inf,
-            save=False
+        self,
+        return_mean=True,
+        verbose=True,
+        n_digits=3,
+        lower_threshold=-np.inf,
+        upper_threshold=np.inf,
+        save=False,
     ):
         """To get the mean duration of positive segments (when AUC > 0).
 
@@ -400,7 +464,7 @@ class BreathingFlow:
                                           Defaults to True (= the mean).
             verbose (bool, optional): to print (or not) results in human
                                       readable format. Defaults to True.
-            n_digits (int, optional): to round auc time to n_digits significant
+            n_digits (int, optional): to round time to n_digits significant
                                       digits. Defaults to 3.
             lower_threshold (float, optional): to ignore values below the threshold.
                                          Defaults to - ∞.
@@ -425,7 +489,7 @@ class BreathingFlow:
             verbose=verbose,
             n_digits=n_digits,
             lower_threshold=lower_threshold,
-            upper_threshold=upper_threshold
+            upper_threshold=upper_threshold,
         )
 
         if save:
@@ -434,13 +498,21 @@ class BreathingFlow:
         return pos_auc_time
 
     @enforce_type_arg(
-        return_mean=bool, verbose=bool, n_digits=int, lower_threshold=float,
-        upper_threshold=float, save=bool
+        return_mean=bool,
+        verbose=bool,
+        n_digits=int,
+        lower_threshold=float,
+        upper_threshold=float,
+        save=bool,
     )
     def get_negative_time(
-            self, return_mean=True, verbose=True, n_digits=3,
-            lower_threshold=-np.inf, upper_threshold=np.inf,
-            save=False
+        self,
+        return_mean=True,
+        verbose=True,
+        n_digits=3,
+        lower_threshold=-np.inf,
+        upper_threshold=np.inf,
+        save=False,
     ):
         """
         To get the mean duration of negative segments (when AUC < 0).
@@ -451,7 +523,7 @@ class BreathingFlow:
                                           Defaults to True (= the mean).
             verbose (bool, optional): to print (or not) results in human
                                       readable format. Defaults to True.
-            n_digits (int, optional): to round auc time to n_digits significant
+            n_digits (int, optional): to round time to n_digits significant
                                       digits. Defaults to 3.
             lower_threshold (float, optional): to ignore values below the threshold.
                                          Defaults to - ∞.
@@ -476,7 +548,7 @@ class BreathingFlow:
             verbose=verbose,
             n_digits=n_digits,
             lower_threshold=lower_threshold,
-            upper_threshold=upper_threshold
+            upper_threshold=upper_threshold,
         )
 
         if save:
@@ -485,12 +557,21 @@ class BreathingFlow:
         return neg_auc_time
 
     @enforce_type_arg(
-        return_mean=bool, verbose=bool, n_digits=int, lower_threshold=float,
-        upper_threshold=float, save=bool
+        return_mean=bool,
+        verbose=bool,
+        n_digits=int,
+        lower_threshold=float,
+        upper_threshold=float,
+        save=bool,
     )
     def get_positive_auc(
-            self, return_mean=True, verbose=True, n_digits=3,
-            lower_threshold=-np.inf, upper_threshold=np.inf, save=False
+        self,
+        return_mean=True,
+        verbose=True,
+        n_digits=3,
+        lower_threshold=-np.inf,
+        upper_threshold=np.inf,
+        save=False,
     ):
         """
         To get the mean AUC of positive segments (when AUC > 0).
@@ -526,7 +607,7 @@ class BreathingFlow:
             verbose=verbose,
             n_digits=n_digits,
             lower_threshold=lower_threshold,
-            upper_threshold=upper_threshold
+            upper_threshold=upper_threshold,
         )
 
         if save:
@@ -535,12 +616,21 @@ class BreathingFlow:
         return pos_auc_val
 
     @enforce_type_arg(
-        return_mean=bool, verbose=bool, n_digits=int, lower_threshold=float,
-        upper_threshold=float, save=bool
+        return_mean=bool,
+        verbose=bool,
+        n_digits=int,
+        lower_threshold=float,
+        upper_threshold=float,
+        save=bool,
     )
     def get_negative_auc(
-            self, return_mean=True, verbose=True, n_digits=3,
-            lower_threshold=-np.inf, upper_threshold=np.inf, save=False
+        self,
+        return_mean=True,
+        verbose=True,
+        n_digits=3,
+        lower_threshold=-np.inf,
+        upper_threshold=np.inf,
+        save=False,
     ):
         """
         To get the mean AUC of negative segments (when AUC < 0).
@@ -579,7 +669,7 @@ class BreathingFlow:
             verbose=verbose,
             n_digits=n_digits,
             lower_threshold=lower_threshold,
-            upper_threshold=upper_threshold
+            upper_threshold=upper_threshold,
         )
 
         if save:
@@ -596,8 +686,8 @@ class BreathingFlow:
         ----
             verbose (bool, optional): to print (or not) results in human
                                       readable format. Defaults to True.
-            n_digits (int, optional): to round auc value to n_digits significant
-                                      digits. Defaults to 3.
+            n_digits (int, optional): to round minute ventilation to n_digits
+                                      significant digits. Defaults to 3.
             save (bool, optional): to memorise or not the value obtained.
                                    Defaults to False.
 
@@ -672,10 +762,11 @@ class BreathingFlow:
             'density'.
 
         """
-        if stat not in ('count', 'frequency', 'probability', 'percent', 'density'):
+        if stat not in ("count", "frequency", "probability", "percent", "density"):
             raise ValueError(
                 "stat should be either 'count', 'frequency', 'probability', "
-                f"'percent' or 'density'. Not {stat}.")
+                f"'percent' or 'density'. Not {stat}."
+            )
 
         visualization.plot_features_distribution(
             self.get_positive_time(return_mean=False),
@@ -683,7 +774,7 @@ class BreathingFlow:
             self.get_positive_auc(return_mean=False),
             self.get_negative_auc(return_mean=False),
             stat=stat,
-            output_path=output_path
+            output_path=output_path,
         )
 
     @enforce_type_arg(output_directory=str)
@@ -705,9 +796,7 @@ class BreathingFlow:
         """
         metrics = ["mean", "std", "n cycle(s)"]
         dict_data = {}
-        dict_data["Bf (rpm)"] = {
-            "mean": self._frequency, "std": "-", "n cycle(s)": "-"
-        }
+        dict_data["Bf (rpm)"] = {"mean": self._frequency, "std": "-", "n cycle(s)": "-"}
         dict_data["time (AUC > 0) (s)"] = dict(zip(metrics, self.positive_time))
         dict_data["time (AUC < 0) (s)"] = dict(zip(metrics, self.negative_time))
         dict_data["AUC value (AUC > 0)"] = dict(zip(metrics, self.positive_auc))
@@ -734,7 +823,8 @@ class BreathingFlow:
 
             """
             data_tuples = [
-                ((key, sub_key), value) for key, sub_dict in overview_dict.items()
+                ((key, sub_key), value)
+                for key, sub_dict in overview_dict.items()
                 for sub_key, value in sub_dict.items()
             ]
             multicols_df = pd.DataFrame.from_dict(dict(data_tuples), orient="index").T
