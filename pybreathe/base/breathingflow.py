@@ -7,8 +7,7 @@ Created on Wed Apr  2 08:40:50 2025
 @author: CoustilletT
 """
 
-from importlib.resources import read_text
-from io import StringIO
+from importlib.resources import files
 import os
 import re
 
@@ -176,11 +175,10 @@ class BreathingFlow:
             To get the signal length in seconds, signal_len must be divided by 500.
             Defaults value: 5000 points = 10 seconds.
         """
-        mouse_01 = pd.read_csv(
-            StringIO(read_text("pybreathe.datasets", "mouse_01.txt")),
-            sep="\t",
-            names=["time", "values"],
-        )
+        mouse_01_path = files("pybreathe.datasets").joinpath("mouse_01.txt")
+
+        with mouse_01_path.open("r", encoding="utf-8") as f:
+            mouse_01 = pd.read_csv(f, sep="\t", names=["time", "values"])
 
         mouse_01["time"] = mouse_01["time"].str.replace(",", ".").astype(float)
 
@@ -204,12 +202,10 @@ class BreathingFlow:
         ----
             is used to demonstrate the 'proof of concept'.
         """
-        sinus = pd.read_csv(
-            StringIO(read_text("pybreathe.datasets", "sinus.txt")),
-            sep="\t",
-            names=["time", "values"],
-            dtype=float,
-        )
+        sinus_path = files("pybreathe.datasets").joinpath("sinus.txt")
+
+        with sinus_path.open("r", encoding="utf-8") as f:
+            sinus = pd.read_csv(f, sep="\t", names=["time", "values"], dtype=float)
 
         return cls(
             identifier="example_sinus",

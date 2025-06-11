@@ -40,3 +40,10 @@ dev = [
 [project.urls]
 Homepage = "https://github.com/tcoustillet/pybreathe"
 Source = "https://github.com/tcoustillet/pybreathe"
+
+[tool.setuptools]
+packages = ["pybreathe"]
+include-package-data = true
+
+[tool.setuptools.package-data]
+pybreathe = ["pybreathe/datasets/*.txt"]
