@@ -7,7 +7,7 @@ Created on Wed Apr  2 08:40:50 2025
 @author: CoustilletT
 """
 
-from importlib.resources import files
+from importlib.resources import files, as_file
 import os
 import re
 
@@ -158,38 +158,6 @@ class BreathingFlow:
         )
 
     @classmethod
-    def load_mouse_01(cls, signal_len=5000):
-        """
-        Load and return a BreathingFlow object from the "mouse_01" dataset.
-
-        Args:
-        ----
-            signal_len (int, optional): desired signal length. Defaults to 5000.
-
-        Returns:
-        -------
-            BreathingFlow: a BreathingFlow object.
-
-        Note:
-        ----
-            To get the signal length in seconds, signal_len must be divided by 500.
-            Defaults value: 5000 points = 10 seconds.
-        """
-        mouse_01_path = files("pybreathe.datasets").joinpath("mouse_01.txt")
-
-        with mouse_01_path.open("r", encoding="utf-8") as f:
-            mouse_01 = pd.read_csv(f, sep="\t", names=["time", "values"])
-
-        mouse_01["time"] = mouse_01["time"].str.replace(",", ".").astype(float)
-
-        return cls(
-            identifier="example_mouse_01",
-            raw_time=mouse_01["time"].values[:signal_len],
-            raw_flow=mouse_01["values"].values[:signal_len],
-            detrend_y=False,
-        )
-
-    @classmethod
     def load_sinus(cls):
         """
         Load and return a BreathingFlow object from the "sinus" dataset.
@@ -202,10 +170,13 @@ class BreathingFlow:
         ----
             is used to demonstrate the 'proof of concept'.
         """
-        sinus_path = files("pybreathe.datasets").joinpath("sinus.txt")
+        sinus_resource = files("pybreathe.datasets").joinpath("sinus.txt")
 
-        with sinus_path.open("r", encoding="utf-8") as f:
-            sinus = pd.read_csv(f, sep="\t", names=["time", "values"], dtype=float)
+        with as_file(sinus_resource) as sinus_path:
+            with open(sinus_path, encoding="utf-8") as f:
+                sinus = pd.read_csv(
+                    f, sep="\t", names=["time", "values"], dtype=float
+                )
 
         return cls(
             identifier="example_sinus",
