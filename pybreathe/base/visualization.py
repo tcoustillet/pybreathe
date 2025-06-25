@@ -137,6 +137,18 @@ def plot_signal(
 
     ax.set_xlabel("time (s)", labelpad=10)
     ax.set_ylabel("Air flow rate", labelpad=10)
+    ax.set_title(
+        f"{len(positive_segments)} positive segments & {len(negative_segments)} negative segments detected",
+        fontsize=9,
+        c="k",
+        backgroundcolor="whitesmoke",
+        bbox={
+            "facecolor": "whitesmoke",
+            "boxstyle": "round,pad=0.3",
+            "edgecolor": "silver",
+            "lw": 0.2,
+        },
+    )
     ax.grid(alpha=0.8, linestyle=":", ms=0.1, zorder=1)
     ax.legend(fontsize=8, loc="upper left", bbox_to_anchor=(0, 1.2))
     ax.spines["top"].set_visible(False)
