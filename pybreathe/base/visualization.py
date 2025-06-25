@@ -64,14 +64,14 @@ def plot_signal(
     )
 
     pos_normalized = positive_auc / np.max(positive_auc)
-    neg_normalized = negative_auc / np.max(negative_auc)
+    neg_normalized = negative_auc / np.min(negative_auc)
 
     cmap_pos, cmap_neg = plt.cm.GnBu, plt.cm.RdPu
     cmap_pos_normalized = cmap_pos(
         np.linspace(np.min(pos_normalized), np.max(pos_normalized), len(positive_auc))
     )
     cmap_neg_normalized = cmap_neg(
-        np.linspace(np.min(neg_normalized), np.max(neg_normalized), len(negative_auc))
+        np.linspace(np.max(neg_normalized), np.min(neg_normalized), len(negative_auc))
     )
     global_cmap = mcolors.ListedColormap(
         np.concatenate([cmap_neg_normalized, cmap_pos_normalized])
