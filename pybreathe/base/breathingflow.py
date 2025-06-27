@@ -15,7 +15,7 @@ import numpy as np
 import pandas as pd
 from scipy.signal import detrend
 
-from .utils import enforce_type_arg, scientific_round
+from .utils import enforce_type_arg, scientific_round, print_source
 from . import featureextraction as features
 from . import visualization
 
@@ -182,6 +182,64 @@ class BreathingFlow:
             identifier="example_sinus",
             raw_time=sinus["time"].values,
             raw_flow=sinus["values"].values,
+            detrend_y=False,
+        )
+
+    @classmethod
+    def load_breathing_like_signal_01(cls):
+        """
+        Load and return a BreathingFlow object from the "breathing-like signal 01" dataset.
+
+        Returns:
+        -------
+            BreathingFlow: a BreathingFlow object.
+        """
+        breathing_resource_01 = (
+            files("pybreathe.datasets")
+            .joinpath("breathing_like_signal_01.txt")
+        )
+
+        with as_file(breathing_resource_01) as breathing_01_path:
+            with open(breathing_01_path, encoding="utf-8") as f:
+                breathing_01 = pd.read_csv(
+                    f, sep="\t", names=["time", "values"], dtype=float
+                )
+
+        print(print_source()["breathing-like 01"])
+
+        return cls(
+            identifier="example_sinus",
+            raw_time=breathing_01["time"].values,
+            raw_flow=breathing_01["values"].values,
+            detrend_y=False,
+        )
+
+    @classmethod
+    def load_breathing_like_signal_02(cls):
+        """
+        Load and return a BreathingFlow object from the "breathing-like signal 02" dataset.
+
+        Returns:
+        -------
+            BreathingFlow: a BreathingFlow object.
+        """
+        breathing_resource_02 = (
+            files("pybreathe.datasets")
+            .joinpath("breathing_like_signal_02.txt")
+        )
+
+        with as_file(breathing_resource_02) as breathing_02_path:
+            with open(breathing_02_path, encoding="utf-8") as f:
+                breathing_02 = pd.read_csv(
+                    f, sep="\t", names=["time", "values"], dtype=float
+                )
+
+        print(print_source()["breathing-like 02"])
+
+        return cls(
+            identifier="example_sinus",
+            raw_time=breathing_02["time"].values,
+            raw_flow=breathing_02["values"].values,
             detrend_y=False,
         )
 

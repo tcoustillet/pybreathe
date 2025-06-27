@@ -8,6 +8,7 @@ Created on Thu Apr 10 09:48:33 2025
 """
 
 
+from importlib.resources import files, as_file
 from functools import wraps
 from inspect import signature
 import os
@@ -96,3 +97,13 @@ def flow_merger(*args, table_name, output_directory=None):
         merged_files.to_excel(excel_writer=f"{output_path}.xlsx")
 
     return merged_files
+
+
+def print_source():
+    """To print the origin of breathing-like signals."""
+    source = files("pybreathe.datasets").joinpath("readme.txt")
+    with as_file(source) as f:
+        blocs = f.read_text(encoding="utf-8").split("info:")[1:]
+        return {
+            b.split("\n", 1)[0]: b.split("\n", 1)[1].rstrip() for b in blocs
+        }
