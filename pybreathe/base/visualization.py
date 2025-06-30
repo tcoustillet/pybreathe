@@ -121,7 +121,7 @@ def plot_signal(
                         color = cmap(normalized[i])
                         ax.fill_between(xs, ys, color=color, alpha=1)
                         max_y = max(ys) if max(ys) > 0 else min(ys)
-                        ax.text(x=(xs[0] + xs[-1]) / 2, y=max_y, s=f"t={t}")
+                        ax.text(x=(xs[0] + xs[-1]) / 2, y=max_y, s=f"t={t}", fontsize=8)
 
     if highlight_auc:
         for s in (positive_segments, negative_segments):
@@ -133,7 +133,7 @@ def plot_signal(
                         color = cmap(normalized[i])
                         ax.fill_between(xs, ys, color=color, alpha=1)
                         max_y = max(ys) if max(ys) > 0 else min(ys)
-                        ax.text(x=(xs[0] + xs[-1]) / 2, y=max_y, s=f"auc={a}")
+                        ax.text(x=(xs[0] + xs[-1]) / 2, y=max_y, s=f"auc={a}", fontsize=8)
 
     ax.set_xlabel("time (s)", labelpad=10)
     ax.set_ylabel("Air flow rate", labelpad=10)

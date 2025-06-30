@@ -208,7 +208,7 @@ class BreathingFlow:
         print(print_source()["breathing-like 01"])
 
         return cls(
-            identifier="example_sinus",
+            identifier="example_breathing-like_signal_01",
             raw_time=breathing_01["time"].values,
             raw_flow=breathing_01["values"].values,
             detrend_y=False,
@@ -237,7 +237,7 @@ class BreathingFlow:
         print(print_source()["breathing-like 02"])
 
         return cls(
-            identifier="example_sinus",
+            identifier="example_breathing-like_signal_02",
             raw_time=breathing_02["time"].values,
             raw_flow=breathing_02["values"].values,
             detrend_y=False,
