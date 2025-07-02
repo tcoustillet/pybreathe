@@ -77,6 +77,13 @@ def plot_signal(
         np.concatenate([cmap_neg_normalized, cmap_pos_normalized])
     )
 
+    bbox_style = {
+        "facecolor": "whitesmoke",
+        "boxstyle": "round,pad=0.3",
+        "edgecolor": "k",
+        "lw": 0.2
+    }
+
     fig, ax = plt.subplots(figsize=(14, 2))
 
     if show_segments:
@@ -121,7 +128,14 @@ def plot_signal(
                         color = cmap(normalized[i])
                         ax.fill_between(xs, ys, color=color, alpha=1)
                         max_y = max(ys) if max(ys) > 0 else min(ys)
-                        ax.text(x=(xs[0] + xs[-1]) / 2, y=max_y, s=f"t={t}", fontsize=8)
+                        ax.text(
+                            x=(xs[0] + xs[-1]) / 2,
+                            y=max_y,
+                            s=f"t={t}",
+                            fontsize=8,
+                            backgroundcolor="whitesmoke",
+                            bbox=bbox_style
+                        )
 
     if highlight_auc:
         for s in (positive_segments, negative_segments):
@@ -133,7 +147,14 @@ def plot_signal(
                         color = cmap(normalized[i])
                         ax.fill_between(xs, ys, color=color, alpha=1)
                         max_y = max(ys) if max(ys) > 0 else min(ys)
-                        ax.text(x=(xs[0] + xs[-1]) / 2, y=max_y, s=f"auc={a}", fontsize=8)
+                        ax.text(
+                            x=(xs[0] + xs[-1]) / 2,
+                            y=max_y,
+                            s=f"auc={a}",
+                            fontsize=8,
+                            backgroundcolor="whitesmoke",
+                            bbox=bbox_style
+                        )
 
     ax.set_xlabel("time (s)", labelpad=10)
     ax.set_ylabel("Air flow rate", labelpad=10)
