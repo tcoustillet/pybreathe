@@ -32,31 +32,35 @@ In 2017, half a billion people worldwide lived with a chronic respiratory diseas
 
 In this paper, we sought to implement an easy-to-use framework specially designed to faciliate respiratory analyses derived from air flow. `pybreathe` is a python package with an API designed to be used by both experimenters and developers. Users can acquire their respiratory data using any standard software. A necessary and sufficient condition for using `pybreathe` is to export the data (instantaneous air flow rate) and discretise it into a classic text format (.txt, .csv, etc.). Most software used to measure respiratory air flow rates includes this functionality and outputs a two-column output file: the first column represents the discretised time, and the second contains the corresponding flow values at each time point.
 
-The main difference with other analysis algorithms is that `pybreathe` is based on ventilatory flow and not on volume. Although the latter can be deduced from the former, it is generally flow rates themselves derived from pressure differences that are supplied [@criee2011]. To our knowledge, there is no open-source algorithm that simply extracts elementary but essential features from air flow recordings. In the case of air flow rates, and as the main feature of a respiratory signal is the tidal volume (i.e., the volume passing through the lungs during a single breath), peak analysis cannot be applied because the amplitude (i.e., height) depends on the 'speed' at which the air flows in and out, i.e., for the same volume exhaled (or inhaled), the faster the exhalation (or inhalation), the greater the amplitude (\autoref{fig:calibrations}). In this situation, to really grasp the tidal volume, we need to get the area under the curve (AUC) instead of the curve height.
+The main difference with other analysis algorithms is that `pybreathe` is based on ventilatory flow and not on volume. Although the latter can be deduced from the former, it is generally flow rates themselves derived from pressure differences that are supplied [@criee2011]. To our knowledge, there is no open-source algorithm that simply extracts elementary but essential features from air flow recordings. In the case of air flow rates, and as the main feature of a respiratory signal is the tidal volume (i.e., the volume passing through the lungs during a single breath), peak analysis cannot be applied because the amplitude (i.e., height) depends on the 'speed' at which the air flows in and out, i.e., for the same volume exhaled (or inhaled), the faster the exhalation (or inhalation), the greater the amplitude (\autoref{fig:calibrations}). In this situation, to really grasp the tidal volume, we need to get the Area Under the Curve (AUC) instead of the amplitude.
 
-![Manual injection/suction of different quantities of air into a chamber at three different speeds: slow, moderate and fast. (a) injection/suction of 2 mL; (b) injection/suction of 3 mL; (c) injection/suction of 4 mL; (d) injection/suction of 5 mL. Injection corresponds to the positive parts (blue) while suction corresponds to the negative parts (purple). Interestingly, regardless of the volume of air injected, high injection speeds consistently compromise measurement precision. This issue arises solely because the air is injected manually by the experimenter. \label{fig:calibrations}](fig_pybreathe.pdf)
+![Manual injection/suction of different quantities of air into a chamber at three different speeds: slow, moderate and fast. (a) injection/suction of 2 mL; (b) injection/suction of 3 mL; (c) injection/suction of 4 mL; (d) injection/suction of 5 mL. Injection corresponds to the positive parts (blue) while suction corresponds to the negative parts (purple). \label{fig:calibrations}](fig_calibrations.pdf)
 
-For a given respiratory signal, `pybreathe` detects zero-crossings and each positive segment will be either inhalation or exhalation (depending on the configuration of the primary acquisition software) and each negative segment will be the other phase. The area of these segments therefore corresponds to the volume inhaled or exhaled. The duration of these segments (time between two zeros) corresponds to the inspiratory or expiratory time. Breathing frequency is also provided bases either on the frequency of peaks or hollows, or using a more sophisticaded spectral analysis.
+For a given respiratory signal, `pybreathe` detects zero-crossings and each positive segment will be either inhalation or exhalation (depending on the configuration of the primary acquisition software) and each negative segment will be the other phase. AUC (integral) of these segments therefore corresponds to the volume inhaled or exhaled. The duration of these segments (time between two zeros) corresponds to the inspiratory or expiratory time. Breathing frequency is also provided bases either on the frequency of peaks or hollows, or using a more sophisticaded spectral analysis.
 
-The quantitative data for manually injected and suctioned volumes (\autoref{fig:calibrations}) are shown in the table below.
+The quantitative data for manually injected and suctioned volumes highlighting the relevance of focusing on volumes rather than ampliutdes (\autoref{fig:calibrations}) are shown in (\autoref{tbl:table1}).
 
-| volume (mL) | speed | positive/negative area | positive/negative height |
-|--|-----| --- | --- |
-| 2 | slow | 1.90 / -2.02 | 1.70 / -2.26
-| 2 | moderate | 1.90 / -1.96 | 2.66 / -2.54
-| 2 | fast | 1.81 / -1.86 | 4.79 / -3.75
-| | | | |
-| 3 | slow | 2.99 / -3.10 | 3.04 / -3.19
-| 3 | moderate | 2.94 / -2.93 | 3.98 / -5.07
-| 3 | fast | 2.53 / -2.52 | 9.24 / -5.21
-| | | | |
-| 4 | slow | 3.90 / -4.05| 2.91 / -3.71
-| 4 | moderate | 3.92 / -4.02 | 6.46 / -4.81
-| 4 | fast | 3.12 / -3.13 | 12.03 / - 7.09
-| | | | |
-| 5 | slow | 4.99 / -5.08 | 4.21 / -5.76
-| 5 | moderate | 4.93 / -5.08 | 6.58 / -6.70
-| 5 | fast | 4.24 / -4.16 | 14.88 / - 9.04
+| actual volume  | speed        | positive integral | negative integral | positive amplitude | negative amplitude |
+|----------------|--------------|-------------------|-------------------|--------------------|--------------------|
+| $\approx$ 2 mL | slow         | 1.90              | - 2.02            | 1.70               | - 2.26             |
+| $\approx$ 2 mL | moderate     | 1.90              | - 1.96            | 2.66               | - 2.54             |
+| $\approx$ 2 mL | fast         | 1.81              | - 1.86            | 4.79               | - 3.75             |
+|                |              |                   |                   |                    |                    |
+| $\approx$ 3 mL | slow         | 2.99              | - 3.10            | 3.04               | - 3.19             |
+| $\approx$ 3 mL | moderate     | 2.94              | - 2.93            | 3.98               | - 5.07             |
+| $\approx$ 3 mL | fast         | 2.53              | - 2.52            | 9.24               | - 5.2              |
+|                |              |                   |                   |                    |                    |
+| $\approx$ 4 mL | slow         | 3.90              | - 4.05            | 2.91               | - 3.71             |
+| $\approx$ 4 mL | moderate     | 3.92              | - 4.02            | 6.46               | - 4.81             |
+| $\approx$ 4 mL | fast         | 3.12              | - 3.13            | 12.03              | - 7.09             |
+|                |              |                   |                   |                    |                    |
+| $\approx$ 5 mL | slow         | 4.99              | - 5.08            | 4.21               | - 5.76             |
+| $\approx$ 5 mL | moderate     | 4.93              | - 5.08            | 6.58               | - 6.70             |
+| $\approx$ 5 mL | fast         | 4.24              | - 4.16            | 14.88              | - 9.04             |
+
+Table: Comparison of the integral (Area Under the Curve) and amplitude (height) of several volumes of air manually injected/suctioned into a chamber. \label{tbl:table1}
+
+For each quantity of air, the integral faithfully represents the volume injected and suctioned. The amplitude is not representative of the volume injected or suctioned. `pybreathe` is therefore capable of detecting the right volumes. Interestingly, regardless of the volume of air injected, high injection speeds consistently compromise measurement precision. This issue arises solely because the air is injected manually by the experimenter
 
 # pybreathe fundamentals
 
@@ -72,7 +76,17 @@ my_signal = BreathingFlow.from_file(
 )
 ```
 
-where `path_to_your_discretised_flow` is a two-column discretised file representing instantaneous airflow as a function of time.
+where `path_to_your_discretised_flow` is a two-column discretised file representing instantaneous airflow as a function of time (e.g., see \autoref{tbl:table2}).
+
+| time   | values |
+|--------|--------|
+| 0.0    | 0.0650 |
+| 0.004  | 0.0660 |
+| 0.008  | 0.0671 |
+| 0.012  | 0.0681 |
+| ...    | ...    |
+
+Table: Discretised instantaneous airflow two-columns file used as input to instantiate an object of type 'BreathingFlow'. The file shows the first values of the sine function. User files should have the same configuration. \label{tbl:table2}
 
 Example files are also supplied with the package. Users can either use the sinus function or two artificial breathing signals by instantiating them using the class method provided for this purpose:
 
@@ -92,25 +106,25 @@ example_02 = BreathingFlow.load_breathing_like_signal_02()
 Then, the five main methods for extracting features are:
 
 ```python
-# Extraction of the average duration of segments where the flow rate is positive.
+# Average duration of segments where the flow rate is positive.
 my_signal.get_positive_time()
 
-# Extraction of the average duration of segments where the flow rate is negative.
+# Average duration of segments where the flow rate is negative.
 my_signal.get_negative_time()
 
-# Extraction of the average area under the curve of segments where the flow rate is positive.
+# Average area under the curve of segments where the flow rate is positive.
 my_signal.get_positive_auc()
 
-# Extraction of the average area under the curve of segments where the flow rate is negative.
+# Average area under the curve of segments where the flow rate is negative.
 my_signal.get_negative_auc()
 
-# Extraction of the breathing frequency.
+# Breathing frequency.
 my_signal.get_frequency()
 ```
 
 # Proof
 
-To ensure that the package worked correctly and that the methods returned the desired output, we checked the volumes extracted when we injected/suctioned known quantities of air (\autoref{fig:calibrations}). Because the manual injection/suction of air into a chamber can be imprecise due to the experimenter and the precision of the syringes, we also created an artifical respiratory signal corresponding to the sinus function. Based on the sinus, we checked that the signal features obtained with `pybreathe` were indeed the same as those obtained 'mathematically'.
+To ensure that the package worked correctly and that the methods returned the desired output, we checked the volumes extracted by `pybreathe` when we injected/suctioned known quantities of air (\autoref{fig:calibrations} and \autoref{tbl:table1}). Because the manual injection/suction of air into a chamber can be imprecise due to the experimenter and the precision of the syringes, we also created an artifical respiratory signal corresponding to the sine function (\autoref{fig:sinus}). Based on the sine, we checked that the signal features obtained with `pybreathe` were indeed the same as those obtained *mathematically*.
 
 Let $f$ the sinus function.
 
@@ -126,9 +140,11 @@ $$
 \forall x \in \mathbb{R},\quad \sin(x + 2\pi) = \sin(x)
 $$
 
+![Graph of the sine function on the interval $[0, 10\pi]$. \label{fig:sinus}](fig_sinus.pdf)
+
 ## Positive time (~ expiratory time)
 
-Statement: the mean length of the interval where the sinus function is positive is exactly equal to $\pi$.
+Statement: the mean length of the interval where the sine function is positive is exactly equal to $\pi$.
 
 ### Mathematical proof 
 
@@ -162,7 +178,7 @@ mean = 3.14 ± 7.43e-10 (n = 9).
 
 ## Positive Area Under the Curve (~ exhaled volume)  
 
-Statement: The mean area under the curve of the positive segments of the sinus function is exactly $2$.
+Statement: the mean AUC (integral) of the positive segments of the sinus function is exactly $2$.
 
 ### Mathematical proof  
 
@@ -208,7 +224,6 @@ mean = -2.0 ± 7.68e-12 (n = 9).
 
 # Acknowledgements
 
-We gratefully thank SATT Lutech for their financial support. We also thank Eugénie Faure and Alexandre Palazzi for their valuable feedback throughout the development of `pybreathe`.
+This work was supported by SATT Lutech. Special thanks are due to \mbox{Eugénie} \mbox{Faure} and \mbox{Alexandre} \mbox{Palazzi} for their valuable feedback throughout the development of `pybreathe`.
 
 # References
-    
