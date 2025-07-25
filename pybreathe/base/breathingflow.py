@@ -268,6 +268,10 @@ class BreathingFlow:
 
         return sliced_object
 
+    def __len__(self):
+        """To get the length of the signal (in number of points)."""
+        return len(self.flow)
+
     @property
     def distance(self):
         """Getter."""
