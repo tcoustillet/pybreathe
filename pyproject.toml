@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "pybreathe"
-version = "0.0.0"
+dynamic = ["version"]
 authors = [
     { name="Thibaut Coustillet", email="thib.coustillet@gmail.com" },
 ]
@@ -24,6 +24,7 @@ classifiers = [
     "Programming Language :: Python :: 3.10",
     "Intended Audience :: Science/Research",
     "Operating System :: OS Independent",
+    "License :: OSI Approved :: MIT License",
 ]
 license = "MIT"
 license-files = ["LICEN[CS]E*"]
