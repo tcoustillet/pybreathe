@@ -24,7 +24,7 @@ class BreathingFlow:
     """Breathing Air Flow rate."""
 
     @enforce_type_arg(identifier=str, detrend_y=bool)
-    def __init__(self, identifier, raw_time, raw_flow, detrend_y=True):
+    def __init__(self, identifier, raw_time, raw_flow, detrend_y):
         """
         Class constructor.
 
@@ -33,8 +33,7 @@ class BreathingFlow:
             identifier (str): breathing signal identifier.
             raw_time (array): discretized time vector.
             raw_flow (array): discretized breathing signal (air flow rate).
-            detrend_y (bool, optional): to set the mean of the air flow rate at 0.
-                                        Defaults to True.
+            detrend_y (bool): to set the mean of the air flow rate at 0.
 
         Returns:
         -------
@@ -73,7 +72,7 @@ class BreathingFlow:
 
     @classmethod
     @enforce_type_arg(identifier=str, filename=str, detrend_y=bool)
-    def from_file(cls, identifier, filename, detrend_y=True):
+    def from_file(cls, identifier, filename, detrend_y=False):
         """
         To instantiate a 'BreathingFlow' objet from a file path.
 
@@ -83,7 +82,7 @@ class BreathingFlow:
             filename (str): path to the two-column file representing
                             discretized time and discretized air flow rate.
             detrend_y (bool, optional): to set the mean of the air flow rate at 0.
-                                        Defaults to True.
+                                        Defaults to False.
 
         Returns:
         -------
@@ -129,7 +128,7 @@ class BreathingFlow:
 
     @classmethod
     @enforce_type_arg(identifier=str, detrend_y=bool)
-    def from_dataframe(cls, identifier, df, detrend_y=True):
+    def from_dataframe(cls, identifier, df, detrend_y=False):
         """
         To instantiate a 'BreathingFlow' objet from a dataframe.
 
@@ -139,7 +138,7 @@ class BreathingFlow:
             df (pandas.DataFrame): two-column dataframe representing discretized
                                    time and discretized air flow rate.
             detrend_y (bool, optional): to set the mean of the air flow rate at 0.
-                                        Defaults to True.
+                                        Defaults to False.
 
         Returns:
         -------
