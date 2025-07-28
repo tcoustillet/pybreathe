@@ -10,7 +10,7 @@ tags:
 authors:
     - name: Thibaut Coustillet
       orcid: 0000-0002-7945-0519
-      affilation: "1, 2"
+      affiliation: "1, 2"
 affiliations:
     - index: 1
       name: Sorbonne Université, CNRS, Inserm, Development, Adaptation and Ageing, Dev2A, F-75005 Paris, France
@@ -51,9 +51,11 @@ Table: Example of a two-column table depicting the instantaneous discretised air
 
 The main difference with other respiratory analysis algorithms is that `pybreathe` is based on ventilatory flow and not on volume. To our knowledge, there is no open-source algorithm that simply extracts elementary but essential features from air flow recordings. 
 
-The main feature of a respiratory signal is the tidal volume (*i.e.*, the volume passing through the lungs during a single breath). In the case of air flow rates, peak/hollow analysis cannot be applied because the amplitude (*i.e.*, height) depends on the 'speed' at which the air flows in and out: for the same exhaled or inhaled volume, the faster the airflow, the greater the amplitude (\autoref{fig:calibrations}). In this situation, to really grasp the tidal volume, we need to get the Area Under the Curve (AUC) instead of the amplitude. We manually injected and aspirated different quantities of air into a chamber at different flow rates to demonstrate the relevance of calculating AUCs rather than amplitudes (\autoref{tbl:table2}).
+The main feature of a respiratory signal is the tidal volume (*i.e.*, the volume passing through the lungs during a single breath). In the case of air flow rates, peak/hollow analysis cannot be applied because the amplitude (*i.e.*, height) depends on the 'speed' at which the air flows in and out: for the same exhaled or inhaled volume, the faster the airflow, the greater the amplitude (\autoref{fig:calibrations}).
 
 ![Manual injection/aspiration of different quantities of air into a chamber with a syringe at three different speeds: slow, moderate and fast. (a) 2 mL; (b) 3 mL; (c) 4 mL; (d) 5 mL. Injection corresponds to the positive parts (blue) while aspiration corresponds to the negative parts (purple). AUCs values were obtained with `pybreathe`. \label{fig:calibrations}](fig_calibrations.pdf)
+
+In this situation, to really grasp the tidal volume, we need to get the Area Under the Curve (AUC) instead of the amplitude. We manually injected and aspirated different quantities of air into a chamber at different flow rates ({fig:calibrations}) and used `pybreathe` to demonstrate the relevance of calculating AUCs rather than amplitudes (\autoref{tbl:table2}).
 
 | actual volume  | speed        | positive integral | negative integral | positive amplitude | negative amplitude |
 |----------------|--------------|-------------------|-------------------|--------------------|--------------------|
