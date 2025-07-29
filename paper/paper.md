@@ -18,7 +18,7 @@ affiliations:
     - index: 2
       name: Sorbonne Université, CNRS, Inserm, Institut de Biologie Paris-Seine, IBPS, F-75005 Paris, France
       ror: 02en5vm52
-date:
+date: 29 July 2025
 bibliography: paper.bib
 ---
 
@@ -32,7 +32,7 @@ In 2017, half a billion people worldwide lived with a chronic respiratory diseas
 
 On the one hand, most of the open source software dealing with breathing relies heavily on peak/hollow detection [@bishop2022; @brammer2020; @makowski2021] to extract signal features such as amplitude and breathing period. However, such detection methods often require human correction, manual curation or advanced algorithms to guarantee the accuracy of the results [@vanegas2020]. Besides, such local extrema detection approaches are more suited for the characterization of instantaneous volume than of instantaneous flow. Although the former can be deduced from the latter (\autoref{fig:flowVSvol}), it is generally flow rates, themselves derived from pressure differences that are supplied [@criee2011]. In some cases, however, signals and related algorithms may also originate from chest/abdominal belts [@holm2024].
 
-![Relationship between instantaneous flow rate (a) and instantaneous volume (b). The volume is obtained by integrating the flow rate over time. Thus, when the flow rate is positive (inhalation; blue), the volume increases, whereas when the flow rate is negative (exhalation; yellow), the volume decreases. \label{fig:flowVSvol}](fig_flowVSvol.pdf)
+![Relationship between instantaneous flow rate (a) and instantaneous volume (b). The volume is obtained by integrating the flow rate over time. Thus, when the flow rate is positive (inhalation; blue areas), the volume increases, whereas when the flow rate is negative (exhalation; yellow areas), the volume decreases. \label{fig:flowVSvol}](fig_flowVSvol.pdf)
 
 On the other hand, some advanced algorithms use cutting-edge clustering methods to detect respiratory patterns that go beyond the features mentioned above [@germain2023]. Although this kind of approach is particularly valuable for providing a deeper understanding of respiratory physiology across various experimental conditions, it requires advanced programming skills and knowledge and may be complicated to set up in practice for non-computer users.
 
@@ -47,15 +47,15 @@ In this paper, we sought to implement an easy-to-use framework specially designe
 | 0.016  | 0.0692 |
 | ...    | ...    |
 
-Table: Example of a two-column table depicting the instantaneous discretised air flow rate required for the use of `pybreathe`. Instantaneous air flow rate is a time series. User files should have the same configuration. To enable the calculation of volumes in absolute values, the flow rate should also be in absolute values (*e.g.*, mL.s^-1^ or L.s^-1^). \label{tbl:table1}
+Table: Example of a two-column table depicting the instantaneous discretised air flow rate required for the use of `pybreathe`. Instantaneous air flow rate is a time series. User files should have the same configuration. To enable the calculation of volumes in absolute values, the flow rate should also be in absolute values (*e.g.*, mL.s^-1^ or L.s^-1^). The time vector format should also represent actual timepoints. \label{tbl:table1}
 
-The main difference with other respiratory analysis algorithms is that `pybreathe` is based on ventilatory flow and not on volume. To our knowledge, there is no open-source algorithm that simply extracts elementary but essential features from air flow recordings. 
+The main difference with other respiratory analysis algorithms is that `pybreathe` is based on ventilatory flow and not on volume. To our knowledge, there is no open-source algorithm that simply extracts elementary but essential features from air flow recordings.
 
 The main feature of a respiratory signal is the tidal volume (*i.e.*, the volume passing through the lungs during a single breath). In the case of air flow rates, peak/hollow analysis cannot be applied because the amplitude (*i.e.*, height) depends on the 'speed' at which the air flows in and out: for the same exhaled or inhaled volume, the faster the airflow, the greater the amplitude (\autoref{fig:calibrations}).
 
 ![Manual injection/aspiration of different quantities of air into a chamber with a syringe at three different speeds: slow, moderate and fast. (a) 2 mL; (b) 3 mL; (c) 4 mL; (d) 5 mL. Injection corresponds to the positive parts (blue) while aspiration corresponds to the negative parts (purple). AUCs values were obtained with `pybreathe`. \label{fig:calibrations}](fig_calibrations.pdf)
 
-In this situation, to really grasp the tidal volume, we need to get the Area Under the Curve (AUC) instead of the amplitude. We manually injected and aspirated different quantities of air into a chamber at different flow rates ({fig:calibrations}) and used `pybreathe` to demonstrate the relevance of calculating AUCs rather than amplitudes (\autoref{tbl:table2}).
+In this situation, to really grasp the tidal volume, we need to get the Area Under the Curve (AUC) instead of the amplitude. We manually injected and aspirated different quantities of air into a chamber at different flow rates (\autoref{fig:calibrations}) and used `pybreathe` to demonstrate the relevance of calculating AUCs rather than amplitudes (\autoref{tbl:table2}).
 
 | actual volume  | speed        | positive integral | negative integral | positive amplitude | negative amplitude |
 |----------------|--------------|-------------------|-------------------|--------------------|--------------------|
@@ -77,7 +77,7 @@ In this situation, to really grasp the tidal volume, we need to get the Area Und
 
 Table: Comparison of the integral (Area Under the Curve) and amplitude (height) of several volumes of air manually injected/aspirated into a chamber. \label{tbl:table2}
 
-For each quantity of air, the integral faithfully represents the volume injected and aspirated. The amplitude is not representative of the volume injected or aspirated. Interestingly, regardless of the volume of air injected, high injection speeds consistently compromise measurement precision. This issue arises solely because the air is injected manually by an experimenter with a syringe, and 
+For each quantity of air, the integral faithfully represents the volume injected and aspirated. The amplitude is not representative of the volume injected or aspirated. Interestingly, regardless of the volume of air injected, high injection speeds consistently compromise measurement precision. This issue arises solely because the air is injected manually by an experimenter with a syringe and does not originate from `pybreathe`.
 
 For a given respiratory signal, `pybreathe` detects zero-crossings (\autoref{fig:flowVSvol}a) and each positive segment will be either inhalation or exhalation (depending on the configuration of the primary acquisition software) and each negative segment will be the other phase. AUC (integral) of these segments therefore corresponds to the volume inhaled or exhaled. The duration of these segments (time between two zeros) corresponds to the inspiratory or expiratory time. Breathing frequency is also provided based either on the frequency of peaks or hollows, or using a more sophisticaded spectral analysis.
 
@@ -102,8 +102,8 @@ The package comes with [example scripts](https://github.com/tcoustillet/pybreath
 ```python
 from pybreathe import BreathingFlow
 
-# Sinus function
-sinus = BreathingFlow.load_sinus()
+# Sine function
+sine = BreathingFlow.load_sinus()
 
 # Artificial signal #1
 example_01 = BreathingFlow.load_breathing_like_signal_01()
@@ -220,6 +220,6 @@ mean = -2.0 ± 7.68e-12 (n = 9).
 
 # Acknowledgements
 
-This work was supported by SATT Lutech. Special thanks are due to \mbox{Eugénie} \mbox{Faure} and \mbox{Alexandre} \mbox{Palazzi} for their valuable feedback throughout the development of `pybreathe`.
+This work was supported by SATT Lutech under Grant *Algostim*. The author acknowledges the NeAR team and Isabelle Vivodtzev for the opportunity to disseminate this work. Warm thanks are also due to \mbox{Eugénie} \mbox{Faure} and \mbox{Alexandre} \mbox{Palazzi} for their valuable feedback throughout the development of `pybreathe`.
 
 # References
