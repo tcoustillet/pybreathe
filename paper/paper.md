@@ -55,7 +55,7 @@ The main feature of a respiratory signal is the tidal volume (*i.e.*, the volume
 
 ![Manual injection/aspiration of different quantities of air into a chamber with a syringe at three different speeds: slow, moderate and fast. (a) 2 mL; (b) 3 mL; (c) 4 mL; (d) 5 mL. Injection corresponds to the positive parts (blue) while aspiration corresponds to the negative parts (purple). AUCs values were obtained with `pybreathe`. \label{fig:calibrations}](fig_calibrations.pdf)
 
-In this situation, to really grasp the tidal volume, we need to get the Area Under the Curve (AUC) instead of the amplitude. We manually injected and aspirated different quantities of air into a chamber at different flow rates (\autoref{fig:calibrations}) and used `pybreathe` to demonstrate the relevance of calculating AUCs rather than amplitudes (\autoref{tbl:table2}).
+In this situation, to really grasp the tidal volume, we need to get the Area Under the Curve (AUC) instead of the amplitude (\autoref{tbl:table2}).
 
 | actual volume  | speed        | positive integral | negative integral | positive amplitude | negative amplitude |
 |----------------|--------------|-------------------|-------------------|--------------------|--------------------|
@@ -79,7 +79,7 @@ Table: Comparison of the integral (Area Under the Curve) and amplitude (height) 
 
 For each quantity of air, the integral faithfully represents the volume injected and aspirated. The amplitude is not representative of the volume injected or aspirated. Interestingly, regardless of the volume of air injected, high injection speeds consistently compromise measurement precision. This issue arises solely because the air is injected manually by an experimenter with a syringe and does not originate from `pybreathe`.
 
-For a given respiratory signal, `pybreathe` detects zero-crossings (\autoref{fig:flowVSvol}a) and each positive segment will be either inhalation or exhalation (depending on the configuration of the primary acquisition software) and each negative segment will be the other phase. AUC (integral) of these segments therefore corresponds to the volume inhaled or exhaled. The duration of these segments (time between two zeros) corresponds to the inspiratory or expiratory time. Breathing frequency is also provided based either on the frequency of peaks or hollows, or using a more sophisticaded spectral analysis.
+For a given respiratory signal, `pybreathe` detects zero-crossings (\autoref{fig:flowVSvol}a). AUC (integral) of these zero-separated segments therefore corresponds to the volume inhaled or exhaled (depending on the configuration of the primary acquisition software). The duration of these segments (time between two zeros) corresponds to the inspiratory or expiratory time. Breathing frequency is also provided based either on the frequency of peaks or hollows, or using a more sophisticaded spectral analysis.
 
 # pybreathe fundamentals
 
@@ -97,34 +97,11 @@ my_signal = BreathingFlow.from_file(
 
 where `path_to_your_discretised_flow` is a two-column discretised file (*e.g.*, .txt, .csv) representing instantaneous airflow as a function of time (e.g., \autoref{tbl:table1}).
 
-The package comes with [example scripts](https://github.com/tcoustillet/pybreathe/tree/main/examples) based on simulated breathing signals that are representative of the data that can be collected experimentally. They explain the milestones involved in carrying out an analysis (feature extraction) and they supply useful documentation. To get started with `pybreathe` API, users are strongly advised to refer to these scripts using either the sine function (mimicking a respiratory signal) or two artificial breathing signals by instantiating *BreathingFlow* objects using the class methods provided for this purpose:
-
-```python
-from pybreathe import BreathingFlow
-
-# Sine function
-sine = BreathingFlow.load_sinus()
-
-# Artificial signal #1
-example_01 = BreathingFlow.load_breathing_like_signal_01()
-
-# Artificial signal #2
-example_02 = BreathingFlow.load_breathing_like_signal_02()
-```
-
-Then, the five main methods for extracting features are:
-
-- `example_01.get_positive_time()` which extracts the average duration of positive segments,
-- `example_01.get_negative_time()` which extracts the average duration of negative segments,
-- `example_01.get_positive_auc()` which extracts the average AUC of positive segments,
-- `example_01.get_negative_auc()` which extracts the average AUC of negative segments,
-- `example_01.get_frequency()`, which extracts the signal frequency.
-
-For optional arguments and other available methods (*e.g.*, visualisation, saving, artefact removal), users should refer to the [example scripts](https://github.com/tcoustillet/pybreathe/tree/main/examples).
+The package comes with [example scripts](https://github.com/tcoustillet/pybreathe/tree/main/examples) based on simulated breathing signals that are representative of the data that can be collected experimentally. They explain the milestones involved in carrying out an analysis (feature extraction) and they supply useful documentation. To get started with `pybreathe` API, users are strongly advised to refer to these scripts using example signals.
 
 # Proof
 
-To ensure that the package worked correctly and that the methods returned the desired output, we checked the volumes extracted by `pybreathe` when we injected/aspirated known quantities of air (\autoref{fig:calibrations} and \autoref{tbl:table2}). We observed that the manually tested volumes (2 mL, 3 mL, 4 mL, 5 mL) corresponded well to the integral values (AUCs) for each injection or aspiration. However, because the manual injection/aspiration of air into a chamber can be imprecise due to the experimenter and the precision of the syringe, we also created an artifical respiratory signal corresponding to the sine function (\autoref{fig:sinus}). Based on the sine, we checked that the signal features obtained with `pybreathe` were indeed the same as those obtained *mathematically*.
+To ensure that the package worked correctly and that the methods returned the desired output, we checked the volumes extracted by `pybreathe` when we injected/aspirated known quantities of air (\autoref{fig:calibrations} and \autoref{tbl:table2}). We observed that the manually tested volumes (2 mL, 3 mL, 4 mL, 5 mL) corresponded well to the integral values (AUCs) for each injection or aspiration. However, because the manual injection/aspiration of air into a chamber can be imprecise due to the experimenter and the precision of the syringe, we also created an artifical respiratory signal corresponding to the sine function (\autoref{fig:sinus}). Based on the sine, we checked that the signal features obtained with `pybreathe` were indeed the same as those obtained *mathematically*. Users can access this documentation in the [validation notebook](https://github.com/tcoustillet/pybreathe/blob/main/examples/validation.ipynb).
 
 Let $f$ the sinus function.
 
@@ -133,11 +110,6 @@ $$
 f : \mathbb{R} &\longrightarrow \mathbb{R} \\
 x &\longmapsto \sin(x)
 \end{aligned}
-$$
-
-The $\sin$ function is $2\pi$-periodic, i.e.,
-$$
-\forall x \in \mathbb{R},\quad \sin(x + 2\pi) = \sin(x)
 $$
 
 ![Graph of the sine function on the interval $[0, 10\pi]$. \label{fig:sinus}](fig_sinus.pdf)
@@ -161,17 +133,6 @@ Thus, the duration (interval length) of all positive segments is $\pi - 0$, whic
 >>> sinus = BreathingFlow.load_sinus()
 >>> sinus.get_positive_time()
 mean = 3.14 ± 9.19e-10 (n = 10).
-```
-
-## Negative time (~ expiratory time)
-
-In the same way, we can demonstrate that the average duration of negative segments is also $\pi$, which is also found with `pybreathe`.
-
-```python
->>> from pybreathe import BreathingFlow
->>> sinus = BreathingFlow.load_sinus()
->>> sinus.get_negative_time()
-mean = 3.14 ± 7.43e-10 (n = 9).
 ```
 
 ## Positive Area Under the Curve (~ inhaled volume)  
@@ -205,17 +166,6 @@ Thus, the mean AUC of all positive segments is $2$.
 >>> sinus = BreathingFlow.load_sinus()
 >>> sinus.get_positive_auc()
 mean = 2.0 ± 8.4e-12 (n = 10).
-```
-
-## Negative Area Under the Curve (~ exhaled volume)
-
-In the same way, we can demonstrate that the average AUC of negative segments is exactly $-2$, which is also found with `pybreathe`.
-
-```python
->>> from pybreathe import BreathingFlow
->>> sinus = BreathingFlow.load_sinus()
->>> sinus.get_negative_auc()
-mean = -2.0 ± 7.68e-12 (n = 9).
 ```
 
 # Acknowledgements
