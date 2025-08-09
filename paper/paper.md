@@ -91,7 +91,7 @@ my_signal = BreathingFlow.from_file(
 )
 ```
 
-The package comes with an [example script](https://github.com/tcoustillet/pybreathe/tree/main/examples) based on simulated breathing signals. It explains the milestones involved in carrying out a complete analysis and it supply useful documentation. To get started with `pybreathe` API, users are strongly advised to refer to this script.
+The package comes with an [example script](https://github.com/tcoustillet/pybreathe/tree/main/examples) based on simulated breathing signals. It explains the milestones involved in carrying out a complete analysis and it supplies useful documentation. To get started with `pybreathe` API, users are strongly advised to refer to this script.
 
 # Proof
 
