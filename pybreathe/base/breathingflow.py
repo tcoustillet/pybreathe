@@ -374,13 +374,22 @@ class BreathingFlow:
             output_path=output_path,
         )
 
-    def get_positive_segments(self):
+    @enforce_type_arg(axis=str)
+    def get_positive_segments(self, axis="both"):
         """To get the pairs (x,y) for which the air flow rate is positive."""
-        return features.get_segments(self.time, self.flow)[0]
 
-    def get_negative_segments(self):
+        return features.get_segment_axis(
+            segments=features.get_segments(self.time, self.flow)[0],
+            axis=axis
+        )
+
+    @enforce_type_arg(axis=str)
+    def get_negative_segments(self, axis="both"):
         """To get the pairs (x,y) for which the air flow rate is negative."""
-        return features.get_segments(self.time, self.flow)[1]
+        return features.get_segment_axis(
+            segments=features.get_segments(self.time, self.flow)[1],
+            axis=axis
+        )
 
     @enforce_type_arg(which_peaks=str, distance=int, set_dist=bool, output_path=str)
     def test_distance(

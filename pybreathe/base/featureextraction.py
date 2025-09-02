@@ -183,6 +183,35 @@ def get_segments(x, y):
     return positive_segments, negative_segments
 
 
+def get_segment_axis(segments, axis):
+    """
+    To get only the x or y values of the positive or negative segments.
+
+    Args:
+    ----
+        segments (list): pairs (x, y) for which y is a single sign (> 0 or < 0).
+        axis (str): to get only the x values or the y values (or both).
+
+    Returns:
+    -------
+        list: list of values (x or y) of positive or negative segments.
+
+    """
+
+    match axis:
+        case "x":
+            return [x for x, _ in segments]
+        case "y":
+            return [y for _, y in segments]
+        case "both":
+            return segments
+        case _:
+            raise ValueError(
+                "axis should be either 'x, 'y' or 'both'. "
+                f"Not {axis}."
+            )
+
+
 def get_peaks(x, y, which_peaks, distance):
     """
     To get the top or bottom peaks of a signal.
