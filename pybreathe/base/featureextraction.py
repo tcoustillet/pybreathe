@@ -352,10 +352,12 @@ def get_auc_time(
         mean_duration = scientific_round(np.mean(duration), n_digits=n_digits)
         std_duration = scientific_round(np.std(duration), n_digits=n_digits)
         n_duration = len(duration)
+        variability = scientific_round(std_duration/mean_duration*100, n_digits=n_digits)
 
         if verbose:
-            print(f"mean = {mean_duration} ± {std_duration} (n = {n_duration}).")
-        return mean_duration, std_duration, n_duration
+            print(f"mean = {mean_duration} ± {std_duration} "
+                  f"(n = {n_duration}; var = {variability} %).")
+        return mean_duration, std_duration, n_duration, variability
 
     return scientific_round(duration, n_digits=n_digits)
 
@@ -392,9 +394,10 @@ def get_auc_value(
         mean_auc = scientific_round(np.mean(auc), n_digits=n_digits)
         std_auc = scientific_round(np.std(auc), n_digits=n_digits)
         n_auc = len(auc)
+        variability = scientific_round(std_auc/abs(mean_auc)*100, n_digits=n_digits)
 
         if verbose:
-            print(f"mean = {mean_auc} ± {std_auc} (n = {n_auc}).")
-        return mean_auc, std_auc, n_auc
+            print(f"mean = {mean_auc} ± {std_auc} (n = {n_auc}; var = {variability} %).")
+        return mean_auc, std_auc, n_auc, variability
 
     return scientific_round(auc, n_digits=n_digits)
