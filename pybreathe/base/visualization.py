@@ -11,7 +11,10 @@ Created on Wed Apr  9 08:30:59 2025
 import matplotlib.pyplot as plt
 import numpy as np
 from matplotlib.cm import ScalarMappable
+from matplotlib.collections import LineCollection
 import matplotlib.colors as mcolors
+from matplotlib.lines import Line2D
+from mpl_toolkits.mplot3d.art3d import Line3DCollection
 from scipy.integrate import trapezoid
 from scipy.signal import find_peaks
 import seaborn as sns
@@ -305,3 +308,90 @@ def plot_features_distribution(*args, stat, output_path):
 
     if output_path:
         fig.savefig(output_path, bbox_inches="tight")
+
+
+def plot_phase_portrait(x, y, time_delay, hz, color_scheme):
+    """
+    To plot the phase portrait of the time series y.
+
+    Args:
+    ----
+        x (array): time axis of the time series.
+        y (array): y axis of the time series.
+        time_delay (float): parameter for phase portrait offset: y(x) vs. y(x+t).
+        hz (int): the sampling rate of the time series.
+        color_scheme (str): whether the color is defined from time or respiratory phases.
+
+    Returns:
+    -------
+        None. Plots the phase portrait of the time series.
+
+    """
+    if color_scheme not in ("time", "phases"):
+        raise ValueError(
+            f"color_scheme should be either 'time' or 'phases'. Not {color_scheme}."
+        )
+
+    time_delay *= hz
+    time_delay = int(time_delay)
+
+    # 2D plot.
+    y0 = y[:-time_delay]
+    y_tau = y[time_delay:]
+
+    # 3D plot.
+    x_3d = y[:-3*time_delay:]
+    y_3d = y[time_delay:-2*time_delay]
+    z_3d = y[3*time_delay:]
+
+    if color_scheme == "time":
+        cmap = plt.cm.viridis(np.linspace(0, 1, len(y)))
+    else:
+        cmap = np.where(y > 0, "tab:blue", "tab:orange")
+
+    fig = plt.figure(figsize=(14, 6))
+    gs = fig.add_gridspec(2, 2, height_ratios=[1, 2], width_ratios=[1, 1.5])
+    ax1 = fig.add_subplot(gs[0, :])
+    ax2 = fig.add_subplot(gs[1, 0])
+    ax3 = fig.add_subplot(gs[1, 1], projection="3d")
+
+    # ax1.
+    segments_1 = np.array([[[x[i], y[i]], [x[i+1], y[i+1]]] for i in range(len(x)-1)])
+    lc1 = LineCollection(segments_1, colors=cmap)
+    ax1.add_collection(lc1)
+    legend_1 = Line2D([0], [0], color=cmap[0], label="air flow rate")
+    ax1.legend(handles=[legend_1], fontsize=8, loc="upper left")
+    ax1.autoscale()
+
+    # ax2.
+    segments_2 = np.array([[[y0[i], y_tau[i]], [y0[i+1], y_tau[i+1]]] for i in range(len(y0)-1)])
+    lc2 = LineCollection(segments_2, colors=cmap)
+    ax2.add_collection(lc2)
+    legend_2 = Line2D([0], [0], color=cmap[0], label="phase portrait 2D")
+    ax2.legend(handles=[legend_2], fontsize=8, loc="upper left")
+    ax2.autoscale()
+
+    segments_3d = np.array([[[x_3d[i], y_3d[i], z_3d[i]], [x_3d[i+1], y_3d[i+1], z_3d[i+1]]] for i in range(len(x_3d)-1)])
+    lc3 = Line3DCollection(segments_3d, colors=cmap, linewidths=2)
+    ax3.add_collection(lc3)
+    legend_3 = Line2D([0], [0], color=cmap[0], label="phase portrait 3D")
+    ax3.legend(handles=[legend_3], fontsize=8, loc="upper left")
+
+    ax3.set_xlim(np.min(x_3d), np.max(x_3d))
+    ax3.set_ylim(np.min(y_3d), np.max(y_3d))
+    ax3.set_zlim(np.min(z_3d), np.max(z_3d))
+
+    for ax in fig.get_axes():
+        ax.grid(alpha=0.8, linestyle=":", ms=0.1, zorder=1)
+        ax.spines["top"].set_visible(False)
+        ax.spines["right"].set_visible(False)
+
+    ax1.set_xlabel("time (s)", labelpad=10)
+    ax1.set_ylabel("Air flow rate", labelpad=10)
+
+    ax2.set_xlabel("y(t)", labelpad=10)
+    ax2.set_ylabel(f"y(t + {time_delay / hz})", labelpad=10)
+
+    ax3.set_xlabel("y(t)", labelpad=10)
+    ax3.set_ylabel(f"y(t + {time_delay / hz})", labelpad=10)
+    ax3.set_zlabel(f"y(t + {2*time_delay / hz})", labelpad=10)

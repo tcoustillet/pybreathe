@@ -377,7 +377,6 @@ class BreathingFlow:
     @enforce_type_arg(axis=str)
     def get_positive_segments(self, axis="both"):
         """To get the pairs (x,y) for which the air flow rate is positive."""
-
         return features.get_segment_axis(
             segments=features.get_segments(self.time, self.flow)[0],
             axis=axis
@@ -812,6 +811,37 @@ class BreathingFlow:
             self.get_negative_auc(return_mean=False),
             stat=stat,
             output_path=output_path,
+        )
+
+    @enforce_type_arg(time_delay=float, color_scheme=str)
+    def plot_phase_portrait(self, time_delay=-1.0, color_scheme="time"):
+        """
+        To plot the phase portrait of the air flow rate.
+
+        Args:
+        ----
+            time_delay (float, optional):
+                parameter for phase portrait offset: y(x) vs. y(x+t). Defaults to -1.0.
+                The default value -1 is then converted into a tailor-made value.
+            color_scheme (str, optional):
+                whether the color is defined from time or respiratory phases. Defaults to "time".
+
+        Returns:
+        -------
+            None. Plots the phase portrait.
+
+        """
+        if time_delay == -1.0:
+            time_delay = (
+                self.get_positive_time(verbose=False)[0] +
+                self.get_negative_time(verbose=False)[0]) * 1/15
+
+        visualization.plot_phase_portrait(
+            x=self.time,
+            y=self.flow,
+            time_delay=time_delay,
+            hz=self.get_hz(),
+            color_scheme=color_scheme
         )
 
     @enforce_type_arg(output_directory=str)
