@@ -57,6 +57,12 @@ def zero_interpolation(x, y):
         the 'y' vector must contains positive and negative values.
 
     """
+
+    if np.all(np.sign(y) == np.sign(y[0])):
+        raise ValueError(
+            "Single-sign air flow rate detected. Please use 'detrend_y=True' "
+            "or provide a valid air flow rate.")
+
     crossing_indices = np.where(
         np.array([0 if e in (-1, 1) else e for e in np.diff(np.sign(y))])
     )[0]
