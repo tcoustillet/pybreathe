@@ -100,17 +100,23 @@ class BreathingFlow:
                     filename, sep=r"\s+", usecols=[0, 1], names=col_names, dtype=str
                 )
             case _ if filename.endswith(("xlsx", "xls")):
-                raw_data = pd.read_excel(filename, names=col_names, dtype=str)
+                raw_data = pd.read_excel(
+                    filename, names=col_names, dtype=str, header=None
+                )
 
         data = raw_data[raw_data["time"].str.match(time_pattern, na=False)].reset_index(
             drop=True
         )
         if not data["time"].str.contains(":").any():
-            data["time"] = data["time"].str.replace(",", ".").astype(float)
+            data["time"] = data["time"].str.replace(",", ".")
         if data["values"].str.contains(",").any():
             data["values"] = data["values"].str.replace(",", ".")
 
         data["values"] = data["values"].astype(float)
+
+        is_wrong_format = data["time"].str.match(r"^\d{2}:\d{2}:\d{2}:\d+$").all()
+        if is_wrong_format:
+            data["time"] = data["time"].str.replace(r":(?=\d+$)", ".", regex=True)
 
         # To instantiate an object even if the time vector is not in absolute seconds.
         # Required format : HH:MM:SS.XXX
@@ -118,6 +124,8 @@ class BreathingFlow:
             re.match(time_pattern_2, time) for time in data["time"].values.astype(str)
         ):
             data["time"] = pd.to_timedelta(data["time"]).dt.total_seconds()
+
+        data["time"] = data["time"].astype(float)
 
         return cls(
             identifier=identifier,
