@@ -96,10 +96,27 @@ def _from_file(cls, identifier, filename, sheet_name="", detrend_y=False, moveme
 
     data = process_dataframe(raw_data)
 
-    return cls(
+    if cls.__name__ == "BreathingFlow":
+        if movement_type:
+            raise ValueError(
+                "A 'BreathingFlow' object cannot have a 'movement_type' argument. "
+                "Use a 'BreathingMovement' object to specify the type of movements."
+            )
+        return cls(
+                identifier=identifier,
+                raw_time=data["time"].values,
+                raw_flow=data["values"].values,
+                detrend_y=detrend_y,
+            )
+
+    if cls.__name__ == "BreathingMovement":
+        if not movement_type:
+            raise TypeError("missing a required argument: 'movement_type'")
+        return cls(
             identifier=identifier,
-            raw_time=data["time"].values,
-            raw_flow=data["values"].values,
+            time=data["time"].values,
+            movements=data["values"].values,
+            movement_type=movement_type,
             detrend_y=detrend_y,
         )
 
