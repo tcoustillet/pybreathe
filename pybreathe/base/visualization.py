@@ -24,7 +24,8 @@ from .utils import scientific_round
 
 
 def plot_signal(
-    x, y, show_segments, show_auc, highlight_time, highlight_auc, output_path
+    x, y, show_zeros, show_segments, show_auc, highlight_time, highlight_auc,
+    label, output_path
 ):
     """To plot y versus x.
 
@@ -32,12 +33,14 @@ def plot_signal(
     ----
         x (array): the values for the x-axis.
         y (array): the values for the y-axis.
+        show_zeros (bool): to highlight the zeros: the x points such as y(x) = 0.
         show_segments (bool): to distinguish between the positive and negative
                               parts of the curve.
         show_auc (bool): to distinguish between the positive and negative
                          areas of the curve.
         highlight_time (tuple): to highlight breathing cycles with a specific time.
         highlight_auc (tuple): to highlight breathing cycles with a specific area.
+        label (str): the label of the curve.
         output_path (str): to choose where to save the figure, if applicable.
 
     Returns:
@@ -97,8 +100,10 @@ def plot_signal(
             neg_label = "Air flow rate < 0" if i == 1 else ""
             ax.plot(x_neg, y_neg, label=neg_label, c="tab:orange")
     else:
-        ax.plot(x, y, label="air flow rate", c="tab:gray", lw=1)
+        ax.plot(x, y, label=label, c="tab:gray", lw=1)
         ax.axhline(y=0, c="grey", linestyle=":", lw=1)
+
+    if show_zeros:
         zeros = np.where(y == 0)[0]
         ax.scatter(x[zeros], y[zeros], zorder=2, c="gold", s=9, lw=0.4, edgecolor="k")
 
@@ -160,19 +165,23 @@ def plot_signal(
                         )
 
     ax.set_xlabel("time (s)", labelpad=10)
-    ax.set_ylabel("Air flow rate", labelpad=10)
-    ax.set_title(
-        f"{len(positive_segments)} positive segments & {len(negative_segments)} negative segments detected",
-        fontsize=9,
-        c="k",
-        backgroundcolor="whitesmoke",
-        bbox={
-            "facecolor": "whitesmoke",
-            "boxstyle": "round,pad=0.3",
-            "edgecolor": "silver",
-            "lw": 0.2,
-        },
-    )
+    if label == "air flow rate":
+        ax.set_ylabel("Air flow rate", labelpad=10)
+        ax.set_title(
+            f"{len(positive_segments)} positive segments & {len(negative_segments)} negative segments detected",
+            fontsize=9,
+            c="k",
+            backgroundcolor="whitesmoke",
+            bbox={
+                "facecolor": "whitesmoke",
+                "boxstyle": "round,pad=0.3",
+                "edgecolor": "silver",
+                "lw": 0.2,
+            },
+        )
+    else:
+        ax.set_ylabel("Amplitude", labelpad=10)
+
     ax.grid(alpha=0.8, linestyle=":", ms=0.1, zorder=1)
     ax.legend(fontsize=8, loc="upper left", bbox_to_anchor=(0, 1.2))
     ax.spines["top"].set_visible(False)

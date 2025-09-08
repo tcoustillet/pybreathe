@@ -153,6 +153,7 @@ class BreathingFlow:
 
     @enforce_type_arg(
         y=str,
+        show_zeros=bool,
         show_segments=bool,
         show_auc=bool,
         highlight_time=tuple,
@@ -162,6 +163,7 @@ class BreathingFlow:
     def plot(
         self,
         y="flow",
+        show_zeros=True,
         show_segments=False,
         show_auc=False,
         highlight_time=(),
@@ -174,12 +176,15 @@ class BreathingFlow:
         Args:
         ----
             y (str, optional): the values for the y-axis.
+            show_zeros (bool, optional): to highlight the zeros: the x points such as y(x) = 0.
+                                          Defaults to True.
             show_segments (bool, optional): to distinguish between the positive and negative
                                             parts of the curve. Defaults to False.
             show_auc (bool, optional): to distinguish between the positive and negative
                                        areas of the curve. Defaults to False.
             highlight_time (tuple, optional): to highlight breathing cycles with a specific time.
             highlight_auc (tuple, optional): to highlight breathing cycles with a specific area.
+            label (str): the label of the curve.
             output_path (str, optional): to choose where to save the figure, if applicable.
                                          Defaults to "" (figure not saved).
 
@@ -203,10 +208,12 @@ class BreathingFlow:
         visualization.plot_signal(
             x=x,
             y=y,
+            show_zeros=show_zeros,
             show_segments=show_segments,
             show_auc=show_auc,
             highlight_time=highlight_time,
             highlight_auc=highlight_auc,
+            label="air flow rate",
             output_path=output_path,
         )
 
