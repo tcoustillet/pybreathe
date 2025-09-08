@@ -7,15 +7,17 @@ Created on Wed Apr  2 08:40:50 2025
 @author: CoustilletT
 """
 
-from importlib.resources import files, as_file
+
 import os
-import re
 
 import numpy as np
 import pandas as pd
 from scipy.signal import detrend
 
-from .utils import enforce_type_arg, scientific_round, print_source
+from .instantiationmethods import (_from_file, _from_dataframe, _load_sinus,
+                                   _load_breathing_like_signal_01,
+                                   _load_breathing_like_signal_02)
+from .utils import enforce_type_arg, scientific_round
 from . import featureextraction as features
 from . import visualization
 
@@ -70,185 +72,11 @@ class BreathingFlow:
         self._positive_minute_ventilation = None
         self._negative_minute_ventilation = None
 
-    @classmethod
-    @enforce_type_arg(identifier=str, filename=str, detrend_y=bool)
-    def from_file(cls, identifier, filename, detrend_y=False):
-        """
-        To instantiate a 'BreathingFlow' objet from a file path.
-
-        Args:
-        ----
-            identifier (str): breathing signal identifier.
-            filename (str): path to the two-column file representing
-                            discretized time and discretized air flow rate.
-            detrend_y (bool, optional): to set the mean of the air flow rate at 0.
-                                        Defaults to False.
-
-        Returns:
-        -------
-            BreathingFlow: instantiate an objet of type 'BreathingFlow'.
-
-        """
-        col_names = ["time", "values"]
-        time_pattern_1 = r"^\d{2}:\d{2}:\d{2}([.:])\d+$"
-        time_pattern_2 = r"^[+-]?\d+([.,]\d+)?([eE+][+-]?\d+)?$"
-        time_pattern = f"(?:{time_pattern_1})|(?:{time_pattern_2})"
-
-        match filename:
-            case _ if filename.endswith("txt"):
-                raw_data = pd.read_csv(
-                    filename, sep=r"\s+", usecols=[0, 1], names=col_names, dtype=str
-                )
-            case _ if filename.endswith(("xlsx", "xls")):
-                raw_data = pd.read_excel(
-                    filename, names=col_names, dtype=str, header=None
-                )
-
-        data = raw_data[raw_data["time"].str.match(time_pattern, na=False)].reset_index(
-            drop=True
-        )
-        if not data["time"].str.contains(":").any():
-            data["time"] = data["time"].str.replace(",", ".")
-        if data["values"].str.contains(",").any():
-            data["values"] = data["values"].str.replace(",", ".")
-
-        data["values"] = data["values"].astype(float)
-
-        is_wrong_format = data["time"].str.match(r"^\d{2}:\d{2}:\d{2}:\d+$").all()
-        if is_wrong_format:
-            data["time"] = data["time"].str.replace(r":(?=\d+$)", ".", regex=True)
-
-        # To instantiate an object even if the time vector is not in absolute seconds.
-        # Required format : HH:MM:SS.XXX
-        if not all(
-            re.match(time_pattern_2, time) for time in data["time"].values.astype(str)
-        ):
-            data["time"] = pd.to_timedelta(data["time"]).dt.total_seconds()
-
-        data["time"] = data["time"].astype(float)
-
-        return cls(
-            identifier=identifier,
-            raw_time=data["time"].values,
-            raw_flow=data["values"].values,
-            detrend_y=detrend_y,
-        )
-
-    @classmethod
-    @enforce_type_arg(identifier=str, detrend_y=bool)
-    def from_dataframe(cls, identifier, df, detrend_y=False):
-        """
-        To instantiate a 'BreathingFlow' objet from a dataframe.
-
-        Args:
-        ----
-            identifier (str): breathing signal identifier.
-            df (pandas.DataFrame): two-column dataframe representing discretized
-                                   time and discretized air flow rate.
-            detrend_y (bool, optional): to set the mean of the air flow rate at 0.
-                                        Defaults to False.
-
-        Returns:
-        -------
-            BreathingFlow: instantiate an objet of type 'BreathingFlow'.
-
-        """
-        if not {"time", "values"}.issubset(df.columns):
-            raise ValueError(
-                "DataFrame must contain a 'time' column and a 'values' column."
-            )
-        return cls(
-            identifier=identifier,
-            raw_time=df["time"].values,
-            raw_flow=df["values"].values,
-            detrend_y=detrend_y,
-        )
-
-    @classmethod
-    def load_sinus(cls):
-        """
-        Load and return a BreathingFlow object from the "sinus" dataset.
-
-        Returns:
-        -------
-            BreathingFlow: a BreathingFlow object = the sinus function.
-
-        Note:
-        ----
-            is used to demonstrate the 'proof of concept'.
-        """
-        sinus_resource = files("pybreathe.datasets").joinpath("sinus.txt")
-
-        with as_file(sinus_resource) as sinus_path:
-            with open(sinus_path, encoding="utf-8") as f:
-                sinus = pd.read_csv(
-                    f, sep="\t", names=["time", "values"], dtype=float
-                )
-
-        return cls(
-            identifier="example_sinus",
-            raw_time=sinus["time"].values,
-            raw_flow=sinus["values"].values,
-            detrend_y=False,
-        )
-
-    @classmethod
-    def load_breathing_like_signal_01(cls):
-        """
-        Load and return a BreathingFlow object from the "breathing-like signal 01" dataset.
-
-        Returns:
-        -------
-            BreathingFlow: a BreathingFlow object.
-        """
-        breathing_resource_01 = (
-            files("pybreathe.datasets")
-            .joinpath("breathing_like_signal_01.txt")
-        )
-
-        with as_file(breathing_resource_01) as breathing_01_path:
-            with open(breathing_01_path, encoding="utf-8") as f:
-                breathing_01 = pd.read_csv(
-                    f, sep="\t", names=["time", "values"], dtype=float
-                )
-
-        print(print_source()["breathing-like 01"])
-
-        return cls(
-            identifier="example_breathing-like_signal_01",
-            raw_time=breathing_01["time"].values,
-            raw_flow=breathing_01["values"].values,
-            detrend_y=False,
-        )
-
-    @classmethod
-    def load_breathing_like_signal_02(cls):
-        """
-        Load and return a BreathingFlow object from the "breathing-like signal 02" dataset.
-
-        Returns:
-        -------
-            BreathingFlow: a BreathingFlow object.
-        """
-        breathing_resource_02 = (
-            files("pybreathe.datasets")
-            .joinpath("breathing_like_signal_02.txt")
-        )
-
-        with as_file(breathing_resource_02) as breathing_02_path:
-            with open(breathing_02_path, encoding="utf-8") as f:
-                breathing_02 = pd.read_csv(
-                    f, sep="\t", names=["time", "values"], dtype=float
-                )
-
-        print(print_source()["breathing-like 02"])
-
-        return cls(
-            identifier="example_breathing-like_signal_02",
-            raw_time=breathing_02["time"].values,
-            raw_flow=breathing_02["values"].values,
-            detrend_y=False,
-        )
+    from_file = classmethod(_from_file)
+    from_dataframe = classmethod(_from_dataframe)
+    load_sinus = classmethod(_load_sinus)
+    load_breathing_like_signal_01 = classmethod(_load_breathing_like_signal_01)
+    load_breathing_like_signal_02 = classmethod(_load_breathing_like_signal_02)
 
     def __getitem__(self, key):
         """
