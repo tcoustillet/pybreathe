@@ -821,8 +821,8 @@ class BreathingFlow:
             output_path=output_path,
         )
 
-    @enforce_type_arg(time_delay=float, color_scheme=str)
-    def plot_phase_portrait(self, time_delay=-1.0, color_scheme="time"):
+    @enforce_type_arg(time_delay=float, color_scheme=str, output_path=str)
+    def plot_phase_portrait(self, time_delay=-1.0, color_scheme="time", output_path=""):
         """
         To plot the phase portrait of the air flow rate.
 
@@ -833,6 +833,8 @@ class BreathingFlow:
                 The default value -1 is then converted into a tailor-made value.
             color_scheme (str, optional):
                 whether the color is defined from time or respiratory phases. Defaults to "time".
+            output_path (str, optional): to choose where to save the figure,
+                                         if applicable. Defaults to "" (figure not saved)
 
         Returns:
         -------
@@ -849,7 +851,8 @@ class BreathingFlow:
             y=self.flow,
             time_delay=time_delay,
             hz=self.get_hz(),
-            color_scheme=color_scheme
+            color_scheme=color_scheme,
+            output_path=output_path
         )
 
     @enforce_type_arg(output_directory=str)

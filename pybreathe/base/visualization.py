@@ -310,7 +310,7 @@ def plot_features_distribution(*args, stat, output_path):
         fig.savefig(output_path, bbox_inches="tight")
 
 
-def plot_phase_portrait(x, y, time_delay, hz, color_scheme):
+def plot_phase_portrait(x, y, time_delay, hz, color_scheme, output_path):
     """
     To plot the phase portrait of the time series y.
 
@@ -321,6 +321,7 @@ def plot_phase_portrait(x, y, time_delay, hz, color_scheme):
         time_delay (float): parameter for phase portrait offset: y(x) vs. y(x+t).
         hz (int): the sampling rate of the time series.
         color_scheme (str): whether the color is defined from time or respiratory phases.
+        output_path (str): to choose where to save the figure, if applicable.
 
     Returns:
     -------
@@ -395,3 +396,6 @@ def plot_phase_portrait(x, y, time_delay, hz, color_scheme):
     ax3.set_xlabel("y(t)", labelpad=10)
     ax3.set_ylabel(f"y(t + {time_delay / hz})", labelpad=10)
     ax3.set_zlabel(f"y(t + {2*time_delay / hz})", labelpad=10)
+
+    if output_path:
+        fig.savefig(output_path, bbox_inches="tight")
