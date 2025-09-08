@@ -1,1 +1,1 @@
-from .base import BreathingFlow, BreathingMovement, flow_merger
+from .base import BreathingFlow, BreathingMovement, BreathingSignals, flow_merger
