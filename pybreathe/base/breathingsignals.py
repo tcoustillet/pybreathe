@@ -17,11 +17,11 @@ from .utils import _check_type
 
 class BreathingSignals:
     def __init__(self, flow, thorax, abdomen):
-        _check_type(flow, BreathingFlow, "flow")
+        _check_type(flow, BreathingFlow, "flow", allow_none=True)
         _check_type(thorax, BreathingMovement, "thorax")
         _check_type(abdomen, BreathingMovement, "abdomen")
 
-        if not np.array_equal(flow.raw_time, thorax.time):
+        if flow is not None and not np.array_equal(flow.raw_time, thorax.time):
             raise ValueError(
                 "The time vectors of the three signals must match together. "
                 "'flow.raw_time' does not match 'thorax.time'."
@@ -33,8 +33,10 @@ class BreathingSignals:
                 "'thorax.raw_time' does not match 'abdomen.time'."
             )
 
-        identifiers = [flow.identifier, thorax.identifier, abdomen.identifier]
-        if not (flow.identifier == thorax.identifier == abdomen.identifier):
+        identifiers = [thorax.identifier, abdomen.identifier]
+        if flow is not None:
+            identifiers.append(flow.identifier)
+        if not all(i == identifiers[0] for i in identifiers):
             raise ValueError(
                 f"Cannot combine data with different identifiers: {identifiers}"
             )

@@ -108,8 +108,10 @@ def print_source():
             b.split("\n", 1)[0]: b.split("\n", 1)[1].rstrip() for b in blocs
         }
 
-def _check_type(value, expected_type, name):
+def _check_type(value, expected_type, name, allow_none=False):
     """To ensure that the type passed to the class constructor is correct."""
+    if value is None and allow_none:
+        return
     if not isinstance(value, expected_type):
         raise TypeError(
             f"Expected '{name}' to be of type '{expected_type.__name__}', "
