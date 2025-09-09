@@ -408,3 +408,87 @@ def plot_phase_portrait(x, y, time_delay, hz, color_scheme, output_path):
 
     if output_path:
         fig.savefig(output_path, bbox_inches="tight")
+
+
+def plot_movements(y1, y2, y3, overlay):
+    """
+    To plot air flow rate and breathing movements on the same plot.
+
+    Args:
+    ----
+        y1 (BreathingFlow): Air flow rate.
+        y2 (BreathingMovement): Thorax movements.
+        y3 (BreathingMovement): Abdominal movements.
+        overlay (bool): whether or not to superimpose respiratory movements.
+
+    Returns:
+    -------
+        None. Plots the three (or two) curves.
+
+    """
+    if y1 is not None:
+        y1 = {
+            "x": y1.raw_absolute_time,
+            "y": y1.raw_flow,
+            "label": "air flow rate",
+            "ylabel": "Air Flow Rate",
+            "color": "tab:gray",
+            "title": f"Air flow rate of: {y1.identifier}"
+        }
+
+    y2 = {
+        "x": y2.absolute_time,
+        "y": y2.movements,
+        "label": y2.movement_type,
+        "ylabel": "Amplitude",
+        "color": "tab:red",
+        "title": f"Movements of: {y2.identifier}"
+    }
+
+    y3 = {
+        "x": y3.absolute_time,
+        "y": y3.movements,
+        "label": y3.movement_type,
+        "ylabel": "Amplitude",
+        "color": "tab:purple",
+        "title": f"Movements of: {y3.identifier}"
+    }
+
+    if y1 is None and overlay:
+        rows, plots = 1, [[y2, y3]]
+    elif y1 is None:
+        rows, plots = 2, [[y2], [y3]]
+    elif overlay:
+        rows, plots = 2, [[y1], [y2, y3]]
+    else:
+        rows, plots = 3, [[y1], [y2], [y3]]
+
+    fig, axes = plt.subplots(figsize=(14, rows*2), nrows=rows)
+    if rows == 1:
+        axes = [axes]
+
+    for ax, series in zip(axes, plots):
+        for s in series:
+            ax.plot(s["x"], s["y"], label=s["label"], color=s["color"])
+
+        ax.set_title(
+            series[0]["title"],
+            fontsize=9,
+            c="k",
+            backgroundcolor="whitesmoke",
+            bbox={
+                "facecolor": "whitesmoke",
+                "boxstyle": "round,pad=0.3",
+                "edgecolor": "silver",
+                "lw": 0.2,
+                }
+        )
+        ax.grid(alpha=0.8, linestyle=":", ms=0.1, zorder=1)
+        ax.set_ylabel(series[0]["ylabel"], labelpad=10)
+        ax.spines["top"].set_visible(False)
+        ax.spines["right"].set_visible(False)
+        ax.legend(loc="upper left")
+
+    axes[-1].set_xlabel("time (s)", labelpad=10)
+
+    plt.tight_layout()

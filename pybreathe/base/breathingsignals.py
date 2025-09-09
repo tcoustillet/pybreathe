@@ -12,10 +12,13 @@ import numpy as np
 
 from .breathingflow import BreathingFlow
 from .breathingmovement import BreathingMovement
-from .utils import _check_type
+from .utils import _check_type, enforce_type_arg
+from .visualization import plot_movements
 
 
 class BreathingSignals:
+    """Object containing air flow and associated breathing movements."""
+
     def __init__(self, flow, thorax, abdomen):
         _check_type(flow, BreathingFlow, "flow", allow_none=True)
         _check_type(thorax, BreathingMovement, "thorax")
@@ -44,3 +47,20 @@ class BreathingSignals:
         self.flow = flow
         self.thorax = thorax
         self.abdomen = abdomen
+
+    @enforce_type_arg(overlay=bool)
+    def plot(self, overlay=False):
+        """
+        To plot air flow rate and breathing movements on the same plot.
+
+        Args:
+        ----
+            overlay (bool, optional): whether or not to superimpose respiratory movements.
+                                      Defaults to False.
+
+        Returns:
+        -------
+            None. Plots air flow rate and breathing movements.
+
+        """
+        plot_movements(y1=self.flow, y2=self.thorax, y3=self.abdomen, overlay=overlay)
