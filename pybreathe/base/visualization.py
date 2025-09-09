@@ -410,7 +410,7 @@ def plot_phase_portrait(x, y, time_delay, hz, color_scheme, output_path):
         fig.savefig(output_path, bbox_inches="tight")
 
 
-def plot_movements(y1, y2, y3, overlay):
+def plot_movements(y1, y2, y3, overlay, output_path):
     """
     To plot air flow rate and breathing movements on the same plot.
 
@@ -420,6 +420,7 @@ def plot_movements(y1, y2, y3, overlay):
         y2 (BreathingMovement): Thorax movements.
         y3 (BreathingMovement): Abdominal movements.
         overlay (bool): whether or not to superimpose respiratory movements.
+        output_path (str): to choose where to save the figure, if applicable.
 
     Returns:
     -------
@@ -492,3 +493,6 @@ def plot_movements(y1, y2, y3, overlay):
     axes[-1].set_xlabel("time (s)", labelpad=10)
 
     plt.tight_layout()
+
+    if output_path:
+        fig.savefig(output_path, bbox_inches="tight")

@@ -48,8 +48,8 @@ class BreathingSignals:
         self.thorax = thorax
         self.abdomen = abdomen
 
-    @enforce_type_arg(overlay=bool)
-    def plot(self, overlay=False):
+    @enforce_type_arg(overlay=bool, output_path=str)
+    def plot(self, overlay=False, output_path=""):
         """
         To plot air flow rate and breathing movements on the same plot.
 
@@ -63,4 +63,10 @@ class BreathingSignals:
             None. Plots air flow rate and breathing movements.
 
         """
-        plot_movements(y1=self.flow, y2=self.thorax, y3=self.abdomen, overlay=overlay)
+        plot_movements(
+            y1=self.flow,
+            y2=self.thorax,
+            y3=self.abdomen,
+            overlay=overlay,
+            output_path=output_path
+        )
