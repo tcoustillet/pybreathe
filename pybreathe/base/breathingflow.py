@@ -46,9 +46,8 @@ class BreathingFlow:
         self.raw_time = raw_time
         self.raw_flow = raw_flow
 
-        time_len = len(self.raw_time)
-        self.absolute_time = np.linspace(
-            0, time_len / self.get_hz(), time_len, endpoint=False
+        self.raw_absolute_time = np.linspace(
+            0, len(self.raw_time) / self.get_hz(), len(self.raw_time), endpoint=False
         )
 
         if detrend_y:
@@ -59,6 +58,11 @@ class BreathingFlow:
 
         self.time, self.flow = features.zero_interpolation(
             x=self.raw_time, y=y_to_be_interpolated
+        )
+
+        time_len = len(self.time)
+        self.absolute_time = np.linspace(
+            0, time_len / self.get_hz(), time_len, endpoint=False
         )
 
         self._distance = None
