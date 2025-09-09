@@ -711,9 +711,14 @@ class BreathingFlow:
             pandas.DataFrame: dataframe summarising the features.
 
         """
-        metrics = ["mean", "std", "n cycle(s)"]
+        metrics = ["mean", "std", "n cycle(s)", "variability"]
         dict_data = {}
-        dict_data["Bf (rpm)"] = {"mean": self._frequency, "std": "-", "n cycle(s)": "-"}
+        dict_data["Bf (rpm)"] = {
+            "mean": self._frequency,
+            "std": "-",
+            "n cycle(s)": "-",
+            "variability (%)": "-"
+        }
         dict_data["time (AUC > 0) (s)"] = dict(zip(metrics, self.positive_time))
         dict_data["time (AUC < 0) (s)"] = dict(zip(metrics, self.negative_time))
         dict_data["AUC value (AUC > 0)"] = dict(zip(metrics, self.positive_auc))
