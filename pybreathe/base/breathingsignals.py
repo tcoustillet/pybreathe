@@ -24,6 +24,14 @@ class BreathingSignals(ComparableMixin):
         _check_type(thorax, BreathingMovement, "thorax")
         _check_type(abdomen, BreathingMovement, "abdomen")
 
+        identifiers = [thorax.identifier, abdomen.identifier]
+        if flow is not None:
+            identifiers.append(flow.identifier)
+        if not all(i == identifiers[0] for i in identifiers):
+            raise ValueError(
+                f"Cannot combine data with different identifiers: {identifiers}"
+            )
+
         if flow is not None and not np.array_equal(flow.raw_time, thorax.time):
             raise ValueError(
                 "The time vectors of the three signals must match together. "
@@ -34,14 +42,6 @@ class BreathingSignals(ComparableMixin):
             raise ValueError(
                 "The time vectors of the three signals must match together. "
                 "'thorax.raw_time' does not match 'abdomen.time'."
-            )
-
-        identifiers = [thorax.identifier, abdomen.identifier]
-        if flow is not None:
-            identifiers.append(flow.identifier)
-        if not all(i == identifiers[0] for i in identifiers):
-            raise ValueError(
-                f"Cannot combine data with different identifiers: {identifiers}"
             )
 
         self.flow = flow
