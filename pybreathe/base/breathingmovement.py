@@ -8,7 +8,7 @@ Created on Fri Sep  5 08:12:19 2025
 """
 
 
-import numpy as np
+import pandas as pd
 from scipy.signal import detrend
 
 from . import featureextraction as features
@@ -39,6 +39,24 @@ class BreathingMovement(ComparableMixin):
     def get_hz(self):
         """To get the sampling rate of the discretized breathing signal."""
         return features.compute_sampling_rate(x=self.processed_time)
+
+    @enforce_type_arg(shape=str)
+    def get_info(self, shape="dict"):
+        """To get signal information (identifier, start, end and duration.)"""
+        info = {
+            "identifier": self.identifier,
+            "start": self.time[0],
+            "end": self.time[-1],
+            "duration": str(pd.to_timedelta(
+                self.absolute_time[-1], unit="s")
+            ).split()[-1]
+        }
+
+        if shape == "dict":
+            return info
+        if shape == "df":
+            return pd.DataFrame([info])
+        raise ValueError(f"shape must be 'dict' or 'df', not '{shape}'.")
 
     @enforce_type_arg(output_path=str)
     def plot(self, output_path=""):

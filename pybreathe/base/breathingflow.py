@@ -95,7 +95,7 @@ class BreathingFlow(ComparableMixin):
         """
         sliced_object = self.__class__(
             identifier=self.identifier,
-            raw_time=self.time[key],
+            raw_time=self.raw_time[key],
             raw_flow=self.flow[key],
             detrend_y=False,
         )
@@ -152,6 +152,25 @@ class BreathingFlow(ComparableMixin):
     def get_hz(self):
         """To get the sampling rate of the discretized breathing signal."""
         return features.compute_sampling_rate(x=self.processed_time)
+
+    @enforce_type_arg(shape=str)
+    def get_info(self, shape="dict"):
+        """To get signal information (identifier, start, end and duration.)"""
+        info = {
+            "identifier": self.identifier,
+            "start": self.raw_time[0],
+            "end": self.raw_time[-1],
+            "duration": str(pd.to_timedelta(
+                self.raw_absolute_time[-1], unit="s")
+            ).split()[-1]
+
+        }
+
+        if shape == "dict":
+            return info
+        if shape == "df":
+            return pd.DataFrame([info])
+        raise ValueError(f"shape must be 'dict' or 'df', not '{shape}'.")
 
     @enforce_type_arg(
         y=str,
