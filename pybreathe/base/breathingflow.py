@@ -18,12 +18,13 @@ from .instantiationmethods import (_from_file, _from_dataframe, _load_sinus,
                                    _load_breathing_like_signal_01,
                                    _load_breathing_like_signal_02,
                                    _process_time)
-from .utils import enforce_type_arg, scientific_round, create_absolute_time
+from .utils import (ComparableMixin, enforce_type_arg, scientific_round,
+                    create_absolute_time)
 from . import featureextraction as features
 from . import visualization
 
 
-class BreathingFlow:
+class BreathingFlow(ComparableMixin):
     """Breathing Air Flow rate."""
 
     @enforce_type_arg(identifier=str, detrend_y=bool)

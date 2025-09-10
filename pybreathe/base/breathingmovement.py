@@ -14,10 +14,10 @@ from scipy.signal import detrend
 from . import featureextraction as features
 from .instantiationmethods import _from_file, _from_dataframe, _process_time
 from . import visualization
-from .utils import enforce_type_arg, create_absolute_time
+from .utils import enforce_type_arg, create_absolute_time, ComparableMixin
 
 
-class BreathingMovement:
+class BreathingMovement(ComparableMixin):
     """Breathing movement: thorax or abdomen."""
 
     def __init__(self, time, movements, movement_type, identifier, detrend_y=False):

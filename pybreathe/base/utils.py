@@ -17,6 +17,39 @@ import pandas as pd
 import numpy as np
 
 
+class ComparableMixin:
+    def __eq__(self, other_object, top_level=True):
+        """To determine whether two instances are equal.
+
+        Equality is based on a comparison of all instance attributes.
+
+        """
+        if not isinstance(other_object, self.__class__):
+            return NotImplemented
+
+        diffs = []
+
+        for attr in self.__dict__:
+            attr_1 = getattr(self, attr)
+            attr_2 = getattr(other_object, attr)
+
+            if isinstance(attr_1, np.ndarray) and isinstance(attr_2, np.ndarray):
+                if not np.array_equiv(attr_1, attr_2):
+                    diffs.append(attr.lstrip("_"))
+
+            elif isinstance(attr_1, ComparableMixin) and isinstance(attr_2, ComparableMixin):
+                if not attr_1.__eq__(attr_2, top_level=False):
+                    diffs.append(attr.lstrip("_"))
+            else:
+                if attr_1 != attr_2:
+                    diffs.append(attr.lstrip("_"))
+
+        if diffs and top_level:
+            print(f"Different attributes: {', '.join(diffs)}.")
+            return False
+        return not diffs
+
+
 # Function (decorator) that handle argument types for object methods.
 def enforce_type_arg(**arg_types):
     """Decorate a function to enforce a method argument to be of certain type."""

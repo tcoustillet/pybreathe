@@ -12,11 +12,11 @@ import numpy as np
 
 from .breathingflow import BreathingFlow
 from .breathingmovement import BreathingMovement
-from .utils import _check_type, enforce_type_arg
+from .utils import _check_type, enforce_type_arg, ComparableMixin
 from .visualization import plot_movements
 
 
-class BreathingSignals:
+class BreathingSignals(ComparableMixin):
     """Object containing air flow and associated breathing movements."""
 
     def __init__(self, flow, thorax, abdomen):
