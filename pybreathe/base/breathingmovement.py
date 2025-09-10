@@ -12,9 +12,9 @@ import numpy as np
 from scipy.signal import detrend
 
 from . import featureextraction as features
-from .instantiationmethods import _from_file, _from_dataframe
+from .instantiationmethods import _from_file, _from_dataframe, _process_time
 from . import visualization
-from .utils import enforce_type_arg
+from .utils import enforce_type_arg, create_absolute_time
 
 
 class BreathingMovement:
@@ -26,10 +26,9 @@ class BreathingMovement:
         self.movement_type = movement_type
         self.identifier = identifier
 
-        time_len = len(self.time)
-        self.absolute_time = np.linspace(
-            0, time_len / self.get_hz(), time_len, endpoint=False
-        )
+        self.processed_time = _process_time(time)
+
+        self.absolute_time = create_absolute_time(self.time, self.get_hz())
 
         if detrend_y:
             self.movement = detrend(self.raw_movements, type="constant")
@@ -39,7 +38,7 @@ class BreathingMovement:
 
     def get_hz(self):
         """To get the sampling rate of the discretized breathing signal."""
-        return features.compute_sampling_rate(x=self.time)
+        return features.compute_sampling_rate(x=self.processed_time)
 
     @enforce_type_arg(output_path=str)
     def plot(self, output_path=""):

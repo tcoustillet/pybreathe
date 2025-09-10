@@ -108,6 +108,7 @@ def print_source():
             b.split("\n", 1)[0]: b.split("\n", 1)[1].rstrip() for b in blocs
         }
 
+
 def _check_type(value, expected_type, name, allow_none=False):
     """To ensure that the type passed to the class constructor is correct."""
     if value is None and allow_none:
@@ -117,3 +118,22 @@ def _check_type(value, expected_type, name, allow_none=False):
             f"Expected '{name}' to be of type '{expected_type.__name__}', "
             f"got {type(value).__name__}."
         )
+
+
+def create_absolute_time(time_vector, hz):
+    """
+    To create an absolute time vector starting from 0.
+
+    Args:
+    ----
+        time_vector (array): any time vector.
+        hz (int): the sampling rate of the time vector.
+
+    Returns:
+    -------
+        array: time vector in an absolute format: [0.000, 0.002, 0.004, ...].
+
+    """
+    return np.linspace(
+        0, len(time_vector) / hz, len(time_vector), endpoint=False
+    )

@@ -16,8 +16,9 @@ from scipy.signal import detrend
 
 from .instantiationmethods import (_from_file, _from_dataframe, _load_sinus,
                                    _load_breathing_like_signal_01,
-                                   _load_breathing_like_signal_02)
-from .utils import enforce_type_arg, scientific_round
+                                   _load_breathing_like_signal_02,
+                                   _process_time)
+from .utils import enforce_type_arg, scientific_round, create_absolute_time
 from . import featureextraction as features
 from . import visualization
 
@@ -46,9 +47,8 @@ class BreathingFlow:
         self.raw_time = raw_time
         self.raw_flow = raw_flow
 
-        self.raw_absolute_time = np.linspace(
-            0, len(self.raw_time) / self.get_hz(), len(self.raw_time), endpoint=False
-        )
+        self.processed_time = _process_time(raw_time)
+        self.raw_absolute_time = create_absolute_time(self.raw_time, self.get_hz())
 
         if detrend_y:
             self.detrended_flow = detrend(self.raw_flow, type="constant")
@@ -57,13 +57,10 @@ class BreathingFlow:
         y_to_be_interpolated = getattr(self, "detrended_flow", self.raw_flow)
 
         self.time, self.flow = features.zero_interpolation(
-            x=self.raw_time, y=y_to_be_interpolated
+            x=self.processed_time, y=y_to_be_interpolated
         )
 
-        time_len = len(self.time)
-        self.absolute_time = np.linspace(
-            0, time_len / self.get_hz(), time_len, endpoint=False
-        )
+        self.absolute_time = create_absolute_time(self.time, self.get_hz())
 
         self._distance = None
 
@@ -153,7 +150,7 @@ class BreathingFlow:
 
     def get_hz(self):
         """To get the sampling rate of the discretized breathing signal."""
-        return features.compute_sampling_rate(x=self.raw_time)
+        return features.compute_sampling_rate(x=self.processed_time)
 
     @enforce_type_arg(
         y=str,
@@ -199,9 +196,9 @@ class BreathingFlow:
         """
         match y:
             case "flow":
-                x, y = self.time, self.flow
+                x, y = self.absolute_time, self.flow
             case "raw_flow":
-                x, y = self.absolute_time, self.raw_flow
+                x, y = self.raw_absolute_time, self.raw_flow
             case "detrended_flow":
                 x, y = self.absolute_time, self.detrended_flow
             case _:

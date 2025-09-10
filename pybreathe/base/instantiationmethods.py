@@ -14,6 +14,11 @@ import re
 from .utils import enforce_type_arg, print_source
 
 
+TIME_PATTERN_1 = r"^\d{2}:\d{2}:\d{2}([.:])\d+$"
+TIME_PATTERN_2 = r"^[+-]?\d+([.,]\d+)?([eE+][+-]?\d+)?$"
+TIME_PATTERN = f"(?:{TIME_PATTERN_1})|(?:{TIME_PATTERN_2})"
+
+
 def process_dataframe(raw_data):
     """
     To process the raw dataframe and properly format it for object instantiation.
@@ -27,11 +32,8 @@ def process_dataframe(raw_data):
         data (pd.DataFrame): Processed DataFrame = correctly formatted DataFrame.
 
     """
-    time_pattern_1 = r"^\d{2}:\d{2}:\d{2}([.:])\d+$"
-    time_pattern_2 = r"^[+-]?\d+([.,]\d+)?([eE+][+-]?\d+)?$"
-    time_pattern = f"(?:{time_pattern_1})|(?:{time_pattern_2})"
-
-    data = raw_data[raw_data["time"].str.match(time_pattern, na=False)].reset_index(
+    raw_data = raw_data.astype(str)
+    data = raw_data[raw_data["time"].str.match(TIME_PATTERN, na=False)].reset_index(
         drop=True
     )
     if not data["time"].str.contains(":").any():
@@ -41,20 +43,38 @@ def process_dataframe(raw_data):
 
     data["values"] = data["values"].astype(float)
 
-    is_wrong_format = data["time"].str.match(r"^\d{2}:\d{2}:\d{2}:\d+$").all()
+    return data
+
+
+def _process_time(time_vector):
+    """
+    To process the time_vector and properly format it for object instantiation.
+
+    Args:
+    ----
+        time_vector (array): time vector associated with discretized air flow.
+
+    Returns:
+    -------
+        array: Processed time vector = correctly formatted time_vector.
+
+    """
+    time_vector = pd.Series(time_vector, dtype=str)
+
+    is_wrong_format = time_vector.str.match(r"^\d{2}:\d{2}:\d{2}:\d+$").all()
     if is_wrong_format:
-        data["time"] = data["time"].str.replace(r":(?=\d+$)", ".", regex=True)
+        time_vector = time_vector.str.replace(r":(?=\d+$)", ".", regex=True)
 
     # To instantiate an object even if the time vector is not in absolute seconds.
     # Required format : HH:MM:SS.XXX
     if not all(
-        re.match(time_pattern_2, time) for time in data["time"].values.astype(str)
+        re.match(TIME_PATTERN_2, time) for time in time_vector.values.astype(str)
     ):
-        data["time"] = pd.to_timedelta(data["time"]).dt.total_seconds()
+        time_vector = pd.to_timedelta(time_vector).dt.total_seconds()
 
-    data["time"] = data["time"].astype(float)
+    time_vector = time_vector.astype(float)
 
-    return data
+    return time_vector.values
 
 
 @enforce_type_arg(identifier=str, filename=str, sheet_name=str, detrend_y=bool, movement_type=str)
