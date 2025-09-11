@@ -12,7 +12,7 @@ import numpy as np
 from numpy import ma
 import pandas as pd
 from scipy.integrate import trapezoid
-from scipy.signal import find_peaks, periodogram, welch, windows
+from scipy.signal import find_peaks, periodogram, welch, windows, argrelextrema
 
 from .utils import scientific_round
 
@@ -407,3 +407,12 @@ def get_auc_value(
         return mean_auc, std_auc, n_auc, variability
 
     return scientific_round(auc, n_digits=n_digits)
+
+
+def extract_local_minima(y):
+    """To extract the first and last local minimum of an array."""
+    minima = argrelextrema(y, np.less)[0]
+    first_min = minima[0]
+    last_min = minima[-1] + 1
+
+    return first_min, last_min

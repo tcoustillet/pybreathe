@@ -12,6 +12,7 @@ import numpy as np
 
 from .breathingflow import BreathingFlow
 from .breathingmovement import BreathingMovement
+from .featureextraction import extract_local_minima
 from .utils import _check_type, enforce_type_arg, ComparableMixin
 from .visualization import plot_movements
 
@@ -47,6 +48,14 @@ class BreathingSignals(ComparableMixin):
         self.flow = flow
         self.thorax = thorax
         self.abdomen = abdomen
+
+        self._truncate_movements()
+
+    def _truncate_movements(self):
+        """To force breathing movements to start and end with a local minimum."""
+        first_min, last_min = extract_local_minima(self.thorax.movements)
+        self.thorax = self.thorax[first_min:last_min]
+        self.abdomen = self.abdomen[first_min:last_min]
 
     @enforce_type_arg(shape=str)
     def get_info(self, shape="dict"):
