@@ -23,6 +23,9 @@ from . import featureextraction as features
 from .utils import scientific_round
 
 
+PI = np.pi
+
+
 def plot_signal(
     x, y, show_zeros, show_segments, show_auc, highlight_time, highlight_auc,
     label, output_path
@@ -491,6 +494,59 @@ def plot_movements(y1, y2, y3, overlay, output_path):
         ax.legend(loc="upper left")
 
     axes[-1].set_xlabel("time (s)", labelpad=10)
+
+    plt.tight_layout()
+
+    if output_path:
+        fig.savefig(output_path, bbox_inches="tight")
+
+
+def plot_phase_difference(
+        time, y1, y2, label_1, label_2, segment_indices, phase_diff, output_path
+):
+    """
+    To plot the phase difference (phase shift) between y1 et y2.
+
+    Args:
+    ----
+        time (array): time vector.
+        y1 (array): discretised movement 1 (usually thorax).
+        y2 (array): discretised movement 2 (usually abdominal).
+        label_1 (str): the label of the first movement.
+        label_2 (str): the label of the second movement.
+        segment_indices (list): indices (time points) for which the phase shift is plotted.
+        phase_diff (list): values of phase shifts for each segment_indices.
+        output_path (str): to choose where to save the figure, if applicable.
+
+    Returns:
+    -------
+        None. Plots the figure.
+
+    """
+    fig, (ax1, ax2) = plt.subplots(figsize=(14, 5), nrows=2, sharex=True)
+
+    ax1.plot(time, y1, c="tab:red", label=label_1)
+    ax1.plot(time, y2, c="tab:purple", label=label_2)
+    ax1.set_ylabel("Amplitude", labelpad=10)
+
+    ax2.plot(
+        segment_indices,
+        phase_diff,
+        label="phase difference",
+        c="navy",
+        marker="o",
+        markeredgecolor="w",
+        markeredgewidth=0.6,
+        lw=0.75
+    )
+    ax2.set_ylabel("Phase difference (radians)", labelpad=10)
+    ax2.set_ylim(-PI, PI)
+
+    for ax in (ax1, ax2):
+        ax.grid(alpha=0.8, linestyle=":", ms=0.1, zorder=1)
+        ax.spines["top"].set_visible(False)
+        ax.spines["right"].set_visible(False)
+        ax.legend(loc="upper left")
 
     plt.tight_layout()
 

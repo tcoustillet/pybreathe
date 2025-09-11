@@ -12,6 +12,7 @@ import numpy as np
 
 from .breathingflow import BreathingFlow
 from .breathingmovement import BreathingMovement
+from .coherence import coherence
 from .featureextraction import extract_local_minima
 from .utils import _check_type, enforce_type_arg, ComparableMixin
 from .visualization import plot_movements
@@ -82,5 +83,15 @@ class BreathingSignals(ComparableMixin):
             y2=self.thorax,
             y3=self.abdomen,
             overlay=overlay,
+            output_path=output_path
+        )
+
+    @enforce_type_arg(segment_duration=float, output_path=str)
+    def get_coherence(self, segment_duration=4.0, output_path=""):
+        """To plot the coherence between the breathing movements."""
+        return coherence(
+            movement_1=self.thorax,
+            movement_2=self.abdomen,
+            segment_duration=segment_duration,
             output_path=output_path
         )
