@@ -36,6 +36,29 @@ class BreathingMovement(ComparableMixin):
     from_file = classmethod(_from_file)
     from_dataframe = classmethod(_from_dataframe)
 
+    def __getitem__(self, key):
+        """
+        To allow a 'BreathingMovement' object to be sliced and used as a new object.
+
+        Args:
+        ----
+            key (list): slice of shape [start:stop:steps].
+
+        Returns:
+        -------
+            A new 'BreathingMovement' sliced object.
+
+        """
+        sliced_object = self.__class__(
+            time=self.time[key],
+            movements=self.movements[key],
+            movement_type=self.movement_type,
+            identifier=self.identifier,
+            detrend_y=False
+        )
+
+        return sliced_object
+
     def get_hz(self):
         """To get the sampling rate of the discretized breathing signal."""
         return features.compute_sampling_rate(x=self.processed_time)
