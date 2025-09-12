@@ -87,8 +87,12 @@ class BreathingSignals(ComparableMixin):
         )
 
     @enforce_type_arg(segment_duration=float, output_path=str)
-    def get_coherence(self, segment_duration=4.0, output_path=""):
+    def get_coherence(self, segment_duration=-1.0, output_path=""):
         """To plot the coherence between the breathing movements."""
+        # Default value = duration of a respiratory cycle (period)
+        if segment_duration == -1.0:
+            segment_duration = 60 / self.thorax.get_frequency()
+
         return coherence(
             movement_1=self.thorax,
             movement_2=self.abdomen,

@@ -63,6 +63,21 @@ class BreathingMovement(ComparableMixin):
         """To get the sampling rate of the discretized breathing signal."""
         return features.compute_sampling_rate(x=self.processed_time)
 
+    def get_frequency(self):
+        """
+        Get movement frequency.
+        """
+        freq = features.frequency(
+            signal=self.movements,
+            sampling_rate=self.get_hz(),
+            method="welch",
+            which_peaks=None,
+            distance=-1,
+            n_digits=3,
+        )
+
+        return freq
+
     @enforce_type_arg(shape=str)
     def get_info(self, shape="dict"):
         """To get signal information (identifier, start, end and duration.)"""
