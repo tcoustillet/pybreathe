@@ -420,7 +420,7 @@ def plot_movements(y1, y2, y3, overlay, output_path):
     Args:
     ----
         y1 (BreathingFlow): Air flow rate.
-        y2 (BreathingMovement): Thorax movements.
+        y2 (BreathingMovement): Thoracic movements.
         y3 (BreathingMovement): Abdominal movements.
         overlay (bool): whether or not to superimpose respiratory movements.
         output_path (str): to choose where to save the figure, if applicable.
@@ -432,8 +432,8 @@ def plot_movements(y1, y2, y3, overlay, output_path):
     """
     if y1 is not None:
         y1 = {
-            "x": y1.raw_absolute_time,
-            "y": y1.raw_flow,
+            "x": y1.absolute_time,
+            "y": y1.flow,
             "label": "air flow rate",
             "ylabel": "Air Flow Rate",
             "color": "tab:gray",
@@ -491,7 +491,7 @@ def plot_movements(y1, y2, y3, overlay, output_path):
         ax.set_ylabel(series[0]["ylabel"], labelpad=10)
         ax.spines["top"].set_visible(False)
         ax.spines["right"].set_visible(False)
-        ax.legend(loc="upper left")
+        ax.legend(fontsize=8, loc="upper left")
 
     axes[-1].set_xlabel("time (s)", labelpad=10)
 
@@ -501,19 +501,15 @@ def plot_movements(y1, y2, y3, overlay, output_path):
         fig.savefig(output_path, bbox_inches="tight")
 
 
-def plot_phase_difference(
-        time, y1, y2, label_1, label_2, segment_indices, phase_diff, output_path
-):
+def plot_phase_difference(time, y1, y2, segment_indices, phase_diff, output_path):
     """
     To plot the phase difference (phase shift) between y1 et y2.
 
     Args:
     ----
         time (array): time vector.
-        y1 (array): discretised movement 1 (usually thorax).
-        y2 (array): discretised movement 2 (usually abdominal).
-        label_1 (str): the label of the first movement.
-        label_2 (str): the label of the second movement.
+        y1 (BreathingMovement): thoracic movements.
+        y2 (BreathingMovement): abdominal movements.
         segment_indices (list): indices (time points) for which the phase shift is plotted.
         phase_diff (list): values of phase shifts for each segment_indices.
         output_path (str): to choose where to save the figure, if applicable.
@@ -523,11 +519,29 @@ def plot_phase_difference(
         None. Plots the figure.
 
     """
-    fig, (ax1, ax2) = plt.subplots(figsize=(14, 5), nrows=2, sharex=True)
+    y1 = {"y": y1.movements, "label": y1.movement_type, "id": y1.identifier}
+    y2 = {"y": y2.movements, "label": y2.movement_type, "id": y2.identifier}
 
-    ax1.plot(time, y1, c="tab:red", label=label_1)
-    ax1.plot(time, y2, c="tab:purple", label=label_2)
+    fig = plt.figure(figsize=(14, 4.65))
+    gs = fig.add_gridspec(2, 1, height_ratios=[1, 1.5])
+    ax1 = fig.add_subplot(gs[0, :])
+    ax2 = fig.add_subplot(gs[1, 0], sharex=ax1)
+
+    ax1.plot(time, y1["y"], c="tab:red", label=y1["label"])
+    ax1.plot(time, y2["y"], c="tab:purple", label=y2["label"])
     ax1.set_ylabel("Amplitude", labelpad=10)
+    ax1.set_title(
+        f"Movements of: {y1['id']}",
+        fontsize=9,
+        c="k",
+        backgroundcolor="whitesmoke",
+        bbox={
+            "facecolor": "whitesmoke",
+            "boxstyle": "round,pad=0.3",
+            "edgecolor": "silver",
+            "lw": 0.2,
+            }
+    )
 
     ax2.plot(
         segment_indices,
@@ -540,13 +554,37 @@ def plot_phase_difference(
         lw=0.75
     )
     ax2.set_ylabel("Phase difference (radians)", labelpad=10)
+    ax2.set_xlabel("time (s)", labelpad=10)
     ax2.set_ylim(-PI, PI)
+    ax1.set_title(
+        f"Phase shift in respiratory movements of: {y1['id']}",
+        fontsize=9,
+        c="k",
+        backgroundcolor="whitesmoke",
+        bbox={
+            "facecolor": "whitesmoke",
+            "boxstyle": "round,pad=0.3",
+            "edgecolor": "silver",
+            "lw": 0.2,
+            }
+    )
+
+    ax2.axhspan(ymin=7*PI/6, ymax=5*PI/6, facecolor="#e31a1c", alpha=0.22)
+    ax2.axhspan(ymin=-7*PI/6, ymax=-5*PI/6, facecolor="#e31a1c", alpha=0.22)
+
+    ax2.axhspan(ymin=5*PI/6, ymax=PI/2, facecolor="#fd8d3c", alpha=0.22)
+    ax2.axhspan(ymin=-5*PI/6, ymax=-PI/2, facecolor="#fd8d3c", alpha=0.22)
+
+    ax2.axhspan(ymin=PI/2, ymax=PI/6, facecolor="#fed976", alpha=0.22)
+    ax2.axhspan(ymin=-PI/2, ymax=-PI/6, facecolor="#fed976", alpha=0.22)
+
+    ax2.axhspan(ymin=-PI/6, ymax=PI/6, facecolor="#78c679", alpha=0.22)
 
     for ax in (ax1, ax2):
         ax.grid(alpha=0.8, linestyle=":", ms=0.1, zorder=1)
         ax.spines["top"].set_visible(False)
         ax.spines["right"].set_visible(False)
-        ax.legend(loc="upper left")
+        ax.legend(fontsize=8, loc="upper left")
 
     plt.tight_layout()
 

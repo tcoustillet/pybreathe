@@ -63,10 +63,8 @@ def coherence(movement_1, movement_2, segment_duration, output_path):
 
     plot_phase_difference(
         time=time,
-        y1=y1,
-        y2=y2,
-        label_1=movement_1.movement_type,
-        label_2=movement_2.movement_type,
+        y1=movement_1,
+        y2=movement_2,
         segment_indices=segment_indices,
         phase_diff=phase_diff,
         output_path=output_path
