@@ -501,7 +501,9 @@ def plot_movements(y1, y2, y3, overlay, output_path):
         fig.savefig(output_path, bbox_inches="tight")
 
 
-def plot_phase_difference(time, y1, y2, segment_indices, phase_diff, output_path):
+def plot_phase_difference(
+        time, y1, y2, segment_indices, phase_diff, output_path, view
+):
     """
     To plot the phase difference (phase shift) between y1 et y2.
 
@@ -513,6 +515,7 @@ def plot_phase_difference(time, y1, y2, segment_indices, phase_diff, output_path
         segment_indices (list): indices (time points) for which the phase shift is plotted.
         phase_diff (list): values of phase shifts for each segment_indices.
         output_path (str): to choose where to save the figure, if applicable.
+        view (bool): whether or not to display the figure.
 
     Returns:
     -------
@@ -587,6 +590,11 @@ def plot_phase_difference(time, y1, y2, segment_indices, phase_diff, output_path
         ax.legend(fontsize=8, loc="upper left")
 
     plt.tight_layout()
+
+    if view:
+        plt.show()
+    else:
+        plt.close(fig)
 
     if output_path:
         fig.savefig(output_path, bbox_inches="tight")

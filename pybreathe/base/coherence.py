@@ -41,7 +41,9 @@ def coherence_score(phase_diff, v1, v2=None):
     return round(ma.masked_outside(phase_diff, -v1, v1).count() / N * 100)
 
 
-def coherence(movement_1, movement_2, segment_duration, output_path):
+def coherence(
+        movement_1, movement_2, segment_duration, output_path, view, return_vals
+ ):
     """
     To get the coherence of the two movements: whether they are synchronised or not.
 
@@ -51,6 +53,8 @@ def coherence(movement_1, movement_2, segment_duration, output_path):
         movement_2 (BreathingMovement): Abdominal movements.
         segment_duration (float): the duration over which coherence is calculated.
         output_path (str): to choose where to save the figure, if applicable.
+        view (bool): whether or not to display the figure.
+        return_vals (bool): whether or not to return the % spent in each phase.
 
     Returns:
     -------
@@ -101,7 +105,8 @@ def coherence(movement_1, movement_2, segment_duration, output_path):
         "paradoxical": paradoxical
     }
 
-    print("; ".join(f"{k}: {v}%" for k, v in coherence_overview.items()))
+    if view:
+        print("; ".join(f"{k}: {v}%" for k, v in coherence_overview.items()))
 
     plot_phase_difference(
         time=time,
@@ -109,7 +114,9 @@ def coherence(movement_1, movement_2, segment_duration, output_path):
         y2=movement_2,
         segment_indices=segment_indices,
         phase_diff=phase_diff,
-        output_path=output_path
+        output_path=output_path,
+        view=view
     )
 
-    return coherence_overview
+    if return_vals:
+        return coherence_overview
