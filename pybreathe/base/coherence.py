@@ -9,9 +9,36 @@ Created on Thu Sep 11 08:38:08 2025
 
 
 import numpy as np
+from numpy import ma
 from scipy.signal import welch, csd
 
-from .visualization import plot_phase_difference
+from .visualization import plot_phase_difference, PI
+
+
+def coherence_score(phase_diff, v1, v2=None):
+    """
+    To quantify the phase difference between movements.
+
+    Args:
+    ----
+        phase_diff (list): values of phase shifts.
+        v1 (float): lower bound for quantifying phase shifts.
+        v2 (float, optional): upper bound for quantifying phase shifts.
+                              Defaults to None.
+
+    Returns:
+    -------
+        float: percentage of values within the range of specified differences.
+
+    """
+    N = len(phase_diff)
+    if v2 is not None:
+        score = round(
+            (ma.masked_outside(phase_diff, v1, v2).count()
+             + ma.masked_outside(phase_diff, -v1, -v2).count()) / N * 100
+        )
+        return score
+    return round(ma.masked_outside(phase_diff, -v1, v1).count() / N * 100)
 
 
 def coherence(movement_1, movement_2, segment_duration, output_path):
@@ -61,6 +88,21 @@ def coherence(movement_1, movement_2, segment_duration, output_path):
         segment_indices.append((start+end)/(2*hz))
         phase_diff.append(segment_phase)
 
+    # Coherence score.
+    normal = coherence_score(phase_diff, v1=PI/6)
+    disrupted = coherence_score(phase_diff, v1=PI/2, v2=PI/6)
+    asynchronous = coherence_score(phase_diff, v1=5*PI/6, v2=PI/2)
+    paradoxical = coherence_score(phase_diff, v1=7*PI/6, v2=5*PI/6)
+
+    coherence_overview = {
+        "normal": normal,
+        "disrupted": disrupted,
+        "asynchronous": asynchronous,
+        "paradoxical": paradoxical
+    }
+
+    print("; ".join(f"{k}: {v}%" for k, v in coherence_overview.items()))
+
     plot_phase_difference(
         time=time,
         y1=movement_1,
@@ -69,3 +111,5 @@ def coherence(movement_1, movement_2, segment_duration, output_path):
         phase_diff=phase_diff,
         output_path=output_path
     )
+
+    return coherence_overview
