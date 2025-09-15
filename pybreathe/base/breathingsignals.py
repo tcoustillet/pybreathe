@@ -9,12 +9,13 @@ Created on Mon Sep  8 14:26:44 2025
 
 
 import numpy as np
+import os
 
 from .breathingflow import BreathingFlow
 from .breathingmovement import BreathingMovement
 from .coherence import coherence
 from .featureextraction import extract_local_minima
-from .utils import _check_type, enforce_type_arg, ComparableMixin
+from .utils import _check_type, enforce_type_arg, ComparableMixin, to_dataframe
 from .visualization import plot_movements
 
 
@@ -106,3 +107,47 @@ class BreathingSignals(ComparableMixin):
             view=view,
             return_vals=return_vals
         )
+
+    @enforce_type_arg(as_dict=bool, output_directory=str)
+    def get_overview(self, as_dict=False, output_directory=""):
+        """
+        To summarize the features of the 'BreathingSignal' object.
+
+        Args:
+        ----
+            as_dict (bool, optional): whether or not to return the data in
+                                      dictionary form. Default to False.
+            output_directory (str, optional): where to save the backup file.
+                                              It should not be the full path
+                                              but just a path to a directory.
+                                              Defaults to "" (no backup).
+
+        Returns:
+        -------
+            pandas.DataFrame: dataframe summarising the features.
+            OR
+            dict: dictionary summarising the features.
+
+        """
+        overview = {}
+
+        if self.flow is not None:
+            overview = self.flow.get_overview(as_dict=True)
+
+        overview["movement coherence (%)"] = self.get_coherence(
+            view=False, return_vals=True
+        )
+        formatted_dataframe = to_dataframe(
+            identifier=self.thorax.identifier, overview_dict=overview
+        )
+
+        if output_directory:
+            output_path = os.path.join(
+                output_directory, f"overview_{self.thorax.identifier}"
+            )
+            formatted_dataframe.to_excel(excel_writer=f"{output_path}.xlsx")
+
+        if as_dict:
+            return overview
+
+        return formatted_dataframe
