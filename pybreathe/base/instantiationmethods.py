@@ -141,8 +141,8 @@ def _from_file(cls, identifier, filename, sheet_name="", detrend_y=False, moveme
         )
 
 
-@enforce_type_arg(identifier=str, detrend_y=bool)
-def _from_dataframe(cls, identifier, df, detrend_y=False):
+@enforce_type_arg(identifier=str, detrend_y=bool, movement_type=str)
+def _from_dataframe(cls, identifier, df, detrend_y=False, movement_type=""):
     """
     To instantiate a 'BreathingFlow' objet from a dataframe.
 
@@ -153,10 +153,14 @@ def _from_dataframe(cls, identifier, df, detrend_y=False):
                                time and discretized air flow rate.
         detrend_y (bool, optional): to set the mean of the air flow rate at 0.
                                     Defaults to False.
+        movement_type (str, optional): type of breathing movements (thorax/abdomen),
+                                       if any. Defaults to "".
 
     Returns:
     -------
         BreathingFlow: instantiate an objet of type 'BreathingFlow'.
+        OR
+        BreathingMovement: instantiate an objet of type 'BreathingMovement'.
 
     """
     if not {"time", "values"}.issubset(df.columns):
@@ -166,12 +170,29 @@ def _from_dataframe(cls, identifier, df, detrend_y=False):
 
     data = process_dataframe(df)
 
-    return cls(
-        identifier=identifier,
-        raw_time=data["time"].values,
-        raw_flow=data["values"].values,
-        detrend_y=detrend_y,
-    )
+    if cls.__name__ == "BreathingFlow":
+        if movement_type:
+            raise ValueError(
+                "A 'BreathingFlow' object cannot have a 'movement_type' argument. "
+                "Use a 'BreathingMovement' object to specify the type of movements."
+            )
+        return cls(
+            identifier=identifier,
+            raw_time=data["time"].values,
+            raw_flow=data["values"].values,
+            detrend_y=detrend_y,
+        )
+
+    if cls.__name__ == "BreathingMovement":
+        if not movement_type:
+            raise TypeError("missing a required argument: 'movement_type'")
+        return cls(
+            identifier=identifier,
+            time=data["time"].values,
+            movements=data["values"].values,
+            movement_type=movement_type,
+            detrend_y=detrend_y,
+        )
 
 
 def _load_sinus(cls):
