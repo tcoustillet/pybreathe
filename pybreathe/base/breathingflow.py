@@ -711,13 +711,15 @@ class BreathingFlow(ComparableMixin):
             output_path=output_path
         )
 
-    @enforce_type_arg(output_directory=str)
-    def get_overview(self, output_directory=""):
+    @enforce_type_arg(as_dict=bool, output_directory=str)
+    def get_overview(self, as_dict=False, output_directory=""):
         """
         To summarize the features of the 'BreathingFlow' object in a DataFrame.
 
         Args:
         ----
+            as_dict (bool, optional): whether or not to return the data in
+                                      dictionary form. Default to False.
             output_directory (str, optional): where to save the backup file.
                                               It should not be the full path
                                               but just a path to a directory.
@@ -726,9 +728,11 @@ class BreathingFlow(ComparableMixin):
         Returns:
         -------
             pandas.DataFrame: dataframe summarising the features.
+            OR
+            dict: dictionary summarising the features.
 
         """
-        metrics = ["mean", "std", "n cycle(s)", "variability"]
+        metrics = ["mean", "std", "n cycle(s)", "variability (%)"]
         dict_data = {}
         dict_data["Bf (rpm)"] = {
             "mean": self._frequency,
@@ -779,4 +783,6 @@ class BreathingFlow(ComparableMixin):
             output_path = os.path.join(output_directory, f"overview_{self.identifier}")
             formatted_dataframe.to_excel(excel_writer=f"{output_path}.xlsx")
 
+        if as_dict:
+            return dict_data
         return formatted_dataframe
