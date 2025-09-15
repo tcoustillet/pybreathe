@@ -170,3 +170,31 @@ def create_absolute_time(time_vector, hz):
     return np.linspace(
         0, len(time_vector) / hz, len(time_vector), endpoint=False
     )
+
+
+def to_dataframe(identifier, overview_dict):
+    """
+    To convert a dictionary into a specially formatted Dataframe.
+
+    Args:
+    ----
+        identifier (str): data dictionary identifier.
+        overview_dict (dict): dictionary hosting all the signal features.
+
+    Returns:
+    -------
+        multicols_df (pandas.DataFrame): dataframe summarising the
+                                         features (freq, auc, times).
+
+    """
+    data_tuples = [
+        ((key, sub_key), value)
+        for key, sub_dict in overview_dict.items()
+        for sub_key, value in sub_dict.items()
+    ]
+    multicols_df = pd.DataFrame.from_dict(dict(data_tuples), orient="index").T
+    multicols_df.columns = pd.MultiIndex.from_tuples(multicols_df.columns)
+    multicols_df.index.name = "identifier"
+    multicols_df.index = [identifier]
+
+    return multicols_df

@@ -19,7 +19,7 @@ from .instantiationmethods import (_from_file, _from_dataframe, _load_sinus,
                                    _load_breathing_like_signal_02,
                                    _process_time)
 from .utils import (ComparableMixin, enforce_type_arg, scientific_round,
-                    create_absolute_time)
+                    create_absolute_time, to_dataframe)
 from . import featureextraction as features
 from . import visualization
 
@@ -751,33 +751,10 @@ class BreathingFlow(ComparableMixin):
             "mean": self._negative_minute_ventilation
         }
 
-        def to_dataframe(overview_dict):
-            """
-            To convert the dictionary into a specially formatted Dataframe.
-
-            Args:
-            ----
-                overview_dict (dict): dictionary hosting all the signal features.
-
-            Returns:
-            -------
-                multicols_df (pandas.DataFrame): dataframe summarising the
-                                                 features (freq, auc, times).
-
-            """
-            data_tuples = [
-                ((key, sub_key), value)
-                for key, sub_dict in overview_dict.items()
-                for sub_key, value in sub_dict.items()
-            ]
-            multicols_df = pd.DataFrame.from_dict(dict(data_tuples), orient="index").T
-            multicols_df.columns = pd.MultiIndex.from_tuples(multicols_df.columns)
-            multicols_df.index.name = "identifier"
-            multicols_df.index = [self.identifier]
-
-            return multicols_df
-
-        formatted_dataframe = to_dataframe(overview_dict=dict_data)
+        formatted_dataframe = to_dataframe(
+            identifier=self.identifier,
+            overview_dict=dict_data
+        )
 
         if output_directory:
             output_path = os.path.join(output_directory, f"overview_{self.identifier}")
