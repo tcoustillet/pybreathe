@@ -558,7 +558,7 @@ def plot_phase_difference(
     )
     ax2.set_ylabel("Phase difference (radians)", labelpad=10)
     ax2.set_xlabel("time (s)", labelpad=10)
-    ax2.set_ylim(-PI, PI)
+    ax2.set_ylim(-3.6, 3.6)
     ax1.set_title(
         f"Phase shift in respiratory movements of: {y1['id']}",
         fontsize=9,
