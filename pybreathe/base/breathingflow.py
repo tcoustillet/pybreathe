@@ -216,7 +216,7 @@ class BreathingFlow(ComparableMixin):
         """
         match y:
             case "flow":
-                x, y = self.absolute_time, self.flow
+                x, y = self.time, self.flow
             case "raw_flow":
                 x, y = self.raw_absolute_time, self.raw_flow
             case "detrended_flow":
