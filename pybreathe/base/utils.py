@@ -96,40 +96,51 @@ def scientific_round(x, n_digits):
         return float(f"{x:.{n_digits - 1}e}")
 
 
-def flow_merger(*args, table_name, output_directory=None):
+def data_merger(*args, table_name, output_directory=None):
     """
     To combine data from several respiratory signals into an unique summary table.
 
     Args:
     ----
-        *args (BreathingFlow): Respiratory air flow rates instantiated
-                               and analysed using 'BreathingFlow' object.
+        *args (BreathingFlow/Signals): Respiratory air flow rates or movements
+                                       instantiated and analysed using
+                                       'BreathingFlow' or 'BreathingSignals' objects.
         table_name (str): name of the summary table.
         output_directory (str, optional): backup directory for the summary table.
                                           Defaults to None.
 
     Raises:
     ------
-        TypeError: forces all arguments to be of the right type ('BreathingFlow').
+        TypeError: forces all arguments to be of the same type
+                  ('BreathingFlow' or 'BreathingSignals').
 
     Returns:
     -------
-        merged_files (pandas.DataFrame): merged data; 1 row = features for a file.
+        merged_df (pandas.DataFrame): merged data; 1 row = features for a file.
 
     """
     from .breathingflow import BreathingFlow
+    from .breathingsignals import BreathingSignals
 
-    if not all(isinstance(arg, BreathingFlow) for arg in args):
-        raise TypeError("All arguments must be of type 'BreathingFlow'.")
+    if not args:
+        return pd.DataFrame()
+
+    class_to_merge = type(args[0])
+
+    if not all(isinstance(arg, class_to_merge) for arg in args):
+        raise TypeError(f"All arguments must be of the same type.")
+
+    if class_to_merge.__name__ not in {"BreathingFlow", "BreathingSignals"}:
+        raise TypeError(f"Unsupported class for merging: {class_to_merge.__name__}")
 
     overview_1f = [arg.get_overview() for arg in args]
-    merged_files = pd.concat(overview_1f)
+    merged_df = pd.concat(overview_1f)
 
     if output_directory:
         output_path = os.path.join(output_directory, f"overview_{table_name}")
-        merged_files.to_excel(excel_writer=f"{output_path}.xlsx")
+        merged_df.to_excel(excel_writer=f"{output_path}.xlsx")
 
-    return merged_files
+    return merged_df
 
 
 def print_source():
