@@ -137,7 +137,9 @@ def data_merger(*args, table_name, output_directory=None):
     merged_df = pd.concat(overview_1f)
 
     if output_directory:
-        output_path = os.path.join(output_directory, f"overview_{table_name}")
+        backup_dir = os.path.join(output_directory, table_name)
+        os.makedirs(backup_dir, exist_ok=True)
+        output_path = os.path.join(backup_dir, f"overview_{table_name}")
         merged_df.to_excel(excel_writer=f"{output_path}.xlsx")
 
     return merged_df
