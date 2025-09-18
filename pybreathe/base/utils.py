@@ -136,13 +136,19 @@ def data_merger(*args, table_name, output_directory=None):
     overview_1f = [arg.get_overview() for arg in args]
     merged_df = pd.concat(overview_1f)
 
+    info_df = [arg.get_info(shape="df") for arg in args]
+    merged_info = pd.concat(info_df)
+
     if output_directory:
         backup_dir = os.path.join(output_directory, table_name)
         os.makedirs(backup_dir, exist_ok=True)
         output_path = os.path.join(backup_dir, f"overview_{table_name}")
-        merged_df.to_excel(excel_writer=f"{output_path}.xlsx")
 
-    return merged_df
+        with pd.ExcelWriter(f"{output_path}.xlsx", engine="xlsxwriter") as w:
+            merged_df.to_excel(w, sheet_name=f"data_{table_name}")
+            merged_info.to_excel(w, sheet_name=f"info_{table_name}", index=False)
+
+    return merged_df, merged_info
 
 
 def print_source():
