@@ -12,3 +12,4 @@ pylint==3.3.5
 pycodestyle==2.13.0
 pydocstyle==6.3.0
 black==25.1.0
+xlsxwriter==3.2.6
