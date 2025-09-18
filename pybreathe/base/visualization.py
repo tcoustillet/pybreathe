@@ -28,7 +28,7 @@ PI = np.pi
 
 def plot_signal(
     x, y, show_zeros, show_segments, show_auc, highlight_time, highlight_auc,
-    label, output_path
+    label, identifier, output_path
 ):
     """To plot y versus x.
 
@@ -44,6 +44,7 @@ def plot_signal(
         highlight_time (tuple): to highlight breathing cycles with a specific time.
         highlight_auc (tuple): to highlight breathing cycles with a specific area.
         label (str): the label of the curve.
+        identifier (str): the identifier of the object whose signal is plotted.
         output_path (str): to choose where to save the figure, if applicable.
 
     Returns:
@@ -171,7 +172,7 @@ def plot_signal(
     if label == "air flow rate":
         ax.set_ylabel("Air flow rate", labelpad=10)
         ax.set_title(
-            f"{len(positive_segments)} positive segments & {len(negative_segments)} negative segments detected",
+            f"{identifier}: {len(positive_segments)} positive segments & {len(negative_segments)} negative segments detected",
             fontsize=9,
             c="k",
             backgroundcolor="whitesmoke",
@@ -194,7 +195,7 @@ def plot_signal(
         fig.savefig(output_path, bbox_inches="tight")
 
 
-def plot_peaks(x, y, which_peaks, distance, output_path):
+def plot_peaks(x, y, identifier, which_peaks, distance, output_path):
     """
     Calibration of peaks detection
     = test of the distance that correctly detects all the peaks.
@@ -203,6 +204,7 @@ def plot_peaks(x, y, which_peaks, distance, output_path):
     ----
         x (array): the values for the x-axis.
         y (array): the values for the y-axis.
+        identifier (str): the identifier of the object whose peaks are plotted.
         which_peaks (str): to consider either top or bottom peaks.
         distance (int): the minimum distance between two neighbouring peaks.
         output_path (str): to choose where to save the figure, if applicable.
@@ -256,6 +258,7 @@ def plot_peaks(x, y, which_peaks, distance, output_path):
     ax.set_ylabel("Air flow rate", labelpad=10)
     ax.grid(alpha=0.8, linestyle=":", ms=0.5)
     ax.legend(prop={"size": 8}, loc="upper left", bbox_to_anchor=(0, 1.25))
+    ax.set_title(f"Detected peaks for: {identifier}")
 
     ax.spines["top"].set_visible(False)
     ax.spines["right"].set_visible(False)
@@ -264,13 +267,14 @@ def plot_peaks(x, y, which_peaks, distance, output_path):
         fig.savefig(output_path, bbox_inches="tight")
 
 
-def plot_features_distribution(*args, stat, output_path):
+def plot_features_distribution(*args, identifier, stat, output_path):
     """
     To get the distribution of each feature of the 'BreathingFlow' object.
 
     Args:
     ----
         *args (array): all the values of one of the signal features.
+        identifier (str): the identifier of the object whose distribution is plotted.
         stat (str): aggregate statistic to compute in each bin.
         output_path (str): to choose where to save the figure, if applicable.
 
@@ -316,13 +320,15 @@ def plot_features_distribution(*args, stat, output_path):
 
         ax.set_title(f"Distribution of {lab} (n = {len(x)})", pad=10)
 
+    fig.suptitle(f"Distribution of features of: {identifier}")
+
     fig.tight_layout()
 
     if output_path:
         fig.savefig(output_path, bbox_inches="tight")
 
 
-def plot_phase_portrait(x, y, time_delay, hz, color_scheme, output_path):
+def plot_phase_portrait(x, y, identifier, time_delay, hz, color_scheme, output_path):
     """
     To plot the phase portrait of the time series y.
 
@@ -330,6 +336,7 @@ def plot_phase_portrait(x, y, time_delay, hz, color_scheme, output_path):
     ----
         x (array): time axis of the time series.
         y (array): y axis of the time series.
+        identifier (str): the identifier of the object whose phase portrait is plotted.
         time_delay (float): parameter for phase portrait offset: y(x) vs. y(x+t).
         hz (int): the sampling rate of the time series.
         color_scheme (str): whether the color is defined from time or respiratory phases.
@@ -408,6 +415,8 @@ def plot_phase_portrait(x, y, time_delay, hz, color_scheme, output_path):
     ax3.set_xlabel("y(t)", labelpad=10)
     ax3.set_ylabel(f"y(t + {time_delay / hz})", labelpad=10)
     ax3.set_zlabel(f"y(t + {2*time_delay / hz})", labelpad=10)
+
+    fig.suptitle(f"Phase portrait of: {identifier}")
 
     if output_path:
         fig.savefig(output_path, bbox_inches="tight")

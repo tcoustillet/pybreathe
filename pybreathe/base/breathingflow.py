@@ -235,6 +235,7 @@ class BreathingFlow(ComparableMixin):
             highlight_time=highlight_time,
             highlight_auc=highlight_auc,
             label="air flow rate",
+            identifier=self.identifier,
             output_path=output_path,
         )
 
@@ -283,6 +284,7 @@ class BreathingFlow(ComparableMixin):
         visualization.plot_peaks(
             x=self.time,
             y=self.flow,
+            identifier=self.identifier,
             which_peaks=which_peaks,
             distance=distance,
             output_path=output_path,
@@ -673,6 +675,7 @@ class BreathingFlow(ComparableMixin):
             self.get_negative_time(return_mean=False),
             self.get_positive_auc(return_mean=False),
             self.get_negative_auc(return_mean=False),
+            identifier=self.identifier,
             stat=stat,
             output_path=output_path,
         )
@@ -705,6 +708,7 @@ class BreathingFlow(ComparableMixin):
         visualization.plot_phase_portrait(
             x=self.time,
             y=self.flow,
+            identifier=self.identifier,
             time_delay=time_delay,
             hz=self.get_hz(),
             color_scheme=color_scheme,
