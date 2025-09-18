@@ -144,9 +144,37 @@ def data_merger(*args, table_name, output_directory=None):
         os.makedirs(backup_dir, exist_ok=True)
         output_path = os.path.join(backup_dir, f"overview_{table_name}")
 
+        # Table.
         with pd.ExcelWriter(f"{output_path}.xlsx", engine="xlsxwriter") as w:
             merged_df.to_excel(w, sheet_name=f"data_{table_name}")
             merged_info.to_excel(w, sheet_name=f"info_{table_name}", index=False)
+
+        # Figures.
+        fig_dir = os.path.join(backup_dir, "figures")
+        os.makedirs(fig_dir, exist_ok=True)
+
+        if isinstance(args[0], BreathingFlow):
+            flow_dir = os.path.join(fig_dir, "flow")
+            distrib_dir = os.path.join(fig_dir, "feat_distrib")
+            portrait_dir = os.path.join(fig_dir, "phase_portrait")
+            os.makedirs(flow_dir, exist_ok=True)
+            os.makedirs(distrib_dir, exist_ok=True)
+            os.makedirs(portrait_dir, exist_ok=True)
+
+            for arg in args:
+                ext = f"_{arg.identifier}.pdf"
+                arg.plot(
+                    show_auc=True,
+                    output_path=os.path.join(flow_dir, f"flow{ext}")
+                )
+
+                arg.plot_distribution(
+                    output_path=os.path.join(distrib_dir, f"features{ext}")
+                )
+
+                arg.plot_phase_portrait(
+                    color_scheme="phases",
+                    output_path=os.path.join(portrait_dir, f"phase_portrait{ext}"))
 
     return merged_df, merged_info
 
