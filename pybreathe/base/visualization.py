@@ -20,7 +20,7 @@ from scipy.signal import find_peaks
 import seaborn as sns
 
 from . import featureextraction as features
-from .utils import scientific_round
+from .utils import scientific_round, _should_plot
 
 
 PI = np.pi
@@ -194,6 +194,11 @@ def plot_signal(
     if output_path:
         fig.savefig(output_path, bbox_inches="tight")
 
+    if _should_plot():
+        plt.show()
+    else:
+        plt.close(fig)
+
 
 def plot_peaks(x, y, identifier, which_peaks, distance, output_path):
     """
@@ -327,6 +332,11 @@ def plot_features_distribution(*args, identifier, stat, output_path):
     if output_path:
         fig.savefig(output_path, bbox_inches="tight")
 
+    if _should_plot():
+        plt.show()
+    else:
+        plt.close(fig)
+
 
 def plot_phase_portrait(x, y, identifier, time_delay, hz, color_scheme, output_path):
     """
@@ -420,6 +430,11 @@ def plot_phase_portrait(x, y, identifier, time_delay, hz, color_scheme, output_p
 
     if output_path:
         fig.savefig(output_path, bbox_inches="tight")
+
+    if _should_plot():
+        plt.show()
+    else:
+        plt.close(fig)
 
 
 def plot_movements(y1, y2, y3, overlay, output_path):

@@ -10,7 +10,7 @@ Created on Thu Apr 10 09:48:33 2025
 
 from importlib.resources import files, as_file
 from functools import wraps
-from inspect import signature
+from inspect import signature, stack
 import os
 import pandas as pd
 
@@ -245,3 +245,8 @@ def to_dataframe(identifier, overview_dict):
     multicols_df.index = [identifier]
 
     return multicols_df
+
+
+def _should_plot():
+    """Do not plot the figures when data_merger() is called: return False."""
+    return all(frame.function != "data_merger" for frame in stack()[1:])
