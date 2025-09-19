@@ -524,6 +524,11 @@ def plot_movements(y1, y2, y3, overlay, output_path):
     if output_path:
         fig.savefig(output_path, bbox_inches="tight")
 
+    if _should_plot(func="data_merger") and _should_plot(func="get_overview"):
+        plt.show()
+    else:
+        plt.close(fig)
+
 
 def plot_phase_difference(
         time, y1, y2, segment_indices, phase_diff, output_path, view

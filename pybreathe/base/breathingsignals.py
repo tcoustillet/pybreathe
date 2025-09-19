@@ -10,6 +10,7 @@ Created on Mon Sep  8 14:26:44 2025
 
 import numpy as np
 import os
+import pandas as pd
 
 from .breathingflow import BreathingFlow
 from .breathingmovement import BreathingMovement
@@ -50,6 +51,8 @@ class BreathingSignals(ComparableMixin):
         self.flow = flow
         self.thorax = thorax
         self.abdomen = abdomen
+
+        self.identifier = self.thorax.identifier
 
         self._truncate_movements()
 
@@ -138,14 +141,43 @@ class BreathingSignals(ComparableMixin):
             view=False, return_vals=True
         )
         formatted_dataframe = to_dataframe(
-            identifier=self.thorax.identifier, overview_dict=overview
+            identifier=self.identifier, overview_dict=overview
         )
 
+        df_info = self.thorax.get_info(shape="df")
+
         if output_directory:
-            output_path = os.path.join(
-                output_directory, f"overview_{self.thorax.identifier}"
+            backup_dir = os.path.join(output_directory, self.identifier)
+            os.makedirs(backup_dir, exist_ok=True)
+            excel_path = os.path.join(
+                backup_dir, f"overview_{self.identifier}"
             )
-            formatted_dataframe.to_excel(excel_writer=f"{output_path}.xlsx")
+            with pd.ExcelWriter(f"{excel_path}.xlsx", engine="xlsxwriter") as w:
+                formatted_dataframe.to_excel(w, sheet_name=f"data_{self.identifier}")
+                df_info.to_excel(w, sheet_name=f"info_{self.identifier}", index=False)
+
+            ext = f"_{self.identifier}.pdf"
+            self.plot(output_path=os.path.join(backup_dir, f"movements{ext}"))
+            self.get_coherence(
+                view=False,
+                output_path=os.path.join(backup_dir, f"coherence{ext}")
+            )
+
+            if self.flow is not None:
+                ext = f"_{self.identifier}.pdf"
+                self.flow.plot(
+                    show_auc=True,
+                    output_path=os.path.join(backup_dir, f"flow{ext}")
+                )
+
+                self.flow.plot_distribution(
+                    output_path=os.path.join(backup_dir, f"feat_distrib{ext}")
+                )
+
+                self.flow.plot_phase_portrait(
+                    color_scheme="phases",
+                    output_path=os.path.join(backup_dir, f"phase_portrait{ext}")
+                    )
 
         if as_dict:
             return overview
