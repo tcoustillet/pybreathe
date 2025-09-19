@@ -247,6 +247,6 @@ def to_dataframe(identifier, overview_dict):
     return multicols_df
 
 
-def _should_plot():
-    """Do not plot the figures when data_merger() is called: return False."""
-    return all(frame.function != "data_merger" for frame in stack()[1:])
+def _should_plot(func):
+    """Do not plot the figures when func() is called: return False."""
+    return all(frame.function != func for frame in stack()[1:])

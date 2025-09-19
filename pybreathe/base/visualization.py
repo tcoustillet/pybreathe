@@ -194,7 +194,7 @@ def plot_signal(
     if output_path:
         fig.savefig(output_path, bbox_inches="tight")
 
-    if _should_plot():
+    if _should_plot(func="data_merger") and _should_plot(func="get_overview"):
         plt.show()
     else:
         plt.close(fig)
@@ -332,7 +332,7 @@ def plot_features_distribution(*args, identifier, stat, output_path):
     if output_path:
         fig.savefig(output_path, bbox_inches="tight")
 
-    if _should_plot():
+    if _should_plot(func="data_merger") and _should_plot(func="get_overview"):
         plt.show()
     else:
         plt.close(fig)
@@ -431,7 +431,7 @@ def plot_phase_portrait(x, y, identifier, time_delay, hz, color_scheme, output_p
     if output_path:
         fig.savefig(output_path, bbox_inches="tight")
 
-    if _should_plot():
+    if _should_plot(func="data_merger") and _should_plot(func="get_overview"):
         plt.show()
     else:
         plt.close(fig)
