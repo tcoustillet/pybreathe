@@ -153,7 +153,7 @@ def data_merger(*args, table_name, output_directory=None):
         fig_dir = os.path.join(backup_dir, "figures")
         os.makedirs(fig_dir, exist_ok=True)
 
-        if isinstance(args[0], BreathingFlow):
+        if isinstance(args[0], BreathingFlow) or hasattr(args[0], "flow"):
             flow_dir = os.path.join(fig_dir, "flow")
             distrib_dir = os.path.join(fig_dir, "feat_distrib")
             portrait_dir = os.path.join(fig_dir, "phase_portrait")
@@ -162,6 +162,8 @@ def data_merger(*args, table_name, output_directory=None):
             os.makedirs(portrait_dir, exist_ok=True)
 
             for arg in args:
+                if isinstance(arg, BreathingSignals):
+                    arg = arg.flow
                 ext = f"_{arg.identifier}.pdf"
                 arg.plot(
                     show_auc=True,
@@ -175,6 +177,18 @@ def data_merger(*args, table_name, output_directory=None):
                 arg.plot_phase_portrait(
                     color_scheme="phases",
                     output_path=os.path.join(portrait_dir, f"phase_portrait{ext}"))
+
+            if isinstance(args[0], BreathingSignals):
+                mov_dir = os.path.join(fig_dir, "movements")
+                os.makedirs(mov_dir, exist_ok=True)
+
+                for arg in args:
+                    ext = f"_{arg.identifier}.pdf"
+                    arg.plot(output_path=os.path.join(mov_dir, f"movements{ext}"))
+                    arg.get_coherence(
+                        view=False,
+                        output_path=os.path.join(mov_dir, f"coherence{ext}")
+                    )
 
     return merged_df, merged_info
 
