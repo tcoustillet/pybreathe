@@ -65,7 +65,7 @@ class BreathingSignals(ComparableMixin):
     @enforce_type_arg(shape=str)
     def get_info(self, shape="dict"):
         """To get signal information (identifier, start, end and duration.)"""
-        return self.thorax.get_info()
+        return self.thorax.get_info(shape=shape)
 
     @enforce_type_arg(overlay=bool, output_path=str)
     def plot(self, overlay=False, output_path=""):
