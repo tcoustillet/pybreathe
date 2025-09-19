@@ -760,9 +760,31 @@ class BreathingFlow(ComparableMixin):
             overview_dict=dict_data
         )
 
+        df_info = self.get_info(shape="df")
+
         if output_directory:
-            output_path = os.path.join(output_directory, f"overview_{self.identifier}")
-            formatted_dataframe.to_excel(excel_writer=f"{output_path}.xlsx")
+            backup_dir = os.path.join(output_directory, self.identifier)
+            os.makedirs(backup_dir, exist_ok=True)
+            excel_path = os.path.join(backup_dir, f"overview_{self.identifier}")
+
+            with pd.ExcelWriter(f"{excel_path}.xlsx", engine="xlsxwriter") as w:
+                formatted_dataframe.to_excel(w, sheet_name=f"data_{self.identifier}")
+                df_info.to_excel(w, sheet_name=f"info_{self.identifier}", index=False)
+
+            ext = f"_{self.identifier}.pdf"
+            self.plot(
+                show_auc=True,
+                output_path=os.path.join(backup_dir, f"flow{ext}")
+            )
+
+            self.plot_distribution(
+                output_path=os.path.join(backup_dir, f"feat_distrib{ext}")
+            )
+
+            self.plot_phase_portrait(
+                color_scheme="phases",
+                output_path=os.path.join(backup_dir, f"phase_portrait{ext}")
+                )
 
         if as_dict:
             return dict_data
