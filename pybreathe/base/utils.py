@@ -12,9 +12,11 @@ from importlib.resources import files, as_file
 from functools import wraps
 from inspect import signature, stack
 import os
-import pandas as pd
+from pathlib import Path
 
 import numpy as np
+import pandas as pd
+import PyPDF2
 
 
 class ComparableMixin:
@@ -190,6 +192,25 @@ def data_merger(*args, table_name, output_directory=None):
                     output_path=os.path.join(mov_dir, f"coherence{ext}")
                 )
 
+        # Merge PDF.
+        for d in Path(fig_dir).iterdir():
+            if d.is_dir():
+                if d == Path(mov_dir):
+                    for t in ["coherence", "movements"]:
+                        files = list(Path(mov_dir).glob(f"{t}_*.pdf"))
+                        if files:
+                            pdf_merger(
+                                *files,
+                                output_path=os.path.join(os.path.dirname(fig_dir), f"{t}_{table_name}.pdf")
+                            )
+                else:
+                    figs = list(d.glob("*.pdf"))
+                    if figs:
+                        pdf_merger(
+                            *figs,
+                            output_path=os.path.join(os.path.dirname(fig_dir), f"{d.name}_{table_name}.pdf")
+                        )
+
     return merged_df, merged_info
 
 
@@ -264,3 +285,28 @@ def to_dataframe(identifier, overview_dict):
 def _should_plot(func):
     """Do not plot the figures when func() is called: return False."""
     return all(frame.function != func for frame in stack()[1:])
+
+
+def pdf_merger(*args, output_path):
+    """
+    Merge multiple PDF files into a single PDF.
+
+    Args:
+    ----
+        *args (str): file paths to PDF document to merge.
+        output_path (str): file path where the merged PDF will be saved.
+
+    Returns:
+    -------
+        None.
+
+    """
+    merger = PyPDF2.PdfMerger()
+
+    for pdf in args:
+        merger.append(pdf)
+
+    merger.write(output_path)
+    merger.close()
+
+    return None
