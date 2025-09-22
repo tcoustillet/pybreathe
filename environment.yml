@@ -20,4 +20,4 @@ dependencies:
   - conda-forge::pydocstyle
   - conda-forge::black
   - conda-forge::xlsxwriter
-prefix: C:\Users\CoustilletT\anaconda3\envs\venv_pybreathe
+  - conda-forge::pypdf2
