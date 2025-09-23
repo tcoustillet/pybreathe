@@ -54,6 +54,8 @@ class BreathingSignals(ComparableMixin):
 
         self.identifier = self.thorax.identifier
 
+        self._thorax_freq = self.thorax.get_frequency()
+
         self._truncate_movements()
 
     def _truncate_movements(self):
@@ -100,7 +102,7 @@ class BreathingSignals(ComparableMixin):
         """To plot the coherence between the breathing movements."""
         # Default value = duration of a respiratory cycle (period)
         if segment_duration == -1.0:
-            segment_duration = 60 / self.thorax.get_frequency()
+            segment_duration = 60 / self._thorax_freq
 
         return coherence(
             movement_1=self.thorax,
