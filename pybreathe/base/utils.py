@@ -13,6 +13,7 @@ from functools import wraps
 from inspect import signature, stack
 import os
 from pathlib import Path
+import re
 
 import numpy as np
 import pandas as pd
@@ -166,7 +167,8 @@ def data_merger(*args, table_name, output_directory=None):
             for arg in args:
                 if isinstance(arg, BreathingSignals):
                     arg = arg.flow
-                ext = f"_{arg.identifier}.pdf"
+                identifier = re.sub(r"[^a-zA-Z0-9\s]", "", arg.identifier)
+                ext = f"_{identifier}.pdf"
                 arg.plot(
                     show_auc=True,
                     output_path=os.path.join(flow_dir, f"flow{ext}")
@@ -185,7 +187,8 @@ def data_merger(*args, table_name, output_directory=None):
             os.makedirs(mov_dir, exist_ok=True)
 
             for arg in args:
-                ext = f"_{arg.identifier}.pdf"
+                identifier = re.sub(r"[^a-zA-Z0-9\s]", "", arg.identifier)
+                ext = f"_{identifier}.pdf"
                 arg.plot(output_path=os.path.join(mov_dir, f"movements{ext}"))
                 arg.get_coherence(
                     view=False,
