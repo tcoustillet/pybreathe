@@ -328,7 +328,7 @@ class BreathingFlow(ComparableMixin):
 
         """
         freq = features.frequency(
-            signal=self.flow,
+            signal=getattr(self, "detrended_flow", self.raw_flow),
             sampling_rate=self.get_hz(),
             method=method,
             which_peaks=which_peaks,
