@@ -16,7 +16,7 @@ from pathlib import Path
 
 import numpy as np
 import pandas as pd
-import PyPDF2
+import pypdf
 
 
 class ComparableMixin:
@@ -301,7 +301,7 @@ def pdf_merger(*args, output_path):
         None.
 
     """
-    merger = PyPDF2.PdfMerger()
+    merger = pypdf.PdfWriter()
 
     for pdf in args:
         merger.append(pdf)

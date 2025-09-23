@@ -20,4 +20,4 @@ dependencies:
   - conda-forge::pydocstyle
   - conda-forge::black
   - conda-forge::xlsxwriter
-  - conda-forge::pypdf2
+  - conda-forge::pypdf
