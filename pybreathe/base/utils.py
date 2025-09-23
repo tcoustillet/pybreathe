@@ -156,10 +156,12 @@ def data_merger(*args, table_name, output_directory=None):
         fig_dir = os.path.join(backup_dir, "figures")
         os.makedirs(fig_dir, exist_ok=True)
 
+        flow_dir = os.path.join(fig_dir, "flow")
+        distrib_dir = os.path.join(fig_dir, "feat_distrib")
+        portrait_dir = os.path.join(fig_dir, "phase_portrait")
+        mov_dir = os.path.join(fig_dir, "movements")
+
         if isinstance(args[0], BreathingFlow) or getattr(args[0], "flow", None) is not None:
-            flow_dir = os.path.join(fig_dir, "flow")
-            distrib_dir = os.path.join(fig_dir, "feat_distrib")
-            portrait_dir = os.path.join(fig_dir, "phase_portrait")
             os.makedirs(flow_dir, exist_ok=True)
             os.makedirs(distrib_dir, exist_ok=True)
             os.makedirs(portrait_dir, exist_ok=True)
@@ -183,7 +185,6 @@ def data_merger(*args, table_name, output_directory=None):
                     output_path=os.path.join(portrait_dir, f"phase_portrait{ext}"))
 
         if isinstance(args[0], BreathingSignals):
-            mov_dir = os.path.join(fig_dir, "movements")
             os.makedirs(mov_dir, exist_ok=True)
 
             for arg in args:
