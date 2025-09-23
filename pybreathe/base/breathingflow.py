@@ -765,11 +765,13 @@ class BreathingFlow(ComparableMixin):
         if output_directory:
             backup_dir = os.path.join(output_directory, self.identifier)
             os.makedirs(backup_dir, exist_ok=True)
+            if len(self.identifier) > 26:
+                identifier = self.identifier[:26]
             excel_path = os.path.join(backup_dir, f"overview_{self.identifier}")
 
             with pd.ExcelWriter(f"{excel_path}.xlsx", engine="xlsxwriter") as w:
-                formatted_dataframe.to_excel(w, sheet_name=f"data_{self.identifier}")
-                df_info.to_excel(w, sheet_name=f"info_{self.identifier}", index=False)
+                formatted_dataframe.to_excel(w, sheet_name=f"data_{identifier}")
+                df_info.to_excel(w, sheet_name=f"info_{identifier}", index=False)
 
             ext = f"_{self.identifier}.pdf"
             self.plot(

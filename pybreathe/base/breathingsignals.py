@@ -154,9 +154,11 @@ class BreathingSignals(ComparableMixin):
             excel_path = os.path.join(
                 backup_dir, f"overview_{self.identifier}"
             )
+            if len(self.identifier) > 26:
+                identifier = self.identifier[26:]
             with pd.ExcelWriter(f"{excel_path}.xlsx", engine="xlsxwriter") as w:
-                formatted_dataframe.to_excel(w, sheet_name=f"data_{self.identifier}")
-                df_info.to_excel(w, sheet_name=f"info_{self.identifier}", index=False)
+                formatted_dataframe.to_excel(w, sheet_name=f"data_{identifier}")
+                df_info.to_excel(w, sheet_name=f"info_{identifier}", index=False)
 
             ext = f"_{self.identifier}.pdf"
             self.plot(output_path=os.path.join(backup_dir, f"movements{ext}"))

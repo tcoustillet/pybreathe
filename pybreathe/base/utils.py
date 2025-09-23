@@ -149,6 +149,8 @@ def data_merger(*args, table_name, output_directory=None):
 
         # Table.
         with pd.ExcelWriter(f"{output_path}.xlsx", engine="xlsxwriter") as w:
+            if len(table_name) > 26:
+                table_name = table_name[:26]
             merged_df.to_excel(w, sheet_name=f"data_{table_name}")
             merged_info.to_excel(w, sheet_name=f"info_{table_name}", index=False)
 
