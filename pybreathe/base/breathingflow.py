@@ -95,7 +95,7 @@ class BreathingFlow(ComparableMixin):
         """
         sliced_object = self.__class__(
             identifier=self.identifier,
-            raw_time=self.raw_time[key],
+            raw_time=self.time[key],
             raw_flow=self.flow[key],
             detrend_y=False,
         )
