@@ -272,7 +272,7 @@ def plot_peaks(x, y, identifier, which_peaks, distance, output_path):
         fig.savefig(output_path, bbox_inches="tight")
 
 
-def plot_features_distribution(*args, identifier, stat, output_path):
+def plot_features_distribution(*args, identifier, stat, kde_min, output_path):
     """
     To get the distribution of each feature of the 'BreathingFlow' object.
 
@@ -281,6 +281,7 @@ def plot_features_distribution(*args, identifier, stat, output_path):
         *args (array): all the values of one of the signal features.
         identifier (str): the identifier of the object whose distribution is plotted.
         stat (str): aggregate statistic to compute in each bin.
+        kde_min (bool): to highlight the minimum of the kernel density estimation.
         output_path (str): to choose where to save the figure, if applicable.
 
     Returns:
@@ -301,6 +302,32 @@ def plot_features_distribution(*args, identifier, stat, output_path):
         ax.lines[0].set_color("crimson")
         ax.spines["top"].set_visible(False)
         ax.spines["bottom"].set_visible(False)
+
+        if kde_min:
+            kde = ax.lines[0]
+            x_kde, y_kde = kde.get_xdata(), kde.get_ydata()
+            min_index_kde = np.argmin(y_kde)
+            min_x_kde, min_y_kde = x_kde[min_index_kde], y_kde[min_index_kde]
+
+            ax.scatter(min_x_kde, min_y_kde, c="crimson", edgecolor="k", zorder=2)
+            ax.annotate(
+                f"min = {min_x_kde:.3f}",
+                xy=(min_x_kde, min_y_kde),
+                xytext=(min_x_kde, min_y_kde + 0.1),
+                arrowprops=dict(
+                    arrowstyle="->",
+                    connectionstyle="arc3,rad=0.3",
+                    shrinkB=5
+                ),
+                fontsize=9,
+                bbox=dict(
+                    boxstyle="round,pad=0.3",
+                    edgecolor="black",
+                    facecolor="whitesmoke",
+                    lw=0.5,
+                    alpha=0.8
+                )
+            )
 
     for ax, lab, x in zip(
         fig.axes,

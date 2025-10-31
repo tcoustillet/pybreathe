@@ -642,8 +642,8 @@ class BreathingFlow(ComparableMixin):
 
         return pos_mv, neg_mv
 
-    @enforce_type_arg(stat=str, output_path=str)
-    def plot_distribution(self, stat="probability", output_path=""):
+    @enforce_type_arg(stat=str, kde_min=bool, output_path=str)
+    def plot_distribution(self, stat="probability", kde_min=False, output_path=""):
         """
         To get distribution of each feature of the 'BreathingFlow' object.
 
@@ -651,6 +651,8 @@ class BreathingFlow(ComparableMixin):
         ----
             stat (int, optional): aggregate statistic to compute in each bin.
                                   Defaults to "probability".
+            kde_min (bool, optionnal): to highlight the minimum of the kernel
+                                       density estimation. Defaults to False.
             output_path (str, optional): to choose where to save the figure,
                                          if applicable. Defaults to "" (figure not saved)
 
@@ -677,6 +679,7 @@ class BreathingFlow(ComparableMixin):
             self.get_negative_auc(return_mean=False),
             identifier=self.identifier,
             stat=stat,
+            kde_min=kde_min,
             output_path=output_path,
         )
 
