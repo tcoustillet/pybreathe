@@ -311,7 +311,7 @@ def plot_features_distribution(*args, identifier, stat, kde_min, output_path):
 
             ax.scatter(min_x_kde, min_y_kde, c="crimson", edgecolor="k", zorder=2)
             ax.annotate(
-                f"min = {min_x_kde:.3f}",
+                f"min = {min_x_kde:.3g}",
                 xy=(min_x_kde, min_y_kde),
                 xytext=(min_x_kde, min_y_kde + 0.1),
                 arrowprops=dict(
